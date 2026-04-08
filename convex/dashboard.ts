@@ -1,6 +1,7 @@
 import { query } from './_generated/server';
 import { v } from 'convex/values';
 import { verifyWorkspace } from './utils';
+import { Id } from './_generated/dataModel';
 
 export const summary = query({
   args: { workspaceId: v.id('workspaces') },
@@ -95,13 +96,29 @@ export const reorderRecommendations = query({
       .sort((a, b) => (a.urgency === 'high' ? -1 : 1) - (b.urgency === 'high' ? -1 : 1))
       .slice(0, 3);
 
-    return Promise.all(
-      top.map(async (rec) => {
-        const item = await ctx.db.get(rec.inventoryItemId);
-        const supplier = rec.supplierId ? await ctx.db.get(rec.supplierId) : null;
-        return { ...rec, itemName: item?.name ?? 'Unknown Item', supplierName: supplier?.name ?? '—' };
-      })
+    // Pre-fetch distinct items and suppliers to avoid N+1 queries
+    const itemIds = Array.from(new Set(top.map((r) => r.inventoryItemId)));
+    const supplierIds = Array.from(
+      new Set(top.map((r) => r.supplierId).filter((id): id is Id<'suppliers'> => id !== undefined))
     );
+
+    const [items, suppliers] = await Promise.all([
+      Promise.all(itemIds.map((id) => ctx.db.get(id))),
+      Promise.all(supplierIds.map((id) => ctx.db.get(id))),
+    ]);
+
+    const itemMap = new Map(items.flatMap((i) => (i ? [[i._id, i]] : [])));
+    const supplierMap = new Map(suppliers.flatMap((s) => (s ? [[s._id, s]] : [])));
+
+    return top.map((rec) => {
+      const item = itemMap.get(rec.inventoryItemId);
+      const supplier = rec.supplierId ? supplierMap.get(rec.supplierId) : null;
+      return {
+        ...rec,
+        itemName: item?.name ?? 'Unknown Item',
+        supplierName: supplier?.name ?? '—',
+      };
+    });
   },
 });
 
