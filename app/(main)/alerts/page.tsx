@@ -222,6 +222,14 @@ export default function AlertsPage() {
               <p className="text-xs text-neutral-500 mt-1">
                 {(alerts ?? []).length === 0 ? "You're all clear." : 'Try adjusting your search or filters.'}
               </p>
+              {(alerts ?? []).length > 0 && (
+                <button
+                  onClick={() => { setSearch(''); setSeverityFilter(''); setTypeFilter(''); }}
+                  className="mt-4 px-4 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+                >
+                  Clear all filters
+                </button>
+              )}
             </li>
           ) : (
             filtered.map((alert) => (
