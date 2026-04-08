@@ -4,6 +4,7 @@ import {
   DotFilledIcon,
   CheckIcon,
   ChevronRightIcon,
+  DotsHorizontalIcon,
 } from '@radix-ui/react-icons';
 import './dropdown.css';
 

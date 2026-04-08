@@ -206,14 +206,14 @@ function InteractiveChart({ data }) {
 
 // Example usage
 export default function App() {
-  const sampleData = Array.from({ length: 50 }, (_, i) => ({
+  const [sampleData] = useState(() => Array.from({ length: 50 }, (_, i) => ({
     id: i,
     label: `Point ${i + 1}`,
     x: Math.random() * 100,
     y: Math.random() * 100,
     size: Math.random() * 30 + 5,
     category: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]
-  }));
+  })));
   
   return (
     <div className="p-8">

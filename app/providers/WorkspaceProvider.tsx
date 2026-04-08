@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Id } from 'convex/values';
+import { Id } from '@/convex/_generated/dataModel';
 
 type WorkspaceContextValue = {
   workspaceId: Id<'workspaces'> | undefined;
@@ -14,16 +14,15 @@ const WorkspaceContext = createContext<WorkspaceContextValue>({
 });
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-  const [workspaceId, setWorkspaceIdState] = useState<Id<'workspaces'> | undefined>(undefined);
-
-  useEffect(() => {
+  const [workspaceId, setWorkspaceIdState] = useState<Id<'workspaces'> | undefined>(() => {
+    if (typeof window === 'undefined') return undefined;
     try {
       const stored = localStorage.getItem('ss_workspace_id');
-      if (stored) setWorkspaceIdState(stored as Id<'workspaces'>);
+      return stored ? (stored as Id<'workspaces'>) : undefined;
     } catch {
-      // localStorage unavailable (SSR guard)
+      return undefined;
     }
-  }, []);
+  });
 
   const setWorkspaceId = (id: Id<'workspaces'>) => {
     try {

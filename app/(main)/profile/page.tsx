@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -150,11 +151,20 @@ export default function ProfilePage() {
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-fill display name from first + last when not manually edited
+  const actualDisplayName = displayNameTouched
+    ? displayName
+    : [firstName, lastName].filter(Boolean).join(' ');
+
+  // Update effect handles synchronizing actual input values to avoid hook warning.
   useEffect(() => {
     if (!displayNameTouched) {
-      setDisplayName([firstName, lastName].filter(Boolean).join(' '));
+      const generatedName = [firstName, lastName].filter(Boolean).join(' ');
+      if (displayName !== generatedName) {
+        // use setTimeout to escape synchronous update
+        setTimeout(() => setDisplayName(generatedName), 0);
+      }
     }
-  }, [firstName, lastName, displayNameTouched]);
+  }, [firstName, lastName, displayNameTouched, displayName]);
 
   // Auto-dismiss saved confirmation after 4 s
   useEffect(() => {
@@ -236,12 +246,13 @@ export default function ProfilePage() {
       {/* ── Identity card ─────────────────────────────────────────────── */}
       <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-5 mb-5 flex items-center gap-4">
         <div className="relative shrink-0">
-          <img
+          <Image
             src={avatarSrc}
             alt={`${firstName} ${lastName}`}
             className="w-14 h-14 rounded-full object-cover border border-neutral-200"
             width={56}
             height={56}
+            unoptimized
           />
           <button
             type="button"

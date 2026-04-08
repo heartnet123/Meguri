@@ -33,7 +33,7 @@ export function BasicDialog() {
 
           {/* Description - Recommended for accessibility */}
           <Dialog.Description className="dialog-description">
-            Make changes to your profile here. Click save when you're done.
+            Make changes to your profile here. Click save when you&apos;re done.
           </Dialog.Description>
 
           {/* Form Content */}
@@ -115,7 +115,7 @@ export function ControlledDialog() {
         <Dialog.Content className="dialog-content">
           <Dialog.Title>Controlled Dialog</Dialog.Title>
           <Dialog.Description>
-            This dialog's state is managed externally.
+            This dialog&apos;s state is managed externally.
           </Dialog.Description>
 
           <p>Dialog is {open ? 'open' : 'closed'}</p>
