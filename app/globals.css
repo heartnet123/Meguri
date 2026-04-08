@@ -1,1 +1,40 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-primary), ui-sans-serif, system-ui;
+  --font-display: var(--font-display), ui-sans-serif, system-ui;
+  
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-muted: var(--muted);
+}
+
+@layer base {
+  :root {
+    /* Industrial Cyber-Minimalism Light Theme */
+    --bg: #f3f4f6;
+    --fg: #0f172a;
+    --surface: #ffffff;
+    --subtle: #f8fafc;
+    --border: #cbd5e1;
+    --accent: #0f766e; /* Deep Teal */
+    --accent-fg: #ffffff;
+    --muted: #64748b;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

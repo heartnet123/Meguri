@@ -1,106 +1,270 @@
 'use client';
 
+import { useState, useMemo } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+
+type InventoryItem = {
+  _id: string;
+  name: string;
+  sku: string;
+  category: string;
+  currentStock: number;
+  minStockLevel: number;
+  unit: string;
+  status: 'Critical' | 'Warning' | 'In Stock';
+};
+
+const PER_PAGE = 20;
+const SKEL_WIDTHS = ['w-2/3', 'w-1/3', 'w-1/2', 'w-1/4', 'w-1/4', 'w-1/3', 'w-8'];
+
+function SkeletonRow() {
+  return (
+    <tr aria-hidden="true" className="animate-pulse">
+      {SKEL_WIDTHS.map((w, i) => (
+        <td key={i} className="px-6 py-4">
+          <div className={`h-4 bg-neutral-100 rounded ${w}`} />
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+function EmptyTableState({ cols, message }: { cols: number; message: string }) {
+  return (
+    <tr>
+      <td colSpan={cols} className="px-6 py-20 text-center">
+        <iconify-icon icon="solar:box-minimalistic-linear" width="32" height="32" className="text-neutral-300 mx-auto mb-3 block" aria-hidden="true" />
+        <p className="text-sm font-medium text-neutral-700">{message}</p>
+        <p className="text-xs text-neutral-500 mt-1">Add items using the button above.</p>
+      </td>
+    </tr>
+  );
+}
+
 export default function InventoryPage() {
+  const workspaceId = useWorkspaceId();
+  const rawItems = useQuery(
+    api.inventory.list,
+    workspaceId ? { workspaceId } : 'skip'
+  ) as InventoryItem[] | undefined;
+
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+
+  const isLoading = workspaceId !== undefined && rawItems === undefined;
+
+  const categories = useMemo(
+    () => [...new Set(rawItems?.map((i) => i.category) ?? [])].sort(),
+    [rawItems]
+  );
+
+  const filtered = useMemo(() => {
+    if (!rawItems) return [];
+    const s = search.toLowerCase();
+    return rawItems.filter((item) => {
+      if (s && !item.name.toLowerCase().includes(s) && !item.sku.toLowerCase().includes(s))
+        return false;
+      if (categoryFilter && item.category !== categoryFilter) return false;
+      if (statusFilter && item.status !== statusFilter) return false;
+      return true;
+    });
+  }, [rawItems, search, categoryFilter, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
+  const handleCategory = (v: string) => { setCategoryFilter(v); setPage(1); };
+  const handleStatus = (v: string) => { setStatusFilter(v); setPage(1); };
+
+  const isEmpty = !isLoading && (rawItems ?? []).length === 0;
+  const noResults = !isLoading && (rawItems ?? []).length > 0 && filtered.length === 0;
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-medium tracking-tight text-neutral-900">Inventory</h1>
-          <p className="text-sm text-neutral-500">Manage your raw materials and stock items.</p>
+          <p className="text-sm text-neutral-500 mt-1">Manage your raw materials and stock items.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="px-4 py-2 bg-white border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 shadow-sm flex items-center gap-2 transition-colors">
-            <iconify-icon icon="solar:export-linear" width="18" height="18"></iconify-icon>
+        <div className="flex items-center gap-2 shrink-0">
+          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
+            <iconify-icon icon="solar:export-linear" width="18" height="18" aria-hidden="true" />
             Export
           </button>
-          <button className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 shadow-sm flex items-center gap-2 transition-colors">
-            <iconify-icon icon="solar:add-circle-linear" width="18" height="18"></iconify-icon>
+          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2">
+            <iconify-icon icon="solar:add-circle-linear" width="18" height="18" aria-hidden="true" />
             Add Item
           </button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-4 flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="relative">
-            <iconify-icon icon="solar:magnifer-linear" width="18" height="18" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></iconify-icon>
-            <input type="text" placeholder="Search items, SKU..." className="pl-9 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 w-64 transition-shadow" />
-          </div>
-          <select className="px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-shadow outline-none">
-            <option>All Categories</option>
-            <option>Dairy</option>
-            <option>Bakery</option>
-            <option>Packaging</option>
-          </select>
-          <select className="px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-shadow outline-none">
-            <option>All Status</option>
-            <option>In Stock</option>
-            <option>Low Stock</option>
-            <option>Out of Stock</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table */}
       <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Filters */}
+        <div className="p-4 border-b border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-50/50">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative">
+              <iconify-icon
+                icon="solar:magnifer-linear"
+                width="18" height="18"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                placeholder="Search items, SKU…"
+                aria-label="Search inventory items"
+                className="pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded-lg bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:border-neutral-900 transition-all w-56"
+              />
+            </div>
+            <select
+              aria-label="Filter by category"
+              value={categoryFilter}
+              onChange={(e) => handleCategory(e.target.value)}
+              className="px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 transition-all"
+            >
+              <option value="">All Categories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <select
+              aria-label="Filter by status"
+              value={statusFilter}
+              onChange={(e) => handleStatus(e.target.value)}
+              className="px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 transition-all"
+            >
+              <option value="">All Statuses</option>
+              <option value="In Stock">In Stock</option>
+              <option value="Warning">Low Stock</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          {!isLoading && rawItems && (
+            <span className="text-xs text-neutral-500 shrink-0">
+              {filtered.length.toLocaleString()} item{filtered.length !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+
+        <div className="overflow-x-auto" aria-busy={isLoading} aria-live="polite">
           <table className="w-full text-left text-sm">
-            <thead className="bg-neutral-50 border-b border-neutral-200 text-neutral-500 font-medium">
+            <caption className="sr-only">Inventory items list showing stock levels and status</caption>
+            <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 border-b border-neutral-200">
               <tr>
-                <th className="px-6 py-3">Item Name</th>
-                <th className="px-6 py-3">SKU</th>
-                <th className="px-6 py-3">Category</th>
-                <th className="px-6 py-3 text-right">Current Stock</th>
-                <th className="px-6 py-3 text-right">Reorder Point</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th scope="col" className="px-6 py-3 font-medium">Item Name</th>
+                <th scope="col" className="px-6 py-3 font-medium">SKU</th>
+                <th scope="col" className="px-6 py-3 font-medium">Category</th>
+                <th scope="col" className="px-6 py-3 font-medium text-right">Current Stock</th>
+                <th scope="col" className="px-6 py-3 font-medium text-right">Min. Stock Level</th>
+                <th scope="col" className="px-6 py-3 font-medium">Status</th>
+                <th scope="col" className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              <InventoryRow name="Whole Milk" sku="DAI-001" category="Dairy" stock="2" unit="L" reorder="10" status="Critical" />
-              <InventoryRow name="Espresso Beans" sku="COF-001" category="Coffee" stock="12" unit="kg" reorder="5" status="In Stock" />
-              <InventoryRow name="Croissant Dough" sku="BAK-002" category="Bakery" stock="15" unit="pcs" reorder="50" status="Warning" />
-              <InventoryRow name="Paper Cups (8oz)" sku="PKG-001" category="Packaging" stock="120" unit="pcs" reorder="200" status="Warning" />
-              <InventoryRow name="Vanilla Syrup" sku="SYR-003" category="Ingredients" stock="8" unit="btl" reorder="3" status="In Stock" />
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
+              ) : isEmpty ? (
+                <EmptyTableState cols={7} message="No inventory items yet" />
+              ) : noResults ? (
+                <EmptyTableState cols={7} message="No items match your filters" />
+              ) : (
+                pageItems.map((item) => <InventoryRow key={item._id} item={item} />)
+              )}
             </tbody>
           </table>
         </div>
-        <div className="px-6 py-4 border-t border-neutral-200 flex items-center justify-between text-sm text-neutral-500">
-          <div>Showing 1 to 5 of 42 items</div>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border border-neutral-200 rounded hover:bg-neutral-50 disabled:opacity-50 transition-colors" disabled>Previous</button>
-            <button className="px-3 py-1 border border-neutral-200 rounded hover:bg-neutral-50 transition-colors">Next</button>
+
+        <div className="p-4 border-t border-neutral-200 flex items-center justify-between text-sm text-neutral-500 bg-neutral-50/50">
+          <div>
+            {isLoading
+              ? <div className="h-4 w-40 bg-neutral-100 rounded animate-pulse" />
+              : `Showing ${Math.min((page - 1) * PER_PAGE + 1, filtered.length)}–${Math.min(page * PER_PAGE, filtered.length)} of ${filtered.length.toLocaleString()} items`
+            }
           </div>
+          {totalPages > 1 && (
+            <nav aria-label="Pagination">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Previous page"
+                  className="px-3 py-1.5 border border-neutral-200 rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    aria-label={`Page ${p}`}
+                    aria-current={page === p ? 'page' : undefined}
+                    className={`px-3 py-1.5 border border-neutral-200 rounded-md hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 ${page === p ? 'bg-white font-medium text-neutral-900' : ''}`}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  aria-label="Next page"
+                  className="px-3 py-1.5 border border-neutral-200 rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+                >
+                  Next
+                </button>
+              </div>
+            </nav>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function InventoryRow({ name, sku, category, stock, unit, reorder, status }: any) {
-  const isCritical = status === 'Critical';
-  const isWarning = status === 'Warning';
-  
+function InventoryRow({ item }: { item: InventoryItem }) {
+  const isCritical = item.status === 'Critical';
+  const isWarning = item.status === 'Warning';
+
   return (
-    <tr className="hover:bg-neutral-50 transition-colors group">
-      <td className="px-6 py-4 font-medium text-neutral-900">{name}</td>
-      <td className="px-6 py-4 text-neutral-500">{sku}</td>
-      <td className="px-6 py-4 text-neutral-500">{category}</td>
-      <td className="px-6 py-4 text-right font-medium text-neutral-900">{stock} <span className="text-neutral-500 font-normal">{unit}</span></td>
-      <td className="px-6 py-4 text-right text-neutral-500">{reorder} <span className="text-neutral-400">{unit}</span></td>
+    <tr className="hover:bg-neutral-50/50 transition-colors">
+      <td className="px-6 py-4 font-medium text-neutral-900 max-w-[220px]">
+        <span className="block truncate" title={item.name}>{item.name || '(unnamed)'}</span>
+      </td>
+      <td className="px-6 py-4 text-neutral-600 font-mono text-xs whitespace-nowrap">{item.sku}</td>
+      <td className="px-6 py-4 text-neutral-600 max-w-[140px]">
+        <span className="block truncate" title={item.category}>{item.category}</span>
+      </td>
+      <td className="px-6 py-4 text-right font-medium text-neutral-900 whitespace-nowrap">
+        {item.currentStock.toLocaleString()} <span className="text-neutral-500 font-normal">{item.unit}</span>
+      </td>
+      <td className="px-6 py-4 text-right text-neutral-500 whitespace-nowrap">
+        {item.minStockLevel.toLocaleString()} <span className="text-neutral-400">{item.unit}</span>
+      </td>
       <td className="px-6 py-4">
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          isCritical ? 'bg-red-50 text-red-700 border border-red-100' : 
-          isWarning ? 'bg-amber-50 text-amber-700 border border-amber-100' : 
-          'bg-emerald-50 text-emerald-700 border border-emerald-100'
-        }`}>
-          {status}
+        <span
+          className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
+            isCritical
+              ? 'bg-red-50 text-red-700 ring-1 ring-red-600/20'
+              : isWarning
+              ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20'
+              : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20'
+          }`}
+        >
+          {item.status}
         </span>
       </td>
       <td className="px-6 py-4 text-right">
-        <button className="text-neutral-400 hover:text-neutral-900 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <iconify-icon icon="solar:menu-dots-bold" width="20" height="20"></iconify-icon>
+        <button
+          className="p-1 text-neutral-400 hover:text-neutral-900 rounded-md hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+          aria-label={`Actions for ${item.name}`}
+        >
+          <iconify-icon icon="solar:menu-dots-bold" width="20" height="20" aria-hidden="true" />
         </button>
       </td>
     </tr>

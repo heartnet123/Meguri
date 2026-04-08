@@ -1,0 +1,116 @@
+
+> ai-studio-applet@0.1.0 lint
+> eslint .
+
+
+E:\smartstock\.agents\skills\claude-d3js-skill\assets\interactive-template.jsx
+  212:8   error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  210 |     id: i,
+  211 |     label: `Point ${i + 1}`,
+> 212 |     x: Math.random() * 100,
+      |        ^^^^^^^^^^^^^ Cannot call impure function
+  213 |     y: Math.random() * 100,
+  214 |     size: Math.random() * 30 + 5,
+  215 |     category: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]  react-hooks/purity
+  213:8   error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  211 |     label: `Point ${i + 1}`,
+  212 |     x: Math.random() * 100,
+> 213 |     y: Math.random() * 100,
+      |        ^^^^^^^^^^^^^ Cannot call impure function
+  214 |     size: Math.random() * 30 + 5,
+  215 |     category: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]
+  216 |   }));      react-hooks/purity
+  214:11  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  212 |     x: Math.random() * 100,
+  213 |     y: Math.random() * 100,
+> 214 |     size: Math.random() * 30 + 5,
+      |           ^^^^^^^^^^^^^ Cannot call impure function
+  215 |     category: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]
+  216 |   }));
+  217 |                                react-hooks/purity
+  215:47  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  213 |     y: Math.random() * 100,
+  214 |     size: Math.random() * 30 + 5,
+> 215 |     category: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]
+      |                                               ^^^^^^^^^^^^^ Cannot call impure function
+  216 |   }));
+  217 |   
+  218 |   return (          react-hooks/purity
+
+E:\smartstock\.agents\skills\radix-ui-design-system\examples\dialog-example.tsx
+   36:67  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  118:24  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\smartstock\.agents\skills\radix-ui-design-system\examples\dropdown-example.tsx
+  139:12  error  'DotsHorizontalIcon' is not defined  react/jsx-no-undef
+
+E:\smartstock\app\(main)\layout.tsx
+  146:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\smartstock\app\(main)\profile\page.tsx
+  155:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\smartstock\app\(main)\profile\page.tsx:155:7
+  153 |   useEffect(() => {
+  154 |     if (!displayNameTouched) {
+> 155 |       setDisplayName([firstName, lastName].filter(Boolean).join(' '));
+      |       ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  156 |     }
+  157 |   }, [firstName, lastName, displayNameTouched]);
+  158 |  react-hooks/set-state-in-effect
+  239:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @next/next/no-img-element
+
+E:\smartstock\app\providers\WorkspaceProvider.tsx
+  22:19  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\smartstock\app\providers\WorkspaceProvider.tsx:22:19
+  20 |     try {
+  21 |       const stored = localStorage.getItem('ss_workspace_id');
+> 22 |       if (stored) setWorkspaceIdState(stored as Id<'workspaces'>);
+     |                   ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  23 |     } catch {
+  24 |       // localStorage unavailable (SSR guard)
+  25 |     }  react-hooks/set-state-in-effect
+
+E:\smartstock\convex\_generated\api.d.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+E:\smartstock\convex\_generated\api.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+E:\smartstock\convex\_generated\dataModel.d.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+E:\smartstock\convex\_generated\server.d.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+E:\smartstock\convex\_generated\server.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+โ– 16 problems (9 errors, 7 warnings)
+  0 errors and 5 warnings potentially fixable with the `--fix` option.
+

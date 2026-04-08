@@ -1,11 +1,18 @@
 import type {Metadata} from 'next';
-import { Inter } from 'next/font/google';
+import { Geist, Space_Grotesk } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css'; // Global styles
+import ConvexClientProvider from './providers/ConvexClientProvider';
+import { WorkspaceProvider } from './providers/WorkspaceProvider';
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-sans',
+  variable: '--font-display',
+});
+
+const geistSans = Geist({
+  subsets: ['latin'],
+  variable: '--font-primary',
 });
 
 export const metadata: Metadata = {
@@ -15,12 +22,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={`${inter.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${spaceGrotesk.variable}`}>
       <head>
         <Script src="https://code.iconify.design/iconify-icon/2.0.0/iconify-icon.min.js" strategy="beforeInteractive" />
       </head>
-      <body className="font-sans text-neutral-900 antialiased bg-neutral-50 selection:bg-neutral-200" suppressHydrationWarning>
-        {children}
+      <body className="font-sans bg-background text-foreground antialiased selection:bg-accent/20" suppressHydrationWarning>
+        <ConvexClientProvider>
+          <WorkspaceProvider>{children}</WorkspaceProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );
