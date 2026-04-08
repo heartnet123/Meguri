@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="1200" height="475" alt="Meguri banner" src="https://ibb.co/t5pKLvy" />
+  <img width="1200" height="475" alt="Meguri banner" src="https://i.ibb.co/8VgsYfF/Gemini-Generated-Image-lpkp99lpkp99lpkp.png" />
 </div>
 
 # Meguri / SmartStock
