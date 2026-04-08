@@ -1,3 +1,4 @@
+import type { Id } from "@/convex/_generated/dataModel";
 'use client';
 
 import { useState } from 'react';
@@ -57,12 +58,12 @@ export default function ForecastingPage() {
 
   const forecasts = useQuery(
     api.forecasting.latestByItem,
-    workspaceId ? { workspaceId, periodDays } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'>, periodDays } : 'skip'
   ) as ForecastRow[] | undefined;
 
   const stats = useQuery(
     api.forecasting.stats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   ) as ForecastStats | undefined;
 
   const isLoading = workspaceId !== undefined && forecasts === undefined;

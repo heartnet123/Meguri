@@ -1,41 +1,32 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Id } from 'convex/values';
+import { createContext, useContext, useEffect, ReactNode } from 'react';
+import { useActiveOrganization } from '@/lib/auth';
 
 type WorkspaceContextValue = {
-  workspaceId: Id<'workspaces'> | undefined;
-  setWorkspaceId: (id: Id<'workspaces'>) => void;
+  workspaceId: string | undefined;
+  organization: any | null; // From better-auth
+  isLoading: boolean;
 };
 
 const WorkspaceContext = createContext<WorkspaceContextValue>({
   workspaceId: undefined,
-  setWorkspaceId: () => {},
+  organization: null,
+  isLoading: true,
 });
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-  const [workspaceId, setWorkspaceIdState] = useState<Id<'workspaces'> | undefined>(undefined);
+  const { data: activeOrg, isPending } = useActiveOrganization();
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('ss_workspace_id');
-      if (stored) setWorkspaceIdState(stored as Id<'workspaces'>);
-    } catch {
-      // localStorage unavailable (SSR guard)
-    }
-  }, []);
-
-  const setWorkspaceId = (id: Id<'workspaces'>) => {
-    try {
-      localStorage.setItem('ss_workspace_id', id);
-    } catch {
-      // ignore
-    }
-    setWorkspaceIdState(id);
-  };
+  // Optionally automatically handle setting active org if needed,
+  // or just rely on what Better Auth manages via the organization plugin
 
   return (
-    <WorkspaceContext.Provider value={{ workspaceId, setWorkspaceId }}>
+    <WorkspaceContext.Provider value={{
+      workspaceId: activeOrg?.id,
+      organization: activeOrg,
+      isLoading: isPending
+    }}>
       {children}
     </WorkspaceContext.Provider>
   );
@@ -43,4 +34,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
 export function useWorkspaceId() {
   return useContext(WorkspaceContext).workspaceId;
+}
+
+export function useWorkspace() {
+  return useContext(WorkspaceContext);
 }

@@ -1,3 +1,4 @@
+import type { Id } from "@/convex/_generated/dataModel";
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -57,11 +58,11 @@ export default function SalesPage() {
   const workspaceId = useWorkspaceId();
   const transactions = useQuery(
     api.sales.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   ) as Transaction[] | undefined;
   const todayStats = useQuery(
     api.sales.todayStats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   );
 
   const [search, setSearch] = useState('');

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from 'convex/values';
+import type { Id } from '@/convex/_generated/dataModel';
 import { useState } from 'react';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 
@@ -47,7 +47,7 @@ export default function PurchasePlanningPage() {
   const workspaceId = useWorkspaceId();
   const recs = useQuery(
     api.purchasePlanning.recommendations,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   ) as Recommendation[] | undefined;
 
   const accept = useMutation(api.purchasePlanning.accept);

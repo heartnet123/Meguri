@@ -1,3 +1,4 @@
+import type { Id } from "@/convex/_generated/dataModel";
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -51,11 +52,11 @@ export default function ProductsPage() {
   const workspaceId = useWorkspaceId();
   const products = useQuery(
     api.products.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   ) as Product[] | undefined;
   const stats = useQuery(
     api.products.stats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   );
 
   const [search, setSearch] = useState('');

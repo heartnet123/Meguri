@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from 'convex/values';
+import type { Id } from '@/convex/_generated/dataModel';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 
 type Alert = {
@@ -80,11 +80,11 @@ export default function AlertsPage() {
   const workspaceId = useWorkspaceId();
   const alerts = useQuery(
     api.alerts.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   ) as Alert[] | undefined;
   const stats = useQuery(
     api.alerts.stats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   ) as AlertStats | undefined;
 
   const resolve = useMutation(api.alerts.resolve);
@@ -123,7 +123,7 @@ export default function AlertsPage() {
     if (!workspaceId) return;
     setResolvingAll(true);
     try {
-      await resolveAll({ workspaceId });
+      await resolveAll({ workspaceId: workspaceId as Id<'workspaces'> });
     } finally {
       setResolvingAll(false);
     }

@@ -1,3 +1,4 @@
+import type { Id } from "@/convex/_generated/dataModel";
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -50,11 +51,11 @@ export default function SuppliersPage() {
   const workspaceId = useWorkspaceId();
   const suppliers = useQuery(
     api.suppliers.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   ) as Supplier[] | undefined;
   const stats = useQuery(
     api.suppliers.stats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   );
 
   const [search, setSearch] = useState('');

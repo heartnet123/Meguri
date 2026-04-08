@@ -1,3 +1,4 @@
+import type { Id } from "@/convex/_generated/dataModel";
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -47,7 +48,7 @@ export default function InventoryPage() {
   const workspaceId = useWorkspaceId();
   const rawItems = useQuery(
     api.inventory.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip'
   ) as InventoryItem[] | undefined;
 
   const [search, setSearch] = useState('');

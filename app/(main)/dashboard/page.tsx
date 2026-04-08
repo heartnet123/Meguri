@@ -1,3 +1,4 @@
+import type { Id } from "@/convex/_generated/dataModel";
 'use client';
 
 import Link from 'next/link';
@@ -195,7 +196,7 @@ function RecSkeleton() {
 
 export default function DashboardPage() {
   const workspaceId = useWorkspaceId();
-  const args = workspaceId ? { workspaceId } : 'skip';
+  const args = workspaceId ? { workspaceId: workspaceId as Id<'workspaces'> } : 'skip';
 
   const summary = useQuery(api.dashboard.summary, args);
   const lowStockItems = useQuery(api.dashboard.lowStockItems, args) as LowStockItem[] | undefined;
