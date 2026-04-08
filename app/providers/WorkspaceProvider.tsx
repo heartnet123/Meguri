@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Id } from 'convex/values';
+import { Id } from '@/convex/_generated/dataModel';
 
 type WorkspaceContextValue = {
   workspaceId: Id<'workspaces'> | undefined;

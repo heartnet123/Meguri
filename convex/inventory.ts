@@ -66,6 +66,30 @@ export const add = mutation({
   },
 });
 
+export const update = mutation({
+  args: {
+    id: v.id('inventoryItems'),
+    sku: v.optional(v.string()),
+    name: v.optional(v.string()),
+    category: v.optional(v.string()),
+    unit: v.optional(v.string()),
+    minStockLevel: v.optional(v.number()),
+    supplierId: v.optional(v.id('suppliers')),
+    costPerUnit: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    const item = await ctx.db.get(id);
+    if (!item) throw new Error('Item not found');
+
+    const user = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(user, ['owner', 'admin', 'manager']);
+
+    await ctx.db.patch(id, { ...updates, updatedAt: Date.now() });
+  },
+});
+
 export const updateStock = mutation({
   args: { id: v.id('inventoryItems'), currentStock: v.number() },
   handler: async (ctx, { id, currentStock }) => {
@@ -76,6 +100,80 @@ export const updateStock = mutation({
     checkRole(user, ['owner', 'admin', 'manager']);
 
     await ctx.db.patch(id, { currentStock, updatedAt: Date.now() });
+  },
+});
+
+export const adjustStock = mutation({
+  args: {
+    id: v.id('inventoryItems'),
+    type: v.union(v.literal('adjustment'), v.literal('wastage')),
+    quantity: v.number(),
+    note: v.optional(v.string()),
+  },
+  handler: async (ctx, { id, type, quantity, note }) => {
+    const item = await ctx.db.get(id);
+    if (!item) throw new Error('Item not found');
+
+    const user = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(user, ['owner', 'admin', 'manager', 'staff']);
+
+    const newStock = item.currentStock + quantity;
+
+    await ctx.db.patch(id, { currentStock: newStock, updatedAt: Date.now() });
+
+    await ctx.db.insert('stockMovements', {
+      workspaceId: item.workspaceId,
+      inventoryItemId: id,
+      type,
+      quantity,
+      note,
+      performedBy: user._id,
+      createdAt: Date.now(),
+    });
+
+    // Check for low stock to potentially create an alert
+    const newStatus = computeStatus(newStock, item.minStockLevel);
+    if (newStatus === 'Critical' || newStatus === 'Warning') {
+      const existingAlerts = await ctx.db
+        .query('alerts')
+        .withIndex('by_workspace_status', (q) =>
+          q.eq('workspaceId', item.workspaceId).eq('status', 'open')
+        )
+        .filter((q) => q.eq(q.field('relatedItemId'), id))
+        .collect();
+
+      if (existingAlerts.length === 0) {
+        await ctx.db.insert('alerts', {
+          workspaceId: item.workspaceId,
+          displayId: `ALT-${Math.floor(Math.random() * 10000)}`,
+          type: 'low_stock',
+          severity: newStatus === 'Critical' ? 'critical' : 'high',
+          title: `Low Stock: ${item.name}`,
+          description: `Stock level for ${item.name} has fallen to ${newStock} ${item.unit}. Minimum level is ${item.minStockLevel}.`,
+          status: 'open',
+          relatedItemId: id,
+          createdAt: Date.now(),
+        });
+      }
+    } else if (newStatus === 'In Stock') {
+      // Resolve any existing low stock alerts for this item
+      const existingAlerts = await ctx.db
+        .query('alerts')
+        .withIndex('by_workspace_status', (q) =>
+          q.eq('workspaceId', item.workspaceId).eq('status', 'open')
+        )
+        .filter((q) => q.eq(q.field('relatedItemId'), id))
+        .filter((q) => q.eq(q.field('type'), 'low_stock'))
+        .collect();
+
+      for (const alert of existingAlerts) {
+        await ctx.db.patch(alert._id, {
+          status: 'resolved',
+          resolvedAt: Date.now(),
+          resolvedBy: user._id,
+        });
+      }
+    }
   },
 });
 

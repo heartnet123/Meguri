@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from 'convex/values';
+import { Id } from '@/convex/_generated/dataModel';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 
 type Alert = {

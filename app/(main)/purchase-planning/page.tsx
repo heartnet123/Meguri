@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from 'convex/values';
+import { Id } from '@/convex/_generated/dataModel';
 import { useState } from 'react';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 
