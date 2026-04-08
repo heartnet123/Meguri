@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 type Alert = {
   _id: Id<'alerts'>;
@@ -77,14 +77,14 @@ function getSeverityClass(severity: Alert['severity']) {
 }
 
 export default function AlertsPage() {
-  const workspaceId = useWorkspaceId();
+  const { workspaceId, workspaceValidated } = useWorkspace();
   const alerts = useQuery(
     api.alerts.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   ) as Alert[] | undefined;
   const stats = useQuery(
     api.alerts.stats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   ) as AlertStats | undefined;
 
   const resolve = useMutation(api.alerts.resolve);

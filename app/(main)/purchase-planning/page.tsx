@@ -4,7 +4,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useState } from 'react';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 type Recommendation = {
   _id: Id<'reorderRecommendations'>;
@@ -44,10 +44,10 @@ function CardSkeleton() {
 }
 
 export default function PurchasePlanningPage() {
-  const workspaceId = useWorkspaceId();
+  const { workspaceId, workspaceValidated } = useWorkspace();
   const recs = useQuery(
     api.purchasePlanning.recommendations,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   ) as Recommendation[] | undefined;
 
   const accept = useMutation(api.purchasePlanning.accept);

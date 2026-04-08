@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 type Supplier = {
   _id: string;
@@ -47,14 +47,14 @@ function statusLabel(status: Supplier['status']) {
 }
 
 export default function SuppliersPage() {
-  const workspaceId = useWorkspaceId();
+  const { workspaceId, workspaceValidated } = useWorkspace();
   const suppliers = useQuery(
     api.suppliers.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   ) as Supplier[] | undefined;
   const stats = useQuery(
     api.suppliers.stats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   );
 
   const [search, setSearch] = useState('');

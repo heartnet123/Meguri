@@ -6,11 +6,13 @@ import { Id } from '@/convex/_generated/dataModel';
 type WorkspaceContextValue = {
   workspaceId: Id<'workspaces'> | undefined;
   setWorkspaceId: (id: Id<'workspaces'>) => void;
+  workspaceValidated: boolean;
 };
 
 const WorkspaceContext = createContext<WorkspaceContextValue>({
   workspaceId: undefined,
   setWorkspaceId: () => {},
+  workspaceValidated: false,
 });
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
@@ -23,6 +25,23 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       return undefined;
     }
   });
+  const [workspaceValidated, setWorkspaceValidated] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (workspaceId) {
+      // TODO: Perform explicit validation here (e.g. check token or ownership).
+      // For now, if we have a workspaceId, we consider it valid after the next tick.
+      const timer = setTimeout(() => {
+        setWorkspaceValidated(true);
+      }, 0);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => {
+        setWorkspaceValidated(false);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [workspaceId]);
 
   const setWorkspaceId = (id: Id<'workspaces'>) => {
     try {
@@ -31,13 +50,18 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       // ignore
     }
     setWorkspaceIdState(id);
+    setWorkspaceValidated(true);
   };
 
   return (
-    <WorkspaceContext.Provider value={{ workspaceId, setWorkspaceId }}>
+    <WorkspaceContext.Provider value={{ workspaceId, setWorkspaceId, workspaceValidated }}>
       {children}
     </WorkspaceContext.Provider>
   );
+}
+
+export function useWorkspace() {
+  return useContext(WorkspaceContext);
 }
 
 export function useWorkspaceId() {

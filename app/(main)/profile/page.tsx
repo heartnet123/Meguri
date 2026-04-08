@@ -155,17 +155,6 @@ export default function ProfilePage() {
     ? displayName
     : [firstName, lastName].filter(Boolean).join(' ');
 
-  // Update effect handles synchronizing actual input values to avoid hook warning.
-  useEffect(() => {
-    if (!displayNameTouched) {
-      const generatedName = [firstName, lastName].filter(Boolean).join(' ');
-      if (displayName !== generatedName) {
-        // use setTimeout to escape synchronous update
-        setTimeout(() => setDisplayName(generatedName), 0);
-      }
-    }
-  }, [firstName, lastName, displayNameTouched, displayName]);
-
   // Auto-dismiss saved confirmation after 4 s
   useEffect(() => {
     if (saved) {
@@ -273,7 +262,7 @@ export default function ProfilePage() {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-neutral-900 truncate">{displayName || `${firstName} ${lastName}`.trim() || 'Your Name'}</p>
+          <p className="text-sm font-semibold text-neutral-900 truncate">{actualDisplayName || 'Your Name'}</p>
           <p className="text-xs text-neutral-500 truncate mt-0.5">{email}</p>
           {avatarError && (
             <p className="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
@@ -339,9 +328,9 @@ export default function ProfilePage() {
               <TextInput
                 id="displayName"
                 type="text"
-                value={displayName}
+                value={actualDisplayName}
                 onChange={(e) => { setDisplayName(e.target.value); setDisplayNameTouched(true); }}
-                onBlur={() => { if (!displayName.trim()) setDisplayNameTouched(false); }}
+                onBlur={() => { if (!actualDisplayName.trim()) setDisplayNameTouched(false); }}
                 autoComplete="nickname"
                 maxLength={80}
                 aria-describedby="displayName-hint"

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 // ─── Skeleton helpers ────────────────────────────────────────────────────────
 
@@ -194,8 +194,8 @@ function RecSkeleton() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const workspaceId = useWorkspaceId();
-  const args = workspaceId ? { workspaceId } : 'skip';
+  const { workspaceId, workspaceValidated } = useWorkspace();
+  const args = workspaceId && workspaceValidated ? { workspaceId } : 'skip';
 
   const summary = useQuery(api.dashboard.summary, args);
   const lowStockItems = useQuery(api.dashboard.lowStockItems, args) as LowStockItem[] | undefined;

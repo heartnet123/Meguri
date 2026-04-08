@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 type Transaction = {
   _id: string;
@@ -54,14 +54,14 @@ function formatCurrency(amount: number) {
 }
 
 export default function SalesPage() {
-  const workspaceId = useWorkspaceId();
+  const { workspaceId, workspaceValidated } = useWorkspace();
   const transactions = useQuery(
     api.sales.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   ) as Transaction[] | undefined;
   const todayStats = useQuery(
     api.sales.todayStats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   );
 
   const [search, setSearch] = useState('');

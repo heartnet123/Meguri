@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 type ForecastRow = {
   _id: string;
@@ -52,7 +52,7 @@ function trendDisplay(trendPct?: number) {
 }
 
 export default function ForecastingPage() {
-  const workspaceId = useWorkspaceId();
+  const { workspaceId, workspaceValidated } = useWorkspace();
   const [periodDays, setPeriodDays] = useState(7);
 
   const forecasts = useQuery(
@@ -62,7 +62,7 @@ export default function ForecastingPage() {
 
   const stats = useQuery(
     api.forecasting.stats,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   ) as ForecastStats | undefined;
 
   const isLoading = workspaceId !== undefined && forecasts === undefined;

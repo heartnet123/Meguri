@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 type InventoryItem = {
   _id: string;
@@ -44,10 +44,10 @@ function EmptyTableState({ cols, message }: { cols: number; message: string }) {
 }
 
 export default function InventoryPage() {
-  const workspaceId = useWorkspaceId();
+  const { workspaceId, workspaceValidated } = useWorkspace();
   const rawItems = useQuery(
     api.inventory.list,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId && workspaceValidated ? { workspaceId } : 'skip'
   ) as InventoryItem[] | undefined;
 
   const [search, setSearch] = useState('');
