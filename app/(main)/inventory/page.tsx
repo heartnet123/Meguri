@@ -4,6 +4,10 @@ import { useState, useMemo } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { InventoryItemDialog } from './components/InventoryItemDialog';
+import { ArchiveItemDialog } from './components/ArchiveItemDialog';
+import { AdjustStockDialog } from './components/AdjustStockDialog';
+import { MovementHistoryDialog } from './components/MovementHistoryDialog';
 
 type InventoryItem = {
   _id: string;
@@ -55,6 +59,16 @@ export default function InventoryPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
 
+  // Dialog state
+  const [isItemDialogOpen, setIsItemDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
+  const [itemToArchive, setItemToArchive] = useState<InventoryItem | null>(null);
+  const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
+  const [itemToAdjust, setItemToAdjust] = useState<InventoryItem | null>(null);
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [historyItemId, setHistoryItemId] = useState<string | null>(null);
+
   const isLoading = workspaceId !== undefined && rawItems === undefined;
 
   const categories = useMemo(
@@ -92,11 +106,27 @@ export default function InventoryPage() {
           <p className="text-sm text-neutral-500 mt-1">Manage your raw materials and stock items.</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => {
+              setHistoryItemId(null);
+              setIsHistoryDialogOpen(true);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+          >
+            <iconify-icon icon="solar:history-linear" width="18" height="18" aria-hidden="true" />
+            History
+          </button>
           <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
             <iconify-icon icon="solar:export-linear" width="18" height="18" aria-hidden="true" />
             Export
           </button>
-          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2">
+          <button
+            onClick={() => {
+              setSelectedItem(null);
+              setIsItemDialogOpen(true);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
+          >
             <iconify-icon icon="solar:add-circle-linear" width="18" height="18" aria-hidden="true" />
             Add Item
           </button>
@@ -175,7 +205,28 @@ export default function InventoryPage() {
               ) : noResults ? (
                 <EmptyTableState cols={7} message="No items match your filters" />
               ) : (
-                pageItems.map((item) => <InventoryRow key={item._id} item={item} />)
+                pageItems.map((item) => (
+                  <InventoryRow
+                    key={item._id}
+                    item={item}
+                    onEdit={() => {
+                      setSelectedItem(item);
+                      setIsItemDialogOpen(true);
+                    }}
+                    onArchive={() => {
+                      setItemToArchive(item);
+                      setIsArchiveDialogOpen(true);
+                    }}
+                    onAdjust={() => {
+                      setItemToAdjust(item);
+                      setIsAdjustDialogOpen(true);
+                    }}
+                    onHistory={() => {
+                      setHistoryItemId(item._id);
+                      setIsHistoryDialogOpen(true);
+                    }}
+                  />
+                ))
               )}
             </tbody>
           </table>
@@ -223,11 +274,48 @@ export default function InventoryPage() {
           )}
         </div>
       </div>
+
+      <InventoryItemDialog
+        isOpen={isItemDialogOpen}
+        onClose={() => setIsItemDialogOpen(false)}
+        item={selectedItem}
+      />
+
+      <ArchiveItemDialog
+        isOpen={isArchiveDialogOpen}
+        onClose={() => setIsArchiveDialogOpen(false)}
+        item={itemToArchive}
+      />
+
+      <AdjustStockDialog
+        isOpen={isAdjustDialogOpen}
+        onClose={() => setIsAdjustDialogOpen(false)}
+        item={itemToAdjust}
+      />
+
+      <MovementHistoryDialog
+        isOpen={isHistoryDialogOpen}
+        onClose={() => setIsHistoryDialogOpen(false)}
+        workspaceId={workspaceId}
+        inventoryItemId={historyItemId}
+      />
     </div>
   );
 }
 
-function InventoryRow({ item }: { item: InventoryItem }) {
+function InventoryRow({
+  item,
+  onEdit,
+  onArchive,
+  onAdjust,
+  onHistory,
+}: {
+  item: InventoryItem;
+  onEdit: () => void;
+  onArchive: () => void;
+  onAdjust: () => void;
+  onHistory: () => void;
+}) {
   const isCritical = item.status === 'Critical';
   const isWarning = item.status === 'Warning';
 
@@ -260,12 +348,40 @@ function InventoryRow({ item }: { item: InventoryItem }) {
         </span>
       </td>
       <td className="px-6 py-4 text-right">
-        <button
-          className="p-1 text-neutral-400 hover:text-neutral-900 rounded-md hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-          aria-label={`Actions for ${item.name}`}
-        >
-          <iconify-icon icon="solar:menu-dots-bold" width="20" height="20" aria-hidden="true" />
-        </button>
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={onHistory}
+            className="p-1.5 text-neutral-400 hover:text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            aria-label={`History for ${item.name}`}
+            title="Movement History"
+          >
+            <iconify-icon icon="solar:history-linear" width="18" height="18" aria-hidden="true" />
+          </button>
+          <button
+            onClick={onAdjust}
+            className="p-1.5 text-neutral-400 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            aria-label={`Adjust stock for ${item.name}`}
+            title="Adjust Stock"
+          >
+            <iconify-icon icon="solar:calculator-minimalistic-linear" width="18" height="18" aria-hidden="true" />
+          </button>
+          <button
+            onClick={onEdit}
+            className="p-1.5 text-neutral-400 hover:text-teal-600 rounded-md hover:bg-teal-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+            aria-label={`Edit ${item.name}`}
+            title="Edit Item"
+          >
+            <iconify-icon icon="solar:pen-linear" width="18" height="18" aria-hidden="true" />
+          </button>
+          <button
+            onClick={onArchive}
+            className="p-1.5 text-neutral-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+            aria-label={`Archive ${item.name}`}
+            title="Archive Item"
+          >
+            <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" aria-hidden="true" />
+          </button>
+        </div>
       </td>
     </tr>
   );
