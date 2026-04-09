@@ -5,6 +5,8 @@ coverage/
 *.log
 .env*
 !.env.example
+**/.omx/
+.omx/
 
 # Auto Claude data directory
 .auto-claude/

@@ -219,6 +219,12 @@ export default defineSchema({
   alerts: defineTable({
     workspaceId: v.id('workspaces'),
     displayId: v.string(),          // e.g. "ALT-1042"
+    category: v.union(
+      v.literal('stock'),
+      v.literal('anomaly'),
+      v.literal('supplier'),
+      v.literal('system'),
+    ),
     type: v.union(
       v.literal('low_stock'),
       v.literal('unusual_demand'),
@@ -238,14 +244,26 @@ export default defineSchema({
       v.literal('open'),
       v.literal('resolved'),
     ),
+    assignedTo: v.optional(v.id('users')),
     relatedItemId: v.optional(v.id('inventoryItems')),
+    relatedEntityType: v.optional(v.union(
+      v.literal('inventory_item'),
+      v.literal('supplier'),
+      v.literal('dashboard'),
+      v.literal('forecast'),
+      v.literal('system'),
+    )),
+    relatedEntityId: v.optional(v.string()),
+    resolutionNote: v.optional(v.string()),
     resolvedAt: v.optional(v.number()),
     resolvedBy: v.optional(v.id('users')),
     createdAt: v.number(),
   })
     .index('by_workspace', ['workspaceId'])
     .index('by_workspace_status', ['workspaceId', 'status'])
-    .index('by_workspace_severity', ['workspaceId', 'severity']),
+    .index('by_workspace_severity', ['workspaceId', 'severity'])
+    .index('by_workspace_category', ['workspaceId', 'category'])
+    .index('by_workspace_assigned_to', ['workspaceId', 'assignedTo']),
 
   // ─── DEMAND FORECASTS (AI-generated snapshots) ───────────────────────────────
 

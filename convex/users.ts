@@ -1,6 +1,6 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import { getCurrentUser } from './utils';
+import { getCurrentUser, verifyWorkspace } from './utils';
 
 /**
  * Upsert the authenticated user's profile in the app users table.
@@ -52,5 +52,28 @@ export const me = query({
   args: {},
   handler: async (ctx) => {
     return await getCurrentUser(ctx);
+  },
+});
+
+export const listByWorkspace = query({
+  args: {
+    workspaceId: v.id('workspaces'),
+  },
+  handler: async (ctx, { workspaceId }) => {
+    await verifyWorkspace(ctx, workspaceId);
+
+    const users = await ctx.db
+      .query('users')
+      .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
+      .collect();
+
+    return users
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((user) => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }));
   },
 });

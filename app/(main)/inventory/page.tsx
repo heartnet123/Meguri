@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
@@ -49,6 +50,8 @@ function EmptyTableState({ cols, message }: { cols: number; message: string }) {
 
 export default function InventoryPage() {
   const workspaceId = useWorkspaceId();
+  const searchParams = useSearchParams();
+  const highlightedItemId = searchParams.get('highlight');
   const rawItems = useQuery(
     api.inventory.list,
     workspaceId ? { workspaceId } : 'skip'
@@ -209,6 +212,7 @@ export default function InventoryPage() {
                   <InventoryRow
                     key={item._id}
                     item={item}
+                    isHighlighted={highlightedItemId === item._id}
                     onEdit={() => {
                       setSelectedItem(item);
                       setIsItemDialogOpen(true);
@@ -305,12 +309,14 @@ export default function InventoryPage() {
 
 function InventoryRow({
   item,
+  isHighlighted = false,
   onEdit,
   onArchive,
   onAdjust,
   onHistory,
 }: {
   item: InventoryItem;
+  isHighlighted?: boolean;
   onEdit: () => void;
   onArchive: () => void;
   onAdjust: () => void;
@@ -320,7 +326,7 @@ function InventoryRow({
   const isWarning = item.status === 'Warning';
 
   return (
-    <tr className="hover:bg-neutral-50/50 transition-colors">
+    <tr className={`transition-colors ${isHighlighted ? 'bg-blue-50/70 hover:bg-blue-50' : 'hover:bg-neutral-50/50'}`}>
       <td className="px-6 py-4 font-medium text-neutral-900 max-w-[220px]">
         <span className="block truncate" title={item.name}>{item.name || '(unnamed)'}</span>
       </td>

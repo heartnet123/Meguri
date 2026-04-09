@@ -146,12 +146,15 @@ export const adjustStock = mutation({
         await ctx.db.insert('alerts', {
           workspaceId: item.workspaceId,
           displayId: `ALT-${Math.floor(Math.random() * 10000)}`,
+          category: 'stock',
           type: 'low_stock',
           severity: newStatus === 'Critical' ? 'critical' : 'high',
           title: `Low Stock: ${item.name}`,
           description: `Stock level for ${item.name} has fallen to ${newStock} ${item.unit}. Minimum level is ${item.minStockLevel}.`,
           status: 'open',
           relatedItemId: id,
+          relatedEntityType: 'inventory_item',
+          relatedEntityId: id,
           createdAt: Date.now(),
         });
       }
@@ -171,6 +174,7 @@ export const adjustStock = mutation({
           status: 'resolved',
           resolvedAt: Date.now(),
           resolvedBy: user._id,
+          resolutionNote: 'Stock level recovered above the minimum threshold.',
         });
       }
     }
