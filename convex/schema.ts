@@ -20,8 +20,8 @@ export default defineSchema({
   // ─── USERS & AUTH ────────────────────────────────────────────────────────────
 
   users: defineTable({
-    workspaceId: v.id('workspaces'),
-    clerkId: v.optional(v.string()),  // external auth provider ID
+    workspaceId: v.optional(v.id('workspaces')), // optional until onboarding completes
+    betterAuthId: v.optional(v.string()),  // Better Auth user ID (ctx.auth.getUserIdentity().subject)
     name: v.string(),
     email: v.string(),
     role: v.union(
@@ -36,7 +36,7 @@ export default defineSchema({
   })
     .index('by_workspace', ['workspaceId'])
     .index('by_email', ['email'])
-    .index('by_clerk_id', ['clerkId']),
+    .index('by_better_auth_id', ['betterAuthId']),
 
   // ─── SUPPLIERS ───────────────────────────────────────────────────────────────
 
@@ -114,7 +114,8 @@ export default defineSchema({
     yieldUnit: v.string(),
     isActive: v.boolean(),
     createdAt: v.number(),
-  }).index('by_product', ['productId']),
+  }).index('by_product', ['productId'])
+    .index('by_workspace', ['workspaceId']),
 
   recipeIngredients: defineTable({
     recipeId: v.id('recipes'),
@@ -155,7 +156,8 @@ export default defineSchema({
     quantity: v.number(),
     unitPrice: v.number(),
     subtotal: v.number(),
-  }).index('by_transaction', ['transactionId']),
+  }).index('by_transaction', ['transactionId'])
+    .index('by_product', ['productId']),
 
   // ─── PURCHASE ORDERS ─────────────────────────────────────────────────────────
 

@@ -35,17 +35,13 @@ export const stats = query({
       .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
       .collect();
 
-    let activeRecipes = 0;
-    for (const p of products) {
-      const rs = await ctx.db
-        .query('recipes')
-        .withIndex('by_product', (q) => q.eq('productId', p._id))
-        .filter((q) => q.eq(q.field('isActive'), true))
-        .collect();
-      activeRecipes += rs.length;
-    }
+    const allRecipes = await ctx.db
+      .query('recipes')
+      .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
+      .filter((q) => q.eq(q.field('isActive'), true))
+      .collect();
 
-    return { total: products.length, activeRecipes };
+    return { total: products.length, activeRecipes: allRecipes.length };
   },
 });
 
@@ -82,6 +78,15 @@ export const remove = mutation({
 
     const user = await verifyWorkspace(ctx, product.workspaceId);
     checkRole(user, ['owner', 'admin']);
+
+    const existingSales = await ctx.db
+      .query('saleItems')
+      .withIndex('by_product', (q) => q.eq('productId', id))
+      .first();
+
+    if (existingSales) {
+      throw new Error('Cannot delete product with existing sales history. Consider deactivating it instead.');
+    }
 
     await ctx.db.delete(id);
   },

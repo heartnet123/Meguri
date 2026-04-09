@@ -79,3 +79,85 @@ export const saveSnapshot = mutation({
     return ctx.db.insert('forecastSnapshots', { ...args, generatedAt: Date.now() });
   },
 });
+
+export const generate = mutation({
+  args: { workspaceId: v.id('workspaces') },
+  handler: async (ctx, { workspaceId }) => {
+    // 1. Fetch all inventory items
+    const items = await ctx.db
+      .query('inventoryItems')
+      .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
+      .collect();
+
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+    // Delete previous pending recommendations to avoid duplicates
+    const pendingRecs = await ctx.db
+      .query('reorderRecommendations')
+      .withIndex('by_workspace_status', (q) => q.eq('workspaceId', workspaceId).eq('status', 'pending'))
+      .collect();
+    for (const rec of pendingRecs) {
+      await ctx.db.delete(rec._id);
+    }
+
+    for (const item of items) {
+      // 2. Calculate daily consumption based on stockMovements
+      const movements = await ctx.db
+        .query('stockMovements')
+        .withIndex('by_item', (q) => q.eq('inventoryItemId', item._id))
+        .collect();
+      
+      const recentOutflow = movements.filter(m => m.createdAt >= thirtyDaysAgo && (m.type === 'sale' || m.type === 'wastage' || m.quantity < 0));
+      const totalOutflow = recentOutflow.reduce((acc, m) => acc + Math.abs(m.quantity), 0);
+      
+      const dailyRunRate = totalOutflow / 30;
+      
+      // Confidence logic
+      const confidence = totalOutflow > 10 ? 'high' : totalOutflow > 0 ? 'medium' : 'low';
+      const warning = totalOutflow === 0 ? 'Insufficient data' : undefined;
+
+      // 3. Generate snapshots
+      for (const days of [7, 14, 30]) {
+        const predictedQty = dailyRunRate * days;
+        await ctx.db.insert('forecastSnapshots', {
+          workspaceId,
+          inventoryItemId: item._id,
+          periodDays: days,
+          predictedQty: Math.round(predictedQty * 10) / 10,
+          unit: item.unit,
+          confidence,
+          model: 'Moving Average',
+          warning,
+          generatedAt: now,
+        });
+      }
+
+      // 4. Reorder Recommendation Logic
+      let leadTimeDays = 7; // default
+      if (item.supplierId) {
+        const supplier = await ctx.db.get(item.supplierId);
+        if (supplier) {
+          leadTimeDays = supplier.leadTimeMaxDays || 7;
+        }
+      }
+      
+      const leadTimeDemand = dailyRunRate * leadTimeDays;
+      if (item.currentStock - leadTimeDemand <= item.minStockLevel && totalOutflow > 0) {
+        // Suggest reorder
+        const recommendedQty = Math.max(item.minStockLevel - (item.currentStock - leadTimeDemand) + (dailyRunRate * 14), 1);
+        
+        await ctx.db.insert('reorderRecommendations', {
+          workspaceId,
+          inventoryItemId: item._id,
+          supplierId: item.supplierId,
+          recommendedQty: Math.ceil(recommendedQty),
+          urgency: item.currentStock <= item.minStockLevel ? 'high' : 'medium',
+          reason: `Stock will drop below min level (${item.minStockLevel}) in the next ${leadTimeDays} days due to lead time.`,
+          status: 'pending',
+          generatedAt: now,
+        });
+      }
+    }
+  },
+});

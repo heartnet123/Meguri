@@ -3,15 +3,16 @@ import { Id } from './_generated/dataModel';
 
 export type User = {
   _id: Id<'users'>;
-  workspaceId: Id<'workspaces'>;
-  clerkId?: string;
+  workspaceId?: Id<'workspaces'>;
+  betterAuthId?: string;
   name: string;
   email: string;
   role: 'owner' | 'admin' | 'manager' | 'staff';
 };
 
 /**
- * Get the currently authenticated user from the database.
+ * Get the currently authenticated user profile from the database.
+ * Identity is provided by Better Auth via the Convex JWT plugin.
  */
 export async function getCurrentUser(ctx: QueryCtx | MutationCtx): Promise<User | null> {
   const identity = await ctx.auth.getUserIdentity();
@@ -19,12 +20,12 @@ export async function getCurrentUser(ctx: QueryCtx | MutationCtx): Promise<User 
 
   return await ctx.db
     .query('users')
-    .withIndex('by_clerk_id', (q) => q.eq('clerkId', identity.subject))
+    .withIndex('by_better_auth_id', (q) => q.eq('betterAuthId', identity.subject))
     .unique();
 }
 
 /**
- * Securely verify that the user belongs to the specified workspace.
+ * Securely verify that the user is authenticated and belongs to the specified workspace.
  */
 export async function verifyWorkspace(
   ctx: QueryCtx | MutationCtx,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 
@@ -54,6 +54,19 @@ function trendDisplay(trendPct?: number) {
 export default function ForecastingPage() {
   const workspaceId = useWorkspaceId();
   const [periodDays, setPeriodDays] = useState(7);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generateForecasts = useMutation(api.forecasting.generate);
+
+  const handleRefresh = async () => {
+    if (!workspaceId) return;
+    setIsGenerating(true);
+    try {
+      await generateForecasts({ workspaceId });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const forecasts = useQuery(
     api.forecasting.latestByItem,
@@ -90,9 +103,13 @@ export default function ForecastingPage() {
             <option value={14}>Next 14 Days</option>
             <option value={30}>Next 30 Days</option>
           </select>
-          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2">
-            <iconify-icon icon="solar:refresh-linear" width="18" height="18" aria-hidden="true" />
-            Refresh Forecast
+          <button 
+            onClick={handleRefresh}
+            disabled={isGenerating}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 disabled:opacity-50"
+          >
+            <iconify-icon icon="solar:refresh-linear" width="18" height="18" aria-hidden="true" className={isGenerating ? "animate-spin" : ""} />
+            {isGenerating ? 'Refreshing...' : 'Refresh Forecast'}
           </button>
         </div>
       </div>

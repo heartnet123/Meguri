@@ -16,17 +16,14 @@ export const list = query({
 });
 
 export const todayStats = query({
-  args: { workspaceId: v.id('workspaces') },
-  handler: async (ctx, { workspaceId }) => {
+  args: { workspaceId: v.id('workspaces'), startOfDayMs: v.number() },
+  handler: async (ctx, { workspaceId, startOfDayMs }) => {
     await verifyWorkspace(ctx, workspaceId);
-
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
 
     const all = await ctx.db
       .query('salesTransactions')
       .withIndex('by_workspace_date', (q) => q.eq('workspaceId', workspaceId))
-      .filter((q) => q.gte(q.field('createdAt'), startOfDay.getTime()))
+      .filter((q) => q.gte(q.field('createdAt'), startOfDayMs))
       .collect();
 
     const completed = all.filter((t) => t.status === 'completed');
@@ -69,18 +66,31 @@ export const add = mutation({
     const user = await verifyWorkspace(ctx, args.workspaceId);
     checkRole(user, ['owner', 'admin', 'manager', 'staff']);
 
-    const now = Date.now();
+    // 1. Initial validation of all items
+    if (args.items && args.items.length > 0) {
+      for (const item of args.items) {
+        if (item.quantity <= 0) throw new Error(`Invalid item quantity for product ${item.productId}: ${item.quantity}. Must be > 0.`);
+        if (item.unitPrice <= 0) throw new Error(`Invalid unit price for product ${item.productId}: ${item.unitPrice}. Must be > 0.`);
+        
+        const product = await ctx.db.get(item.productId);
+        if (!product) throw new Error(`Product not found: ${item.productId}`);
+      }
+    }
 
     // Map to keep track of required inventory items
     const inventoryDeductions = new Map<string, number>();
+    // Cache for validated inventory items to avoid re-fetching
+    const inventoryItemCache = new Map<string, any>();
 
     // Map to keep track of product stock deductions
     const productDeductions = new Map<string, number>();
+    // Cache for product records if needed
+    const productCache = new Map<string, any>();
 
     if (args.status === 'completed' && args.items && args.items.length > 0) {
       for (const item of args.items) {
-        const product = await ctx.db.get(item.productId);
-        if (!product) throw new Error(`Product not found: ${item.productId}`);
+        const product = (await ctx.db.get(item.productId))!; // Already validated above
+        productCache.set(item.productId, product);
 
         // Try to find an active recipe for this product
         const recipes = await ctx.db
@@ -92,6 +102,10 @@ export const add = mutation({
         if (recipes.length > 0) {
           // If product has a recipe, it's made from inventory items
           const recipe = recipes[0]; // Assuming only one active recipe per product
+
+          if (recipe.yieldQty <= 0) {
+            throw new Error(`Invalid recipe yield for product ${product.name} (Recipe: ${recipe._id}). Yield must be > 0.`);
+          }
 
           const ingredients = await ctx.db
             .query('recipeIngredients')
@@ -105,7 +119,6 @@ export const add = mutation({
           }
         } else {
           // If no recipe, we might deduct from product's direct stock
-          // Depending on product category: finished_goods with no recipe, or raw_materials sold directly
           const currentReq = productDeductions.get(item.productId) || 0;
           productDeductions.set(item.productId, currentReq + item.quantity);
         }
@@ -113,8 +126,10 @@ export const add = mutation({
 
       // Check stock sufficiency for inventory items
       for (const [inventoryItemId, requiredQty] of inventoryDeductions.entries()) {
-        const invItem = await ctx.db.get(inventoryItemId as import("./_generated/dataModel").Id<"inventoryItems">);
+        const invItem = (await ctx.db.get(inventoryItemId as any)) as any;
         if (!invItem) throw new Error(`Inventory item not found: ${inventoryItemId}`);
+        inventoryItemCache.set(inventoryItemId, invItem);
+        
         if (invItem.currentStock < requiredQty) {
           throw new Error(`Insufficient stock for ingredient: ${invItem.name}. Required: ${requiredQty}, Available: ${invItem.currentStock}`);
         }
@@ -122,14 +137,14 @@ export const add = mutation({
 
       // Check stock sufficiency for products sold directly
       for (const [productId, requiredQty] of productDeductions.entries()) {
-        const product = await ctx.db.get(productId as import("./_generated/dataModel").Id<"products">);
-        if (!product) throw new Error(`Product not found: ${productId}`);
+        const product = productCache.get(productId) as any;
         if (product.currentStock < requiredQty) {
           throw new Error(`Insufficient stock for product: ${product.name}. Required: ${requiredQty}, Available: ${product.currentStock}`);
         }
       }
     }
 
+    const now = Date.now();
     const { items, ...transactionArgs } = args;
 
     // 1. Create Transaction
@@ -153,36 +168,31 @@ export const add = mutation({
       if (args.status === 'completed') {
         // 3. Deduct Inventory Items & Record Stock Movements
         for (const [inventoryItemId, deductionQty] of inventoryDeductions.entries()) {
-          const invItem = await ctx.db.get(inventoryItemId as import("./_generated/dataModel").Id<"inventoryItems">);
-          if (invItem) {
-            await ctx.db.patch(invItem._id, {
-              currentStock: invItem.currentStock - deductionQty,
-              updatedAt: now,
-            });
+          const invItem = inventoryItemCache.get(inventoryItemId) as any;
+          // Deduction quantity might be 0 for some items, but typically it will be > 0 if in the map
+          await ctx.db.patch(invItem._id, {
+            currentStock: invItem.currentStock - deductionQty,
+            updatedAt: now,
+          });
 
-            await ctx.db.insert('stockMovements', {
-              workspaceId: args.workspaceId,
-              inventoryItemId: invItem._id,
-              type: 'sale',
-              quantity: -deductionQty, // negative for deductions
-              referenceId: args.displayId,
-              performedBy: user._id,
-              createdAt: now,
-            });
-          }
+          await ctx.db.insert('stockMovements', {
+            workspaceId: args.workspaceId,
+            inventoryItemId: invItem._id,
+            type: 'sale',
+            quantity: -deductionQty, // negative for deductions
+            referenceId: args.displayId,
+            performedBy: user._id,
+            createdAt: now,
+          });
         }
 
         // 4. Deduct Product Stock (if sold directly without recipe)
         for (const [productId, deductionQty] of productDeductions.entries()) {
-          const product = await ctx.db.get(productId as import("./_generated/dataModel").Id<"products">);
-          if (product) {
-            await ctx.db.patch(product._id, {
-              currentStock: product.currentStock - deductionQty,
-              updatedAt: now,
-            });
-            // We do not have a separate stock movement table for finished goods in schema.ts
-            // stockMovements is only for inventoryItems
-          }
+          const product = productCache.get(productId) as any;
+          await ctx.db.patch(product._id, {
+            currentStock: product.currentStock - deductionQty,
+            updatedAt: now,
+          });
         }
       }
     }

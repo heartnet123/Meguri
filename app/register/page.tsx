@@ -1,42 +1,84 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    const form = e.currentTarget;
+    const name = (form.elements.namedItem('name') as HTMLInputElement).value;
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+    const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+
+    const { error: authError } = await authClient.signUp.email({
+      name,
+      email,
+      password,
+      callbackURL: '/onboarding',
+    });
+
+    setIsLoading(false);
+
+    if (authError) {
+      setError(authError.message ?? 'Sign up failed. Please try again.');
+    } else {
+      router.push('/onboarding');
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-neutral-200">
         <div className="text-center">
-          <h2 className="text-3xl font-medium tracking-tight text-neutral-900">Create an account</h2>
+          <h1 className="text-3xl font-medium tracking-tight text-neutral-900">Create your account</h1>
           <p className="mt-2 text-sm text-neutral-500">
-            Start your 14-day free trial today
+            Start managing your inventory in minutes
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+
+        <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-6">
+          {error && (
+            <div role="alert" className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-4">
             <div>
-              <label htmlFor="company-name" className="block text-sm font-medium text-neutral-700">
-                Company Name
+              <label htmlFor="name" className="block text-sm font-medium text-neutral-700">
+                Full name
               </label>
               <input
-                id="company-name"
-                name="company"
+                id="name"
+                name="name"
                 type="text"
+                autoComplete="name"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-500 text-neutral-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 focus:z-10 sm:text-sm"
-                placeholder="Acme Bakery"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 sm:text-sm"
+                placeholder="Jane Smith"
               />
             </div>
             <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-neutral-700">
+              <label htmlFor="email" className="block text-sm font-medium text-neutral-700">
                 Email address
               </label>
               <input
-                id="email-address"
+                id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-500 text-neutral-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 focus:z-10 sm:text-sm"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 sm:text-sm"
                 placeholder="you@example.com"
               />
             </div>
@@ -50,57 +92,27 @@ export default function RegisterPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-500 text-neutral-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 focus:z-10 sm:text-sm"
-                placeholder="••••••••"
+                minLength={8}
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 sm:text-sm"
+                placeholder="At least 8 characters"
               />
             </div>
           </div>
 
-          <div>
-            <Link
-              href="/dashboard"
-              className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-600 shadow-sm transition-colors"
-            >
-              Sign up
-            </Link>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            id="sign-up-btn"
+            className="w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-600 shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            aria-busy={isLoading}
+          >
+            {isLoading ? 'Creating account…' : 'Create account'}
+          </button>
         </form>
-        
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-neutral-500">Or sign up with</span>
-            </div>
-          </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <div>
-              <a
-                href="#"
-                className="w-full inline-flex justify-center py-2 px-4 border border-neutral-300 rounded-lg shadow-sm bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50"
-              >
-                <span className="sr-only">Sign up with Google</span>
-                <iconify-icon icon="logos:google-icon" width="20" height="20"></iconify-icon>
-              </a>
-            </div>
-            <div>
-              <a
-                href="#"
-                className="w-full inline-flex justify-center py-2 px-4 border border-neutral-300 rounded-lg shadow-sm bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50"
-              >
-                <span className="sr-only">Sign up with Apple</span>
-                <iconify-icon icon="logos:apple" width="20" height="20"></iconify-icon>
-              </a>
-            </div>
-          </div>
-        </div>
-        
         <p className="mt-2 text-center text-sm text-neutral-600">
           Already have an account?{' '}
-          <Link href="/login" className="font-medium text-neutral-900 hover:underline">
+          <Link href="/login" className="font-medium text-teal-600 hover:text-teal-700 hover:underline">
             Sign in
           </Link>
         </p>

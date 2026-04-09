@@ -3,8 +3,9 @@ import { v } from 'convex/values';
 import { getCurrentUser } from './utils';
 
 /**
- * Stores or updates a user in the database based on their Clerk identity.
- * This should be called by the frontend after a successful login.
+ * Upsert the authenticated user's profile in the app users table.
+ * Called by the frontend after a successful Better Auth sign-in/sign-up
+ * when a workspaceId has been established (i.e., after onboarding).
  */
 export const store = mutation({
   args: {
@@ -13,37 +14,30 @@ export const store = mutation({
   handler: async (ctx, { workspaceId }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error('Called storeUser without authentication');
+      throw new Error('Unauthenticated');
     }
 
-    // Check if user already exists
     const user = await ctx.db
       .query('users')
-      .withIndex('by_clerk_id', (q) => q.eq('clerkId', identity.subject))
+      .withIndex('by_better_auth_id', (q) => q.eq('betterAuthId', identity.subject))
       .unique();
 
     if (user !== null) {
-      // If the user already exists, update their profile
-      if (user.workspaceId !== workspaceId) {
-        // If they're trying to join a different workspace, this logic depends on the app's requirements.
-        // For now, we'll keep the existing workspace association.
-      }
-      
+      // Update profile fields that may have changed
       await ctx.db.patch(user._id, {
         name: identity.name ?? user.name,
-        email: identity.email ?? user.email,
         avatarUrl: identity.pictureUrl ?? user.avatarUrl,
       });
       return user._id;
     }
 
-    // Create a new user
+    // First sign-in: create the user profile
     return await ctx.db.insert('users', {
       workspaceId,
-      clerkId: identity.subject,
+      betterAuthId: identity.subject,
       name: identity.name ?? 'Unknown User',
-      email: identity.email ?? 'no-email@clerk.com',
-      role: 'owner', // Default role for the first user in a workspace
+      email: identity.email ?? '',
+      role: 'owner',
       notificationsEnabled: true,
       createdAt: Date.now(),
       avatarUrl: identity.pictureUrl,
@@ -52,7 +46,7 @@ export const store = mutation({
 });
 
 /**
- * Returns the currently authenticated user.
+ * Returns the currently authenticated user's app profile.
  */
 export const me = query({
   args: {},

@@ -4,17 +4,14 @@ import { verifyWorkspace } from './utils';
 import { Id } from './_generated/dataModel';
 
 export const summary = query({
-  args: { workspaceId: v.id('workspaces') },
-  handler: async (ctx, { workspaceId }) => {
+  args: { workspaceId: v.id('workspaces'), startOfDayMs: v.number() },
+  handler: async (ctx, { workspaceId, startOfDayMs }) => {
     await verifyWorkspace(ctx, workspaceId);
-
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
 
     const todayTrx = await ctx.db
       .query('salesTransactions')
       .withIndex('by_workspace_date', (q) => q.eq('workspaceId', workspaceId))
-      .filter((q) => q.gte(q.field('createdAt'), startOfDay.getTime()))
+      .filter((q) => q.gte(q.field('createdAt'), startOfDayMs))
       .collect();
 
     const completed = todayTrx.filter((t) => t.status === 'completed');

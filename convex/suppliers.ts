@@ -78,6 +78,15 @@ export const remove = mutation({
     const user = await verifyWorkspace(ctx, supplier.workspaceId);
     checkRole(user, ['owner', 'admin']);
 
+    const existingOrders = await ctx.db
+      .query('purchaseOrders')
+      .withIndex('by_supplier', (q) => q.eq('supplierId', id))
+      .first();
+
+    if (existingOrders) {
+      throw new Error('Cannot delete supplier with existing purchase orders. Consider marking them as inactive instead.');
+    }
+
     await ctx.db.delete(id);
   },
 });
