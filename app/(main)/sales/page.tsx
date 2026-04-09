@@ -205,8 +205,14 @@ export default function SalesPage() {
                 </tr>
               ) : noResults ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center text-sm text-neutral-500">
-                    No transactions match your search.
+                  <td colSpan={8} className="px-6 py-16 text-center">
+                    <p className="text-sm text-neutral-500 mb-4">No transactions match your search.</p>
+                    <button
+                      onClick={() => { setSearch(''); setStatusFilter(''); setPage(1); }}
+                      className="px-4 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+                    >
+                      Clear all filters
+                    </button>
                   </td>
                 </tr>
               ) : (
