@@ -12,13 +12,24 @@ export const recommendations = query({
       .order('desc')
       .collect();
 
-    return Promise.all(
-      recs.map(async (rec) => {
-        const item = await ctx.db.get(rec.inventoryItemId);
-        const supplier = rec.supplierId ? await ctx.db.get(rec.supplierId) : null;
-        return { ...rec, item, supplier };
-      })
-    );
+    const itemIds = [...new Set(recs.map((r) => r.inventoryItemId))];
+    const supplierIds = [
+      ...new Set(recs.map((r) => r.supplierId).filter((id): id is NonNullable<typeof id> => !!id)),
+    ];
+
+    const [items, suppliers] = await Promise.all([
+      Promise.all(itemIds.map((id) => ctx.db.get(id))),
+      Promise.all(supplierIds.map((id) => ctx.db.get(id))),
+    ]);
+
+    const itemMap = new Map(itemIds.map((id, i) => [id, items[i]]));
+    const supplierMap = new Map(supplierIds.map((id, i) => [id, suppliers[i]]));
+
+    return recs.map((rec) => ({
+      ...rec,
+      item: itemMap.get(rec.inventoryItemId),
+      supplier: rec.supplierId ? supplierMap.get(rec.supplierId) : null,
+    }));
   },
 });
 
