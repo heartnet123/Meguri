@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import { Geist, Space_Grotesk } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
-import ConvexClientProvider from './providers/ConvexClientProvider';
+import { ConvexClientProvider } from './components/ConvexClientProvider';
 import { WorkspaceProvider } from './providers/WorkspaceProvider';
 import { getToken } from '@/lib/auth-server';
 
