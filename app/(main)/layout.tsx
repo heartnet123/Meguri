@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ReactNode, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -31,11 +32,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex">
+    <div className="min-h-screen bg-subtle flex">
       {/* Skip to main content */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:border focus:border-neutral-900 focus:rounded-lg focus:text-sm focus:font-medium focus:text-neutral-900 focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-surface focus:border focus:border-neutral-900 focus:rounded-lg focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg"
       >
         Skip to main content
       </a>
@@ -53,19 +54,19 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <aside
         id="mobile-nav"
         aria-label="Mobile navigation"
-        className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-neutral-200 flex flex-col z-50 transition-transform duration-200 md:hidden ${
+        className={`fixed inset-y-0 left-0 w-64 bg-surface border-r border-border flex flex-col z-50 transition-transform duration-200 md:hidden ${
           mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="h-16 flex items-center justify-between px-6 border-b border-neutral-200 shrink-0">
-          <Link href="/" className="font-sans font-medium tracking-tighter text-lg text-neutral-900 flex items-center gap-2">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-border shrink-0">
+          <Link href="/" className="font-sans font-medium tracking-tighter text-lg text-foreground flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-sm bg-teal-500 shrink-0" aria-hidden="true"></span>
             SMARTSTOCK
           </Link>
           <button
             onClick={() => setMobileNavOpen(false)}
             aria-label="Close navigation menu"
-            className="p-1 text-neutral-500 hover:text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="p-1 text-muted hover:text-foreground rounded-lg hover:bg-neutral-100 transition-colors"
           >
             <iconify-icon icon="solar:close-circle-linear" width="24" height="24" aria-hidden="true"></iconify-icon>
           </button>
@@ -77,11 +78,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
       {/* Desktop Sidebar */}
       <aside
-        className="w-64 bg-white border-r border-neutral-200 flex-col hidden md:flex sticky top-0 h-screen"
+        className="w-64 bg-surface border-r border-border flex-col hidden md:flex sticky top-0 h-screen"
         aria-label="Main navigation"
       >
-        <div className="h-16 flex items-center px-6 border-b border-neutral-200 shrink-0">
-          <Link href="/" className="font-sans font-medium tracking-tighter text-lg text-neutral-900 flex items-center gap-2">
+        <div className="h-16 flex items-center px-6 border-b border-border shrink-0">
+          <Link href="/" className="font-sans font-medium tracking-tighter text-lg text-foreground flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-sm bg-teal-500 shrink-0" aria-hidden="true"></span>
             SMARTSTOCK
           </Link>
@@ -94,10 +95,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-neutral-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-10">
+        <header className="h-16 bg-surface border-b border-border flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <button
-              className="md:hidden text-neutral-500 hover:text-neutral-900 transition-colors p-1 rounded-lg hover:bg-neutral-100"
+              className="md:hidden text-muted hover:text-foreground transition-colors p-1 rounded-lg hover:bg-neutral-100"
               onClick={() => setMobileNavOpen(true)}
               aria-label="Open navigation menu"
               aria-expanded={mobileNavOpen}
@@ -106,13 +107,13 @@ export default function MainLayout({ children }: { children: ReactNode }) {
               <iconify-icon icon="solar:hamburger-menu-linear" width="24" height="24" aria-hidden="true"></iconify-icon>
             </button>
             <button
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-neutral-100 rounded-lg border border-neutral-200 hover:bg-neutral-200 transition-colors"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-neutral-100 rounded-lg border border-border hover:bg-surface-raised transition-colors"
               aria-label="Switch store: Main Store BKK"
               aria-haspopup="listbox"
             >
-              <iconify-icon icon="solar:shop-linear" width="18" height="18" className="text-neutral-500" aria-hidden="true"></iconify-icon>
+              <iconify-icon icon="solar:shop-linear" width="18" height="18" className="text-muted" aria-hidden="true"></iconify-icon>
               <span className="text-sm font-medium text-neutral-700">Main Store (BKK)</span>
-              <iconify-icon icon="solar:alt-arrow-down-linear" width="16" height="16" className="text-neutral-500" aria-hidden="true"></iconify-icon>
+              <iconify-icon icon="solar:alt-arrow-down-linear" width="16" height="16" className="text-muted" aria-hidden="true"></iconify-icon>
             </button>
           </div>
           <div className="flex items-center gap-4">
@@ -128,11 +129,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 type="search"
                 placeholder="Search..."
                 aria-label="Search"
-                className="pl-9 pr-4 py-1.5 bg-neutral-100 border border-neutral-200 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 w-64 transition-shadow"
+                className="pl-9 pr-4 py-1.5 bg-neutral-100 border border-border rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground w-64 transition-shadow"
               />
             </div>
             <button
-              className="relative text-neutral-500 hover:text-neutral-900 transition-colors p-1 rounded-lg hover:bg-neutral-100"
+              className="relative text-muted hover:text-foreground transition-colors p-1 rounded-lg hover:bg-neutral-100"
               aria-label="Notifications, 1 unread"
             >
               <iconify-icon icon="solar:bell-linear" width="24" height="24" aria-hidden="true"></iconify-icon>
@@ -140,15 +141,16 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             </button>
             <Link
               href="/profile"
-              className="w-8 h-8 rounded-full bg-neutral-200 border border-neutral-300 overflow-hidden block hover:ring-2 hover:ring-neutral-400 hover:ring-offset-1 transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-1"
+              className="w-8 h-8 rounded-full bg-surface-raised border border-neutral-300 overflow-hidden block hover:ring-2 hover:ring-border hover:ring-offset-1 transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-1"
               aria-label="Your profile"
             >
-              <img
+              <Image
                 src="https://picsum.photos/seed/user/100/100"
                 alt="User profile picture"
                 className="w-full h-full object-cover"
                 width={32}
                 height={32}
+                priority
               />
             </Link>
           </div>
@@ -183,8 +185,8 @@ function NavItem({
       aria-current={isActive ? 'page' : undefined}
       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         isActive
-          ? 'bg-teal-50 text-teal-700'
-          : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
+          ? 'bg-accent-subtle text-accent'
+          : 'text-muted hover:bg-subtle hover:text-foreground'
       }`}
     >
       <iconify-icon icon={icon} width="20" height="20" aria-hidden="true"></iconify-icon>

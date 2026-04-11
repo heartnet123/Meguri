@@ -35,23 +35,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-neutral-200">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-surface p-8 rounded-2xl shadow-xl border border-border">
         <div className="text-center">
-          <h1 className="text-3xl font-medium tracking-tight text-neutral-900">Welcome back</h1>
-          <p className="mt-2 text-sm text-neutral-500">Sign in to your SmartStock account</p>
+          <h1 className="text-3xl font-medium tracking-tight text-foreground">Welcome back</h1>
+          <p className="mt-2 text-sm text-muted">Sign in to your SmartStock account</p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-6">
           {error && (
-            <div role="alert" className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700">
+            <div role="alert" className="p-3 rounded-lg bg-danger-subtle border border-danger/20 text-sm text-danger">
               {error}
             </div>
           )}
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-neutral-700">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground">
                 Email address
               </label>
               <input
@@ -60,12 +60,12 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:border-neutral-900 sm:text-sm"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-border placeholder-muted-fg text-foreground rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:border-foreground sm:text-sm"
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
                 Password
               </label>
               <input
@@ -75,7 +75,7 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 required
                 minLength={8}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:border-neutral-900 sm:text-sm"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-border placeholder-muted-fg text-foreground rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:border-foreground sm:text-sm"
                 placeholder="••••••••"
               />
             </div>
@@ -85,16 +85,16 @@ export default function LoginPage() {
             type="submit"
             disabled={isLoading}
             id="sign-in-btn"
-            className="w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-600 shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-accent-fg bg-accent hover:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             aria-busy={isLoading}
           >
             {isLoading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
-        <p className="mt-2 text-center text-sm text-neutral-600">
+        <p className="mt-2 text-center text-sm text-muted">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-medium text-teal-600 hover:text-teal-700 hover:underline">
+          <Link href="/register" className="font-medium text-accent hover:text-accent/80 hover:underline">
             Sign up
           </Link>
         </p>

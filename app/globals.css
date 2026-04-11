@@ -4,6 +4,7 @@
   --font-sans: var(--font-primary), ui-sans-serif, system-ui;
   --font-display: var(--font-display), ui-sans-serif, system-ui;
   
+  /* Primary palette */
   --color-background: var(--bg);
   --color-foreground: var(--fg);
   --color-surface: var(--surface);
@@ -12,19 +13,84 @@
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
   --color-muted: var(--muted);
+
+  /* Expanded neutral scale */
+  --color-surface-raised: var(--surface-raised);
+  --color-border-subtle: var(--border-subtle);
+  --color-muted-fg: var(--muted-fg);
+  --color-faint: var(--faint);
+
+  /* Semantic state colours */
+  --color-success: var(--success);
+  --color-success-fg: var(--success-fg);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-fg: var(--warning-fg);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-danger: var(--danger);
+  --color-danger-fg: var(--danger-fg);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-accent-subtle: var(--accent-subtle);
 }
 
 @layer base {
   :root {
-    /* Industrial Cyber-Minimalism Light Theme */
-    --bg: #f3f4f6;
-    --fg: #0f172a;
-    --surface: #ffffff;
-    --subtle: #f8fafc;
-    --border: #cbd5e1;
-    --accent: #0f766e; /* Deep Teal */
-    --accent-fg: #ffffff;
-    --muted: #64748b;
+    /* ── Industrial Cyber-Minimalism Light Theme ── */
+    --bg:          #f3f4f6;
+    --fg:          #0f172a;
+    --surface:     #ffffff;
+    --subtle:      #f8fafc;
+    --border:      #cbd5e1;
+    --accent:      #0f766e;   /* Deep Teal */
+    --accent-fg:   #ffffff;
+    --accent-subtle: #f0fdfa;
+    --muted:       #64748b;
+
+    /* Neutral scale */
+    --surface-raised: #f1f5f9;  /* hover/pressed surfaces */
+    --border-subtle:  #e2e8f0;  /* light dividers */
+    --muted-fg:       #94a3b8;  /* tertiary text */
+    --faint:          #f8fafc;  /* nearly-invisible backgrounds */
+
+    /* Semantic */
+    --success:        #059669;
+    --success-fg:     #ffffff;
+    --success-subtle: #ecfdf5;
+    --warning:        #d97706;
+    --warning-fg:     #ffffff;
+    --warning-subtle: #fffbeb;
+    --danger:         #dc2626;
+    --danger-fg:      #ffffff;
+    --danger-subtle:  #fef2f2;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:          #0b0f1a;
+    --fg:          #f1f5f9;
+    --surface:     #111827;
+    --subtle:      #1e293b;
+    --border:      #334155;
+    --accent:      #14b8a6;   /* Lighter teal for dark bg */
+    --accent-fg:   #0b0f1a;
+    --accent-subtle: #0f2d29;
+    --muted:       #94a3b8;
+
+    --surface-raised: #1e293b;
+    --border-subtle:  #1e293b;
+    --muted-fg:       #475569;
+    --faint:          #0f172a;
+
+    --success:        #10b981;
+    --success-fg:     #0b0f1a;
+    --success-subtle: #022c22;
+    --warning:        #f59e0b;
+    --warning-fg:     #0b0f1a;
+    --warning-subtle: #1c1200;
+    --danger:         #ef4444;
+    --danger-fg:      #0b0f1a;
+    --danger-subtle:  #1f0707;
   }
 }
 

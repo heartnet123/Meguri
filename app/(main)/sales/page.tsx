@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useQuery } from 'convex/react';
+import Link from 'next/link';
 import { api } from '@/convex/_generated/api';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 
@@ -102,10 +103,10 @@ export default function SalesPage() {
             <iconify-icon icon="solar:export-linear" width="18" height="18" aria-hidden="true" />
             Export Report
           </button>
-          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2">
+          <Link href="/sales/new" className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2">
             <iconify-icon icon="solar:add-circle-linear" width="18" height="18" aria-hidden="true" />
             New Order
-          </button>
+          </Link>
         </div>
       </div>
 

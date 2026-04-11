@@ -16,14 +16,19 @@ export const list = query({
 });
 
 export const todayStats = query({
-  args: { workspaceId: v.id('workspaces'), startOfDayMs: v.number() },
+  args: { workspaceId: v.id('workspaces'), startOfDayMs: v.optional(v.number()) },
   handler: async (ctx, { workspaceId, startOfDayMs }) => {
     await verifyWorkspace(ctx, workspaceId);
+
+    const startMs = startOfDayMs ?? (() => {
+      const now = new Date();
+      return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    })();
 
     const all = await ctx.db
       .query('salesTransactions')
       .withIndex('by_workspace_date', (q) => q.eq('workspaceId', workspaceId))
-      .filter((q) => q.gte(q.field('createdAt'), startOfDayMs))
+      .filter((q) => q.gte(q.field('createdAt'), startMs))
       .collect();
 
     const completed = all.filter((t) => t.status === 'completed');
@@ -198,5 +203,122 @@ export const add = mutation({
     }
 
     return transactionId;
+  },
+});
+
+export const getImpactPreview = query({
+  args: {
+    workspaceId: v.id('workspaces'),
+    items: v.array(
+      v.object({
+        productId: v.id('products'),
+        quantity: v.number(),
+      })
+    ),
+  },
+  handler: async (ctx, { workspaceId, items }) => {
+    await verifyWorkspace(ctx, workspaceId);
+
+    if (items.length === 0) {
+      return { ingredientImpacts: [], productImpacts: [], totals: { revenue: 0, cost: 0, margin: 0, marginPct: 0 } };
+    }
+
+    // Aggregate required inventory deductions (via recipes)
+    const inventoryDeductions = new Map<string, number>();
+    // Aggregate direct product stock deductions (no recipe)
+    const productDeductions = new Map<string, number>();
+
+    let totalRevenue = 0;
+    let totalCost = 0;
+
+    const productInfoMap = new Map<string, { name: string; price: number; cost: number; currentStock: number }>();
+
+    for (const item of items) {
+      const product = await ctx.db.get(item.productId);
+      if (!product) continue;
+
+      productInfoMap.set(item.productId, {
+        name: product.name,
+        price: product.price,
+        cost: product.cost,
+        currentStock: product.currentStock,
+      });
+
+      totalRevenue += product.price * item.quantity;
+      totalCost += product.cost * item.quantity;
+
+      // Look for an active recipe
+      const recipes = await ctx.db
+        .query('recipes')
+        .withIndex('by_product', (q) => q.eq('productId', item.productId))
+        .filter((q) => q.eq(q.field('isActive'), true))
+        .collect();
+
+      if (recipes.length > 0) {
+        const recipe = recipes[0];
+        const ingredients = await ctx.db
+          .query('recipeIngredients')
+          .withIndex('by_recipe', (q) => q.eq('recipeId', recipe._id))
+          .collect();
+
+        for (const ingredient of ingredients) {
+          const requiredQty = recipe.yieldQty > 0
+            ? (item.quantity / recipe.yieldQty) * ingredient.quantity
+            : 0;
+          const current = inventoryDeductions.get(ingredient.inventoryItemId) || 0;
+          inventoryDeductions.set(ingredient.inventoryItemId, current + requiredQty);
+        }
+      } else {
+        const current = productDeductions.get(item.productId) || 0;
+        productDeductions.set(item.productId, current + item.quantity);
+      }
+    }
+
+    // Build ingredient impact list
+    const ingredientImpacts = [];
+    for (const [inventoryItemId, deduction] of inventoryDeductions.entries()) {
+      const invItem = await ctx.db.get(inventoryItemId as any);
+      if (!invItem) continue;
+      const remaining = (invItem as any).currentStock - deduction;
+      ingredientImpacts.push({
+        inventoryItemId,
+        name: (invItem as any).name,
+        unit: (invItem as any).unit,
+        currentStock: (invItem as any).currentStock,
+        deduction: Math.round(deduction * 100) / 100,
+        remainingStock: Math.round(remaining * 100) / 100,
+        insufficient: remaining < 0,
+      });
+    }
+
+    // Build product impact list (direct stock deductions)
+    const productImpacts = [];
+    for (const [productId, deduction] of productDeductions.entries()) {
+      const info = productInfoMap.get(productId);
+      if (!info) continue;
+      const remaining = info.currentStock - deduction;
+      productImpacts.push({
+        productId,
+        name: info.name,
+        currentStock: info.currentStock,
+        deduction,
+        remainingStock: remaining,
+        insufficient: remaining < 0,
+      });
+    }
+
+    const margin = totalRevenue - totalCost;
+    const marginPct = totalRevenue > 0 ? Math.round((margin / totalRevenue) * 100) : 0;
+
+    return {
+      ingredientImpacts,
+      productImpacts,
+      totals: {
+        revenue: Math.round(totalRevenue * 100) / 100,
+        cost: Math.round(totalCost * 100) / 100,
+        margin: Math.round(margin * 100) / 100,
+        marginPct,
+      },
+    };
   },
 });

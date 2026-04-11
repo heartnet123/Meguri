@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -125,8 +125,14 @@ export default function ProfilePage() {
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState(CURRENT_USER.firstName);
   const [lastName, setLastName] = useState(CURRENT_USER.lastName);
-  const [displayName, setDisplayName] = useState(CURRENT_USER.displayName);
+  const [displayNameOverride, setDisplayNameOverride] = useState<string | null>(CURRENT_USER.displayName);
   const [displayNameTouched, setDisplayNameTouched] = useState(true); // pre-filled, don't auto-overwrite
+  // Derived display name: falls back to first+last when not manually set
+  const displayName = useMemo(
+    () => displayNameOverride ?? [firstName, lastName].filter(Boolean).join(' '),
+    [displayNameOverride, firstName, lastName]
+  );
+  const setDisplayName = (val: string) => setDisplayNameOverride(val);
   // Contact
   const [email, setEmail] = useState(CURRENT_USER.email);
   const [phone, setPhone] = useState(CURRENT_USER.phone);
@@ -148,13 +154,6 @@ export default function ProfilePage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Auto-fill display name from first + last when not manually edited
-  useEffect(() => {
-    if (!displayNameTouched) {
-      setDisplayName([firstName, lastName].filter(Boolean).join(' '));
-    }
-  }, [firstName, lastName, displayNameTouched]);
 
   // Auto-dismiss saved confirmation after 4 s
   useEffect(() => {
@@ -330,7 +329,7 @@ export default function ProfilePage() {
                 type="text"
                 value={displayName}
                 onChange={(e) => { setDisplayName(e.target.value); setDisplayNameTouched(true); }}
-                onBlur={() => { if (!displayName.trim()) setDisplayNameTouched(false); }}
+                onBlur={() => { if (!displayName.trim()) { setDisplayNameOverride(null); setDisplayNameTouched(false); } }}
                 autoComplete="nickname"
                 maxLength={80}
                 aria-describedby="displayName-hint"

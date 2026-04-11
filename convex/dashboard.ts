@@ -3,15 +3,60 @@ import { v } from 'convex/values';
 import { verifyWorkspace } from './utils';
 import { Id } from './_generated/dataModel';
 
+// ─── Sales Trend (7-day daily breakdown for dashboard chart) ──────────────────
+
+export const salesTrend = query({
+  args: { workspaceId: v.id('workspaces') },
+  handler: async (ctx, { workspaceId }) => {
+    await verifyWorkspace(ctx, workspaceId);
+
+    const now = Date.now();
+    const MS_PER_DAY = 86_400_000;
+    // Collect last 7 complete days + today
+    const days: { label: string; revenue: number; orderCount: number }[] = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = now - (i + 1) * MS_PER_DAY;
+      const dayEnd   = now - i * MS_PER_DAY;
+
+      const trxs = await ctx.db
+        .query('salesTransactions')
+        .withIndex('by_workspace_date', (q) =>
+          q.eq('workspaceId', workspaceId)
+           .gte('createdAt', dayStart)
+        )
+        .filter((q) => q.lt(q.field('createdAt'), dayEnd))
+        .collect();
+
+      const completed = trxs.filter((t) => t.status === 'completed');
+      const revenue = completed.reduce((s, t) => s + t.totalAmount, 0);
+
+      // Day-of-week label (Mon, Tue, …)
+      const d = new Date(dayStart);
+      const label = d.toLocaleDateString('en-US', { weekday: 'short' });
+
+      days.push({ label, revenue, orderCount: completed.length });
+    }
+
+    return days;
+  },
+});
+
 export const summary = query({
-  args: { workspaceId: v.id('workspaces'), startOfDayMs: v.number() },
+  args: { workspaceId: v.id('workspaces'), startOfDayMs: v.optional(v.number()) },
   handler: async (ctx, { workspaceId, startOfDayMs }) => {
     await verifyWorkspace(ctx, workspaceId);
+
+    // Default to start of current UTC day if not provided
+    const startMs = startOfDayMs ?? (() => {
+      const now = new Date();
+      return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    })();
 
     const todayTrx = await ctx.db
       .query('salesTransactions')
       .withIndex('by_workspace_date', (q) => q.eq('workspaceId', workspaceId))
-      .filter((q) => q.gte(q.field('createdAt'), startOfDayMs))
+      .filter((q) => q.gte(q.field('createdAt'), startMs))
       .collect();
 
     const completed = todayTrx.filter((t) => t.status === 'completed');
