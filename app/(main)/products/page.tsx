@@ -279,11 +279,13 @@ export default function ProductsPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
+                  aria-label="Previous page"
                   className="px-3 py-1.5 border border-neutral-200 rounded-md hover:bg-neutral-100 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
                 >Previous</button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
+                  aria-label="Next page"
                   className="px-3 py-1.5 border border-neutral-200 rounded-md hover:bg-neutral-100 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
                 >Next</button>
               </div>
