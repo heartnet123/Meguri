@@ -75,8 +75,9 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
           <button
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-900 transition-colors"
+            aria-label="Close dialog"
           >
-            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
+            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" aria-hidden="true" />
           </button>
         </div>
 
