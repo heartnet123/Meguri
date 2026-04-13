@@ -1,0 +1,3 @@
+## 2024-11-28 - Dialog Close Button Accessibility Pattern
+**Learning:** Found a recurring pattern in the app's components (`InventoryItemDialog`, `MovementHistoryDialog`, `AdjustStockDialog`) where close buttons consisting solely of a `<iconify-icon>` lacked an `aria-label` on the `<button>` and an `aria-hidden="true"` on the `<iconify-icon>`. This makes the buttons inaccessible to screen readers as they announce no readable text.
+**Action:** When implementing new dialogs or components with icon-only buttons, always ensure that an explicit `aria-label` is set on the button element and the inner icon is hidden from screen readers using `aria-hidden="true"`.
