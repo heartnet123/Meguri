@@ -1,3 +1,5 @@
+'use client';
+
 interface Report {
   id: string;
   title: string;
@@ -7,56 +9,120 @@ interface Report {
   lastGenerated: string;
   icon: string;
   iconColor: string;
+  bgColor: string;
 }
 
 export default function ReportsPage() {
   const reports: Report[] = [
-    { id: 'REP-001', title: 'Monthly Sales Summary', description: 'Overview of sales performance, top products, and revenue for the month.', type: 'Sales', frequency: 'Monthly', lastGenerated: '2026-03-01', icon: 'solar:chart-square-linear', iconColor: 'text-blue-500' },
-    { id: 'REP-002', title: 'Inventory Valuation', description: 'Current value of all stock on hand, categorized by product type.', type: 'Inventory', frequency: 'Weekly', lastGenerated: '2026-03-15', icon: 'solar:pie-chart-2-linear', iconColor: 'text-emerald-500' },
-    { id: 'REP-003', title: 'Demand Forecast Accuracy', description: 'Comparison of forecasted demand vs actual sales over the past 30 days.', type: 'Forecasting', frequency: 'Monthly', lastGenerated: '2026-03-01', icon: 'solar:graph-up-linear', iconColor: 'text-indigo-500' },
-    { id: 'REP-004', title: 'Supplier Performance', description: 'Analysis of supplier lead times, order fulfillment rates, and quality issues.', type: 'Suppliers', frequency: 'Quarterly', lastGenerated: '2026-01-01', icon: 'solar:document-text-linear', iconColor: 'text-amber-500' },
-    { id: 'REP-005', title: 'Low Stock & Stockout History', description: 'Log of all low stock alerts and actual stockout events.', type: 'Inventory', frequency: 'Weekly', lastGenerated: '2026-03-15', icon: 'solar:document-linear', iconColor: 'text-red-500' },
+    {
+      id: 'REP-001',
+      title: 'Consolidated Revenue Matrix',
+      description: 'Comprehensive overview of sales performance, top velocity products, and unit margins.',
+      type: 'Financial',
+      frequency: 'Monthly',
+      lastGenerated: '2026-03-01',
+      icon: 'solar:chart-square-bold-duotone',
+      iconColor: 'text-accent',
+      bgColor: 'bg-accent-subtle/40',
+    },
+    {
+      id: 'REP-002',
+      title: 'Global Asset Valuation',
+      description: 'Real-time valuation of all on-hand stock assets categorized by operational risk.',
+      type: 'Inventory',
+      frequency: 'Weekly',
+      lastGenerated: '2026-03-15',
+      icon: 'solar:pie-chart-2-bold-duotone',
+      iconColor: 'text-success',
+      bgColor: 'bg-success-subtle/40',
+    },
+    {
+      id: 'REP-003',
+      title: 'Predictive Variance Audit',
+      description: 'High-fidelity comparison of AI-forecasted demand vs verified actual sales velocity.',
+      type: 'Intelligence',
+      frequency: 'Monthly',
+      lastGenerated: '2026-03-01',
+      icon: 'solar:graph-up-bold-duotone',
+      iconColor: 'text-accent',
+      bgColor: 'bg-accent-subtle/40',
+    },
+    {
+      id: 'REP-004',
+      title: 'Vendor Reliability Index',
+      description: 'Algorithmic scoring of vendor lead times, fulfillment integrity, and defect rates.',
+      type: 'Procurement',
+      frequency: 'Quarterly',
+      lastGenerated: '2026-01-01',
+      icon: 'solar:document-text-bold-duotone',
+      iconColor: 'text-warning',
+      bgColor: 'bg-warning-subtle/40',
+    },
+    {
+      id: 'REP-005',
+      title: 'Critical Stockout Forensics',
+      description: 'Historical audit of stockout events, recovery duration, and lost opportunity cost.',
+      type: 'Operational',
+      frequency: 'Weekly',
+      lastGenerated: '2026-03-15',
+      icon: 'solar:document-bold-duotone',
+      iconColor: 'text-danger',
+      bgColor: 'bg-danger-subtle/40',
+    },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight text-neutral-900">Reports & Analytics</h1>
-          <p className="text-sm text-neutral-500 mt-1">Generate, view, and schedule standard and custom reports.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Analytical Suite</h1>
+          <p className="text-sm text-muted mt-2 leading-relaxed max-w-xl">Generate high-fidelity reports, schedule automated data exports, and perform deep-dive forensics.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2">
-            <iconify-icon icon="solar:add-circle-linear" width="18" height="18" aria-hidden="true"></iconify-icon>
-            Create Custom Report
+        <div className="flex items-center gap-3 shrink-0">
+          <button className="inline-flex items-center justify-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-[0.15em] text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 hover:scale-105 active:scale-95">
+            <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true"></iconify-icon>
+            Configure Custom Suite
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {reports.map((report) => (
-          <div key={report.id} className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex flex-col h-full">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-neutral-50 flex items-center justify-center border border-neutral-100">
-                <iconify-icon icon={report.icon} width="20" height="20" className={report.iconColor} aria-hidden="true"></iconify-icon>
-              </div>
-              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 text-neutral-600 ring-1 ring-neutral-200/80">
-                {report.type}
-              </span>
+          <div key={report.id} className="group bg-surface border border-border rounded-2xl shadow-sm hover:shadow-2xl hover:shadow-accent/5 hover:border-accent/20 transition-all duration-500 flex flex-col h-full overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+               <span className="text-[10px] font-black uppercase tracking-widest text-muted/20">{report.id}</span>
             </div>
-            <h3 className="text-base font-medium text-neutral-900 mb-1">{report.title}</h3>
-            <p className="text-sm text-neutral-500 mb-4 flex-1">{report.description}</p>
-            <div className="pt-4 border-t border-neutral-100 flex items-center justify-between mt-auto">
-              <div className="flex items-center gap-1.5 text-xs text-neutral-500">
-                <iconify-icon icon="solar:calendar-linear" width="14" height="14" aria-hidden="true"></iconify-icon>
-                Last generated: {report.lastGenerated}
+            
+            <div className="p-7 flex-1 flex flex-col">
+              <div className="flex items-start justify-between mb-6">
+                <div className={`w-14 h-14 rounded-2xl ${report.bgColor} flex items-center justify-center border border-border group-hover:scale-110 transition-transform duration-500 shadow-sm shadow-accent/5`}>
+                  <iconify-icon icon={report.icon} width="28" height="28" className={report.iconColor} aria-hidden="true"></iconify-icon>
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-surface-raised text-foreground/70 border border-border/50 shadow-sm">
+                    {report.type}
+                  </span>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-muted/40 px-3 truncate">
+                    {report.frequency}
+                  </span>
+                </div>
               </div>
-              <button
-                className="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-                aria-label={`Download ${report.title} as PDF`}
-              >
-                <iconify-icon icon="solar:download-linear" width="16" height="16" aria-hidden="true"></iconify-icon>
-              </button>
+              
+              <h3 className="text-lg font-bold text-foreground mb-3 group-hover:text-accent transition-colors leading-tight">{report.title}</h3>
+              <p className="text-sm text-muted/80 leading-relaxed mb-8 flex-1 line-clamp-3 font-medium">{report.description}</p>
+              
+              <div className="pt-6 border-t border-border/50 flex items-center justify-between mt-auto">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted/40">
+                  <iconify-icon icon="solar:history-bold-duotone" width="14" height="14" aria-hidden="true" className="text-muted/20"></iconify-icon>
+                  Sync: <span className="text-muted/60">{report.lastGenerated}</span>
+                </div>
+                <button
+                  className="w-10 h-10 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/40 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-90 border border-transparent hover:border-accent/10"
+                  aria-label={`Execute Export for ${report.title}`}
+                >
+                  <iconify-icon icon="solar:file-download-bold-duotone" width="22" height="22" aria-hidden="true"></iconify-icon>
+                </button>
+              </div>
             </div>
           </div>
         ))}

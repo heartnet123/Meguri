@@ -224,31 +224,31 @@ export default function ProfilePage() {
   const pwStrength = getPasswordStrength(newPassword);
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
       {/* ── Page header ───────────────────────────────────────────────── */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Profile</h1>
-        <p className="text-sm text-neutral-500 mt-1">Manage your personal information and preferences.</p>
+      <div className="space-y-2">
+        <h1 className="text-3xl font-black tracking-tight text-foreground">Personnel Identity</h1>
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted leading-relaxed">Management of authentication tiers & professional metadata</p>
       </div>
 
       {/* ── Identity card ─────────────────────────────────────────────── */}
-      <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-5 mb-5 flex items-center gap-4">
+      <div className="bg-surface border border-border rounded-3xl shadow-2xl shadow-black/5 p-8 flex items-center gap-6 relative overflow-hidden group/card">
         <div className="relative shrink-0">
           <img
             src={avatarSrc}
             alt={`${firstName} ${lastName}`}
-            className="w-14 h-14 rounded-full object-cover border border-neutral-200"
-            width={56}
-            height={56}
+            className="w-20 h-20 rounded-2xl object-cover border border-border bg-surface-raised ring-4 ring-transparent group-hover/card:ring-accent/10 transition-all duration-500"
+            width={80}
+            height={80}
           />
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-white border border-neutral-300 flex items-center justify-center hover:bg-neutral-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+            className="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-surface border border-border flex items-center justify-center hover:bg-surface-raised transition-all shadow-lg active:scale-90 focus:outline-none focus:ring-2 focus:ring-accent ring-offset-2"
             aria-label="Change profile photo"
           >
-            <iconify-icon icon="solar:pen-2-linear" width="12" height="12" className="text-neutral-600" aria-hidden="true"></iconify-icon>
+            <iconify-icon icon="solar:camera-bold-duotone" width="16" height="16" className="text-accent" aria-hidden="true"></iconify-icon>
           </button>
           <input
             ref={fileInputRef}
@@ -261,35 +261,37 @@ export default function ProfilePage() {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-neutral-900 truncate">{displayName || `${firstName} ${lastName}`.trim() || 'Your Name'}</p>
-          <p className="text-xs text-neutral-500 truncate mt-0.5">{email}</p>
+          <p className="text-lg font-black text-foreground truncate tracking-tight">{displayName || `${firstName} ${lastName}`.trim() || 'Unidentified Entity'}</p>
+          <p className="text-sm font-medium text-muted truncate mt-0.5 opacity-70">{email}</p>
           {avatarError && (
-            <p className="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
-              <iconify-icon icon="solar:danger-circle-linear" width="12" height="12" aria-hidden="true"></iconify-icon>
+            <p className="text-xs text-danger mt-2 flex items-center gap-1.5 font-black uppercase tracking-widest" role="alert">
+              <iconify-icon icon="solar:danger-circle-bold-duotone" width="14" height="14" aria-hidden="true"></iconify-icon>
               {avatarError}
             </p>
           )}
         </div>
-        <div className="shrink-0 hidden sm:flex flex-col items-end gap-1">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 border border-teal-100 text-xs font-medium text-teal-700">
-            <iconify-icon icon="solar:shield-check-linear" width="12" height="12" aria-hidden="true"></iconify-icon>
-            {CURRENT_USER.role}
-          </span>
-          <span className="text-xs text-neutral-400">Member since {CURRENT_USER.memberSince}</span>
+        <div className="shrink-0 hidden sm:flex flex-col items-end gap-2 text-right">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-black uppercase tracking-widest text-accent">
+            <iconify-icon icon="solar:shield-check-bold-duotone" width="14" height="14" aria-hidden="true"></iconify-icon>
+            {CURRENT_USER.role} LEVEL
+          </div>
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/50 leading-none">Active since {CURRENT_USER.memberSince}</span>
         </div>
+        {/* Decorative corner accent */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-[4rem] -mr-8 -mt-8 blur-2xl" />
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="space-y-5">
+        <div className="space-y-8">
 
           {/* ── Personal information ──────────────────────────────────── */}
           <FormSection
-            title="Personal information"
-            description="Your name and photo as seen by your teammates."
-            icon="solar:user-rounded-linear"
+            title="Biometric & Nominal"
+            description="Operational identity markers visible across the workspace."
+            icon="solar:user-rounded-bold-duotone"
           >
             <FormRow>
-              <FormField label="First name" htmlFor="firstName" required error={errors.firstName}>
+              <FormField label="First Nominal" htmlFor="firstName" required error={errors.firstName}>
                 <TextInput
                   id="firstName"
                   type="text"
@@ -303,7 +305,7 @@ export default function ProfilePage() {
                   aria-describedby={errors.firstName ? 'firstName-error' : undefined}
                 />
               </FormField>
-              <FormField label="Last name" htmlFor="lastName" required error={errors.lastName}>
+              <FormField label="Last Nominal" htmlFor="lastName" required error={errors.lastName}>
                 <TextInput
                   id="lastName"
                   type="text"
@@ -320,9 +322,9 @@ export default function ProfilePage() {
             </FormRow>
 
             <FormField
-              label="Display name"
+              label="Interface Handle"
               htmlFor="displayName"
-              hint="How you appear in comments and notifications."
+              hint="Preferred alias for collaborative interaction hubs."
             >
               <TextInput
                 id="displayName"
@@ -339,11 +341,11 @@ export default function ProfilePage() {
 
           {/* ── Contact & role ────────────────────────────────────────── */}
           <FormSection
-            title="Contact & role"
-            description="Your work contact details and position in the team."
-            icon="solar:buildings-2-linear"
+            title="Communication Tiers"
+            description="Secure channels for operational synchronization."
+            icon="solar:buildings-2-bold-duotone"
           >
-            <FormField label="Work email" htmlFor="email" required error={errors.email}>
+            <FormField label="Operational Mail" htmlFor="email" required error={errors.email}>
               <TextInput
                 id="email"
                 type="email"
@@ -359,7 +361,7 @@ export default function ProfilePage() {
             </FormField>
 
             <FormRow>
-              <FormField label="Phone number" htmlFor="phone" hint="Optional — for urgent stock alerts.">
+              <FormField label="Telephony Link" htmlFor="phone" hint="Emergency protocol activation channel.">
                 <TextInput
                   id="phone"
                   type="tel"
@@ -369,7 +371,7 @@ export default function ProfilePage() {
                   maxLength={30}
                 />
               </FormField>
-              <FormField label="Job title" htmlFor="jobTitle">
+              <FormField label="Executive Designation" htmlFor="jobTitle">
                 <TextInput
                   id="jobTitle"
                   type="text"
@@ -381,7 +383,7 @@ export default function ProfilePage() {
               </FormField>
             </FormRow>
 
-            <FormField label="Department" htmlFor="department">
+            <FormField label="Functional Department" htmlFor="department">
               <SelectInput
                 id="department"
                 value={department}
@@ -393,12 +395,12 @@ export default function ProfilePage() {
 
           {/* ── Preferences ───────────────────────────────────────────── */}
           <FormSection
-            title="Preferences"
-            description="Localisation and display settings for your account."
-            icon="solar:settings-linear"
+            title="Regional Overrides"
+            description="Linguistic and temporal constraints for local node synchronization."
+            icon="solar:settings-bold-duotone"
           >
             <FormRow>
-              <FormField label="Timezone" htmlFor="timezone">
+              <FormField label="Temporal Zone" htmlFor="timezone">
                 <SelectInput
                   id="timezone"
                   value={timezone}
@@ -406,7 +408,7 @@ export default function ProfilePage() {
                   options={TIMEZONES}
                 />
               </FormField>
-              <FormField label="Language" htmlFor="language">
+              <FormField label="Linguistic Core" htmlFor="language">
                 <SelectInput
                   id="language"
                   value={language}
@@ -417,7 +419,7 @@ export default function ProfilePage() {
             </FormRow>
 
             <FormRow>
-              <FormField label="Currency" htmlFor="currency">
+              <FormField label="Fiscal Unit" htmlFor="currency">
                 <SelectInput
                   id="currency"
                   value={currency}
@@ -425,7 +427,7 @@ export default function ProfilePage() {
                   options={CURRENCIES}
                 />
               </FormField>
-              <FormField label="Date format" htmlFor="dateFormat">
+              <FormField label="Chronological Schema" htmlFor="dateFormat">
                 <SelectInput
                   id="dateFormat"
                   value={dateFormat}
@@ -438,15 +440,15 @@ export default function ProfilePage() {
 
           {/* ── Password & security ───────────────────────────────────── */}
           <FormSection
-            title="Password & security"
-            description="Leave all fields blank to keep your current password."
-            icon="solar:lock-password-linear"
+            title="Cryptographic Access"
+            description="Security credentials for identity verification."
+            icon="solar:lock-password-bold-duotone"
           >
-            <FormField label="Current password" htmlFor="currentPassword">
+            <FormField label="Current Credentials" htmlFor="currentPassword">
               <TextInput
                 id="currentPassword"
                 type="password"
-                placeholder="Enter current password"
+                placeholder="Verify active identity"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 autoComplete="current-password"
@@ -455,12 +457,12 @@ export default function ProfilePage() {
 
             <FormRow>
               {/* New password + strength meter */}
-              <div className="space-y-1.5">
-                <FormField label="New password" htmlFor="newPassword" error={errors.newPassword}>
+              <div className="space-y-3">
+                <FormField label="New Cryptokey" htmlFor="newPassword" error={errors.newPassword}>
                   <TextInput
                     id="newPassword"
                     type="password"
-                    placeholder="Min. 8 characters"
+                    placeholder="8+ Entropy characters"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     autoComplete="new-password"
@@ -469,47 +471,47 @@ export default function ProfilePage() {
                   />
                 </FormField>
                 {newPassword && (
-                  <div className="space-y-1" aria-live="polite" aria-atomic="true">
-                    <div className="flex gap-1" aria-hidden="true">
+                  <div className="space-y-2 p-3 rounded-2xl bg-surface-raised/50 border border-border/50" aria-live="polite" aria-atomic="true">
+                    <div className="flex gap-1.5" aria-hidden="true">
                       {(['weak', 'fair', 'strong'] as PasswordStrength[]).map((level, i) => (
                         <div
                           key={level}
-                          className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                          className={`h-1.5 flex-1 rounded-full transition-all duration-700 ${
                             pwStrength === 'weak' && i === 0
-                              ? 'bg-red-400'
+                              ? 'bg-danger shadow-[0_0_12px_rgba(239,68,68,0.4)]'
                               : pwStrength === 'fair' && i <= 1
-                              ? 'bg-amber-400'
+                              ? 'bg-warning shadow-[0_0_12px_rgba(245,158,11,0.4)]'
                               : pwStrength === 'strong'
-                              ? 'bg-emerald-500'
-                              : 'bg-neutral-200'
+                              ? 'bg-success shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+                              : 'bg-surface border border-border/50'
                           }`}
                         />
                       ))}
                     </div>
                     <p
-                      className={`text-xs font-medium ${
+                      className={`text-[9px] font-black uppercase tracking-[0.2em] pt-0.5 ${
                         pwStrength === 'weak'
-                          ? 'text-red-600'
+                          ? 'text-danger'
                           : pwStrength === 'fair'
-                          ? 'text-amber-600'
-                          : 'text-emerald-600'
+                          ? 'text-warning'
+                          : 'text-success'
                       }`}
                     >
                       {pwStrength === 'weak'
-                        ? 'Weak — add uppercase letters, numbers, or symbols'
+                        ? 'Insufficient Entropy'
                         : pwStrength === 'fair'
-                        ? 'Fair — try adding a symbol or number'
-                        : 'Strong password'}
+                        ? 'Standard Resilience'
+                        : 'Maximized Security'}
                     </p>
                   </div>
                 )}
               </div>
 
-              <FormField label="Confirm new password" htmlFor="confirmPassword" error={errors.confirmPassword}>
+              <FormField label="Repeat Pattern" htmlFor="confirmPassword" error={errors.confirmPassword}>
                 <TextInput
                   id="confirmPassword"
                   type="password"
-                  placeholder="Repeat new password"
+                  placeholder="Redundant verification"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   autoComplete="new-password"
@@ -522,35 +524,38 @@ export default function ProfilePage() {
           </FormSection>
 
           {/* ── Form actions ──────────────────────────────────────────── */}
-          <div className="flex items-center justify-end gap-3 border-t border-neutral-100 pt-5">
+          <div className="flex items-center justify-end gap-5 border-t border-border mt-12 pt-8">
             {saved && (
               <span
-                className="flex items-center gap-1.5 text-sm text-emerald-600 mr-auto"
+                className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.15em] text-success mr-auto px-5 py-2.5 bg-success/5 rounded-2xl border border-success/20 animate-in fade-in slide-in-from-left-4"
                 role="status"
                 aria-live="polite"
               >
-                <iconify-icon icon="solar:check-circle-linear" width="16" height="16" aria-hidden="true"></iconify-icon>
-                Changes saved
+                <iconify-icon icon="solar:check-circle-bold-duotone" width="18" height="18" aria-hidden="true"></iconify-icon>
+                Synchronization Successful
               </span>
             )}
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
+              className="group inline-flex items-center gap-3 px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white bg-accent rounded-2xl hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-2xl shadow-accent/40 focus:outline-none focus:ring-4 focus:ring-accent/20 active:scale-95"
             >
               {saving ? (
                 <>
                   <iconify-icon
                     icon="solar:refresh-linear"
-                    width="16"
-                    height="16"
+                    width="18"
+                    height="18"
                     aria-hidden="true"
                     className="animate-spin"
                   ></iconify-icon>
-                  Saving…
+                  Synchronizing…
                 </>
               ) : (
-                'Save changes'
+                <>
+                  Upload Changes
+                  <iconify-icon icon="solar:arrow-right-up-linear" width="18" height="18" className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                </>
               )}
             </button>
           </div>
@@ -565,44 +570,45 @@ export default function ProfilePage() {
 
 function FormSection({ title, description, icon, children }: FormSectionProps) {
   return (
-    <section className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
-      <div className="px-5 py-4 border-b border-neutral-100 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-neutral-50 border border-neutral-100 flex items-center justify-center shrink-0">
-          <iconify-icon icon={icon} width="18" height="18" className="text-neutral-500" aria-hidden="true"></iconify-icon>
+    <section className="bg-surface border border-border rounded-[2rem] shadow-2xl shadow-black/5 overflow-hidden group/section transition-all duration-500 hover:border-accent/10">
+      <div className="px-8 py-6 border-b border-border/50 flex items-center gap-5 bg-surface-raised/30">
+        <div className="w-12 h-12 rounded-2xl bg-surface-raised border border-border flex items-center justify-center shrink-0 shadow-sm group-hover/section:scale-110 group-hover/section:border-accent/30 group-hover/section:text-accent transition-all duration-500">
+          <iconify-icon icon={icon} width="24" height="24" className="text-muted/60 group-hover/section:text-accent transition-colors" aria-hidden="true"></iconify-icon>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-neutral-900">{title}</h2>
-          <p className="text-xs text-neutral-500 mt-0.5">{description}</p>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">{title}</h2>
+          <p className="text-[11px] text-muted mt-1 opacity-70 leading-relaxed">{description}</p>
         </div>
       </div>
-      <div className="px-5 py-5 space-y-4">{children}</div>
+      <div className="px-10 py-10 space-y-8">{children}</div>
     </section>
   );
 }
 
 function FormRow({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{children}</div>;
+  return <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">{children}</div>;
 }
 
 function FormField({ label, htmlFor, required, hint, error, children }: FormFieldProps) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-sm font-medium text-neutral-700">
+    <div className="flex flex-col gap-2.5">
+      <label htmlFor={htmlFor} className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/80 pl-1 flex items-center gap-1.5">
+        <iconify-icon icon="solar:tuning-bold-duotone" width="12" height="12" className="text-muted/30" />
         {label}
         {required && (
-          <span className="text-red-500 ml-0.5" aria-hidden="true">
+          <span className="text-danger ml-0.5" aria-hidden="true">
             *
           </span>
         )}
       </label>
       {children}
       {error ? (
-        <p id={`${htmlFor}-error`} className="text-xs text-red-600 flex items-center gap-1" role="alert">
-          <iconify-icon icon="solar:danger-circle-linear" width="12" height="12" aria-hidden="true"></iconify-icon>
+        <p id={`${htmlFor}-error`} className="text-[10px] text-danger flex items-center gap-2 font-black uppercase tracking-widest pl-1 pt-1 animate-in fade-in slide-in-from-top-1" role="alert">
+          <iconify-icon icon="solar:danger-circle-bold-duotone" width="14" height="14" aria-hidden="true"></iconify-icon>
           {error}
         </p>
       ) : hint ? (
-        <p id={`${htmlFor}-hint`} className="text-xs text-neutral-500">
+        <p id={`${htmlFor}-hint`} className="text-[10px] text-muted/60 leading-relaxed pl-1 font-medium">
           {hint}
         </p>
       ) : null}
@@ -615,12 +621,12 @@ function TextInput({ id, hasError, className, ...props }: TextInputProps) {
     <input
       id={id}
       className={[
-        'w-full px-3 py-2 text-sm bg-white border rounded-lg text-neutral-900',
-        'placeholder:text-neutral-400 transition-shadow',
-        'focus:outline-none focus-visible:ring-2',
+        'w-full px-6 py-4 text-sm bg-surface-raised/30 border rounded-2xl text-foreground font-bold tracking-tight',
+        'placeholder:text-muted/30 transition-all duration-500',
+        'focus:outline-none focus:ring-4',
         hasError
-          ? 'border-red-400 focus-visible:ring-red-500'
-          : 'border-neutral-200 hover:border-neutral-300 focus-visible:ring-teal-600',
+          ? 'border-danger/30 focus:ring-danger/10 text-danger bg-danger/5'
+          : 'border-border/60 hover:border-accent/30 hover:bg-surface-raised focus:border-accent/40 focus:ring-accent/10 focus:bg-surface',
         className ?? '',
       ].join(' ')}
       {...props}
@@ -630,28 +636,28 @@ function TextInput({ id, hasError, className, ...props }: TextInputProps) {
 
 function SelectInput({ id, options, hasError, className, ...props }: SelectInputProps) {
   return (
-    <div className="relative">
+    <div className="relative group/select">
       <select
         id={id}
         className={[
-          'w-full appearance-none px-3 py-2 pr-8 text-sm bg-white border rounded-lg',
-          'text-neutral-900 cursor-pointer transition-shadow',
-          'focus:outline-none focus-visible:ring-2',
+          'w-full appearance-none px-6 py-4 pr-12 text-sm bg-surface-raised/30 border rounded-2xl',
+          'text-foreground cursor-pointer transition-all duration-500 font-bold tracking-tight',
+          'focus:outline-none focus:ring-4',
           hasError
-            ? 'border-red-400 focus-visible:ring-red-500'
-            : 'border-neutral-200 hover:border-neutral-300 focus-visible:ring-teal-600',
+            ? 'border-danger/30 focus:ring-danger/10 text-danger bg-danger/5'
+            : 'border-border/60 hover:border-accent/30 hover:bg-surface-raised focus:border-accent/40 focus:ring-accent/10 focus:bg-surface',
           className ?? '',
         ].join(' ')}
         {...props}
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value} className="bg-surface text-foreground font-medium">
             {opt.label}
           </option>
         ))}
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center" aria-hidden="true">
-        <iconify-icon icon="solar:alt-arrow-down-linear" width="14" height="14" className="text-neutral-400"></iconify-icon>
+      <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center transition-transform group-hover/select:translate-y-0.5" aria-hidden="true">
+        <iconify-icon icon="solar:alt-arrow-down-bold-duotone" width="18" height="18" className="text-muted/40 group-hover/select:text-accent"></iconify-icon>
       </div>
     </div>
   );

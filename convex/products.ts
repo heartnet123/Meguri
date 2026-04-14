@@ -70,6 +70,35 @@ export const add = mutation({
   },
 });
 
+export const update = mutation({
+  args: {
+    id: v.id('products'),
+    name: v.optional(v.string()),
+    sku: v.optional(v.string()),
+    category: v.optional(
+      v.union(
+        v.literal('finished_goods'),
+        v.literal('bundles'),
+        v.literal('raw_materials')
+      )
+    ),
+    price: v.optional(v.number()),
+    cost: v.optional(v.number()),
+    currentStock: v.optional(v.number()),
+    isActive: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    const product = await ctx.db.get(id);
+    if (!product) throw new Error('Product not found');
+
+    const user = await verifyWorkspace(ctx, product.workspaceId);
+    checkRole(user, ['owner', 'admin', 'manager']);
+
+    await ctx.db.patch(id, { ...updates, updatedAt: Date.now() });
+  },
+});
+
 export const remove = mutation({
   args: { id: v.id('products') },
   handler: async (ctx, { id }) => {

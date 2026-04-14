@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useQuery } from 'convex/react';
+import { useQuery, useConvexAuth } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 
@@ -26,7 +26,7 @@ function SkeletonRow() {
     <tr aria-hidden="true" className="animate-pulse">
       {SKEL_WIDTHS.map((w, i) => (
         <td key={i} className="px-6 py-4">
-          <div className={`h-4 bg-neutral-100 rounded ${w}`} />
+          <div className={`h-4 bg-surface-raised rounded-lg ${w}`} />
         </td>
       ))}
     </tr>
@@ -34,7 +34,7 @@ function SkeletonRow() {
 }
 
 function StatSkeleton() {
-  return <div className="h-7 w-16 bg-neutral-100 rounded animate-pulse" />;
+  return <div className="h-7 w-16 bg-surface-raised rounded-lg animate-pulse" />;
 }
 
 function leadTimeLabel(min: number, max: number) {
@@ -47,15 +47,11 @@ function statusLabel(status: Supplier['status']) {
 }
 
 export default function SuppliersPage() {
+  const { isAuthenticated } = useConvexAuth();
   const workspaceId = useWorkspaceId();
-  const suppliers = useQuery(
-    api.suppliers.list,
-    workspaceId ? { workspaceId } : 'skip'
-  ) as Supplier[] | undefined;
-  const stats = useQuery(
-    api.suppliers.stats,
-    workspaceId ? { workspaceId } : 'skip'
-  );
+  const args = (workspaceId && isAuthenticated) ? { workspaceId } : 'skip';
+  const suppliers = useQuery(api.suppliers.list, args) as Supplier[] | undefined;
+  const stats = useQuery(api.suppliers.stats, args);
 
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -84,99 +80,99 @@ export default function SuppliersPage() {
   const noResults = !isLoading && (suppliers ?? []).length > 0 && filtered.length === 0;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight text-neutral-900">Suppliers</h1>
-          <p className="text-sm text-neutral-500 mt-1">Manage your suppliers, track performance, and view contact details.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Supply Chain Network</h1>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">Manage vendor relationships, procurement leads, and performance metrics.</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
-            <iconify-icon icon="solar:export-linear" width="18" height="18" aria-hidden="true" />
-            Export List
+          <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.98]">
+            <iconify-icon icon="solar:export-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
+            Export Registry
           </button>
-          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2">
-            <iconify-icon icon="solar:add-circle-linear" width="18" height="18" aria-hidden="true" />
-            Add Supplier
+          <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 active:scale-[0.98]">
+            <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
+            Enroll Vendor
           </button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600" aria-hidden="true">
-              <iconify-icon icon="solar:delivery-linear" width="16" height="16" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-accent/20 transition-all">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-accent-subtle/50 flex items-center justify-center text-accent border border-accent/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+              <iconify-icon icon="solar:delivery-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-sm font-medium text-neutral-600">Total Suppliers</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Total Vendors</h3>
           </div>
-          <div className="text-2xl font-medium tracking-tight text-neutral-900">
+          <div className="text-3xl font-bold tracking-tight text-foreground">
             {stats === undefined ? <StatSkeleton /> : stats.total.toLocaleString()}
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600" aria-hidden="true">
-              <iconify-icon icon="solar:star-linear" width="16" height="16" />
+        <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-success/20 transition-all">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-success-subtle/50 flex items-center justify-center text-success border border-success/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+              <iconify-icon icon="solar:star-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-sm font-medium text-neutral-600">Average Rating</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Avg Reliability</h3>
           </div>
-          <div className="text-2xl font-medium tracking-tight text-neutral-900">
+          <div className="text-3xl font-bold tracking-tight text-foreground flex items-baseline gap-1.5">
             {stats === undefined
               ? <StatSkeleton />
-              : <>{stats.avgRating}<span className="text-base text-neutral-500 font-normal">/5.0</span></>
+              : <>{stats.avgRating}<span className="text-[10px] text-muted/40 font-black tracking-[0.2em] uppercase align-baseline">Score</span></>
             }
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600" aria-hidden="true">
-              <iconify-icon icon="solar:clock-circle-linear" width="16" height="16" />
+        <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-warning/20 transition-all">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-warning-subtle/50 flex items-center justify-center text-warning border border-warning/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+              <iconify-icon icon="solar:clock-circle-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-sm font-medium text-neutral-600">Pending Orders</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Open Fulfilments</h3>
           </div>
-          <div className="text-2xl font-medium tracking-tight text-neutral-900">
+          <div className="text-3xl font-bold tracking-tight text-foreground">
             {stats === undefined ? <StatSkeleton /> : stats.pendingOrderCount.toLocaleString()}
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-50/50">
+      <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-raised/30">
           <div className="relative max-w-md w-full">
             <iconify-icon
               icon="solar:magnifer-linear" width="18" height="18"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
               aria-hidden="true"
             />
             <input
               type="search"
               value={search}
               onChange={(e) => { setSearch(e.target.value); }}
-              placeholder="Search suppliers, contacts…"
+              placeholder="Search by vendor or contact…"
               aria-label="Search suppliers"
-              className="w-full pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:border-neutral-900 transition-all bg-white"
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <select
               aria-label="Filter by category"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+              className="px-4 py-2.5 bg-surface border border-border rounded-xl text-xs font-bold uppercase tracking-widest text-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
             >
-              <option value="">All Categories</option>
+              <option value="">All Regions</option>
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <select
               aria-label="Filter by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+              className="px-4 py-2.5 bg-surface border border-border rounded-xl text-xs font-bold uppercase tracking-widest text-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
             >
-              <option value="">All Statuses</option>
+              <option value="">All Tiers</option>
               <option value="active">Active</option>
               <option value="needs_review">Needs Review</option>
               <option value="inactive">Inactive</option>
@@ -187,97 +183,110 @@ export default function SuppliersPage() {
         <div className="overflow-x-auto" aria-busy={isLoading} aria-live="polite">
           <table className="w-full text-sm text-left">
             <caption className="sr-only">Suppliers list with contact information, ratings, and status</caption>
-            <thead className="text-xs text-neutral-500 uppercase bg-neutral-50/50 border-b border-neutral-200">
+            <thead className="text-[10px] text-muted/60 font-bold uppercase tracking-widest bg-surface-raised/50 border-b border-border">
               <tr>
-                <th scope="col" className="px-6 py-3 font-medium">Supplier Name</th>
-                <th scope="col" className="px-6 py-3 font-medium">Category</th>
-                <th scope="col" className="px-6 py-3 font-medium">Contact Info</th>
-                <th scope="col" className="px-6 py-3 font-medium text-center">Lead Time</th>
-                <th scope="col" className="px-6 py-3 font-medium text-center">Rating</th>
-                <th scope="col" className="px-6 py-3 font-medium text-center">Status</th>
-                <th scope="col" className="px-6 py-3 font-medium text-right">Actions</th>
+                <th scope="col" className="px-6 py-4">Vendor Identity</th>
+                <th scope="col" className="px-6 py-4">Commercial Tier</th>
+                <th scope="col" className="px-6 py-4">Communication Details</th>
+                <th scope="col" className="px-6 py-4 text-center">Fulfillment Cycle</th>
+                <th scope="col" className="px-6 py-4 text-center">Trust Index</th>
+                <th scope="col" className="px-6 py-4 text-center">Operational Status</th>
+                <th scope="col" className="px-6 py-4 text-right">Management</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-border">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
               ) : isEmpty ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-20 text-center">
-                    <iconify-icon icon="solar:delivery-linear" width="32" height="32" className="text-neutral-300 mx-auto mb-3 block" aria-hidden="true" />
-                    <p className="text-sm font-medium text-neutral-700">No suppliers yet</p>
-                    <p className="text-xs text-neutral-500 mt-1">Add your first supplier to get started.</p>
+                    <div className="w-20 h-20 rounded-3xl bg-surface-raised flex items-center justify-center mx-auto mb-6 border border-border shadow-inner">
+                      <iconify-icon icon="solar:delivery-bold-duotone" width="40" height="40" className="text-muted/20" aria-hidden="true" />
+                    </div>
+                    <p className="text-lg font-bold text-foreground">No Vendors Enrolled</p>
+                    <p className="text-sm text-muted mt-2 leading-relaxed max-w-xs mx-auto">Initialize your supply chain network by adding your primary vendors.</p>
                   </td>
                 </tr>
               ) : noResults ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-16 text-center text-sm text-neutral-500">
-                    No suppliers match your search.
+                  <td colSpan={7} className="px-6 py-16 text-center">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40">
+                      No matching vendors found for the current query
+                    </div>
                   </td>
                 </tr>
               ) : (
                 filtered.map((supplier) => (
-                  <tr key={supplier._id} className="hover:bg-neutral-50/50 transition-colors">
-                    <td className="px-6 py-4 min-w-0">
-                      <div className="font-medium text-neutral-900 max-w-[200px] truncate" title={supplier.name}>
+                  <tr key={supplier._id} className="hover:bg-accent-subtle/5 transition-colors group">
+                    <td className="px-6 py-5 min-w-0">
+                      <div className="font-bold text-foreground max-w-[240px] truncate group-hover:text-accent transition-colors" title={supplier.name}>
                         {supplier.name}
                       </div>
-                      <div className="text-xs text-neutral-500 mt-0.5">{supplier.displayId}</div>
+                      <div className="text-[10px] font-black uppercase tracking-widest text-muted/40 mt-1.5 flex items-center gap-2">
+                         <span className="px-1.5 py-0.5 rounded bg-surface-raised border border-border/50">{supplier.displayId}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-neutral-600 max-w-[140px]">
-                      <span className="block truncate" title={supplier.category}>{supplier.category}</span>
+                    <td className="px-6 py-5">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 bg-surface-raised/50 px-2 py-1 rounded-lg border border-border/10">
+                        {supplier.category}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 min-w-0">
-                      <div className="font-medium text-neutral-900 truncate max-w-[160px]" title={supplier.contactName}>
+                    <td className="px-6 py-5 min-w-0">
+                      <div className="font-bold text-foreground truncate max-w-[180px] pb-1 text-xs" title={supplier.contactName}>
                         {supplier.contactName}
                       </div>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
+                      <div className="flex flex-col gap-1.5 mt-1">
                         <a
                           href={`mailto:${supplier.email}`}
-                          className="text-xs text-neutral-500 hover:text-teal-600 flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded min-w-0"
+                          className="text-[10px] font-medium text-muted/60 hover:text-accent flex items-center gap-2 transition-colors focus:outline-none truncate max-w-[180px]"
                           aria-label={`Email ${supplier.contactName}`}
                         >
-                          <iconify-icon icon="solar:letter-linear" width="12" height="12" className="shrink-0" aria-hidden="true" />
-                          <span className="truncate max-w-[140px]">{supplier.email}</span>
+                          <iconify-icon icon="solar:letter-bold-duotone" width="14" height="14" className="shrink-0 text-muted/20" aria-hidden="true" />
+                          {supplier.email}
                         </a>
                         <a
                           href={`tel:${supplier.phone}`}
-                          className="text-xs text-neutral-500 hover:text-teal-600 flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded"
+                          className="text-[10px] font-medium text-muted/60 hover:text-accent flex items-center gap-2 transition-colors focus:outline-none"
                           aria-label={`Call ${supplier.contactName}`}
                         >
-                          <iconify-icon icon="solar:phone-linear" width="12" height="12" className="shrink-0" aria-hidden="true" />
-                          <span className="whitespace-nowrap">{supplier.phone}</span>
+                          <iconify-icon icon="solar:phone-bold-duotone" width="14" height="14" className="shrink-0 text-muted/20" aria-hidden="true" />
+                          {supplier.phone}
                         </a>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center text-neutral-600 whitespace-nowrap">
-                      {leadTimeLabel(supplier.leadTimeMinDays, supplier.leadTimeMaxDays)}
+                    <td className="px-6 py-5 text-center">
+                       <span className="text-[10px] font-black tracking-widest text-foreground/70 uppercase">
+                          {leadTimeLabel(supplier.leadTimeMinDays, supplier.leadTimeMaxDays)}
+                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-1 text-amber-500">
-                        <iconify-icon icon="solar:star-bold" width="16" height="16" aria-hidden="true" />
-                        <span className="font-medium text-neutral-900">{supplier.rating.toFixed(1)}</span>
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex items-center justify-center gap-1.5 text-warning group/rating">
+                        <iconify-icon icon="solar:star-bold-duotone" width="16" height="16" className="group-hover/rating:scale-125 transition-transform" aria-hidden="true" />
+                        <span className="font-black text-foreground tabular-nums tracking-tighter text-sm">{supplier.rating.toFixed(1)}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-5 text-center">
                       <span
-                        className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
+                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap shadow-sm border ${
                           supplier.status === 'active'
-                            ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20'
+                            ? 'bg-success-subtle/50 text-success border-success/10'
                             : supplier.status === 'inactive'
-                            ? 'bg-neutral-100 text-neutral-600 ring-1 ring-neutral-200'
-                            : 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20'
+                            ? 'bg-surface-raised text-muted/40 border-border/50'
+                            : 'bg-warning-subtle/50 text-warning border-warning/10'
                         }`}
                       >
+                        <span className={`w-1.5 h-1.5 rounded-full mr-2 shadow-sm ${
+                          supplier.status === 'active' ? 'bg-success' : supplier.status === 'inactive' ? 'bg-muted/30' : 'bg-warning'
+                        }`} />
                         {statusLabel(supplier.status)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-5 text-right">
                       <button
-                        className="p-1 text-neutral-400 hover:text-neutral-900 rounded-md hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+                        className="w-9 h-9 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.9] border border-transparent hover:border-accent/10"
                         aria-label={`Actions for ${supplier.name}`}
                       >
-                        <iconify-icon icon="solar:menu-dots-bold" width="20" height="20" aria-hidden="true" />
+                        <iconify-icon icon="solar:menu-dots-bold-duotone" width="22" height="22" aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -287,12 +296,20 @@ export default function SuppliersPage() {
           </table>
         </div>
 
-        <div className="p-4 border-t border-neutral-200 flex items-center justify-between text-sm text-neutral-500 bg-neutral-50/50">
-          <div>
+        <div className="p-5 border-t border-border flex items-center justify-between bg-surface-raised/30">
+          <div className="text-[10px] font-black uppercase tracking-widest text-muted/40">
             {isLoading
-              ? <div className="h-4 w-40 bg-neutral-100 rounded animate-pulse" />
-              : `Showing ${filtered.length.toLocaleString()} of ${(suppliers ?? []).length.toLocaleString()} suppliers`
+              ? <div className="h-4 w-40 bg-surface-raised rounded-lg animate-pulse" />
+              : <>Network Index <span className="text-foreground/60">{filtered.length.toLocaleString()}</span> of <span className="text-foreground/60">{(suppliers ?? []).length.toLocaleString()}</span> Vendors Connected</>
             }
+          </div>
+          <div className="flex gap-2">
+            <button className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]" disabled>
+               <iconify-icon icon="solar:alt-arrow-left-linear" width="18" height="18" />
+            </button>
+            <button className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]" disabled>
+               <iconify-icon icon="solar:alt-arrow-right-linear" width="18" height="18" />
+            </button>
           </div>
         </div>
       </div>

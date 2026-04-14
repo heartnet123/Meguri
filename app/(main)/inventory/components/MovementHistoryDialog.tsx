@@ -23,15 +23,15 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-neutral-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-surface rounded-xl shadow-xl border border-border w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface">
+          <h2 className="text-lg font-semibold text-foreground">
             Stock Movement History
           </h2>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-900 transition-colors"
+            className="text-muted hover:text-foreground transition-colors p-1 rounded-lg hover:bg-surface-raised"
           >
             <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
           </button>
@@ -39,12 +39,18 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
 
         <div className="p-0 overflow-y-auto">
           {movements === undefined ? (
-            <div className="p-8 text-center text-neutral-500">Loading history...</div>
+            <div className="p-12 text-center">
+               <iconify-icon icon="solar:refresh-circle-linear" width="32" height="32" className="animate-spin text-accent mx-auto mb-3 block" />
+               <p className="text-sm font-medium text-muted">Loading history...</p>
+            </div>
           ) : movements.length === 0 ? (
-            <div className="p-8 text-center text-neutral-500">No stock movements found.</div>
+            <div className="p-12 text-center">
+               <iconify-icon icon="solar:history-linear" width="32" height="32" className="text-muted/30 mx-auto mb-3 block" />
+               <p className="text-sm font-medium text-muted">No stock movements found.</p>
+            </div>
           ) : (
             <table className="w-full text-left text-sm">
-              <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 border-b border-neutral-200 sticky top-0">
+              <thead className="text-xs text-muted uppercase bg-surface-raised border-b border-border sticky top-0">
                 <tr>
                   <th scope="col" className="px-6 py-3 font-medium">Date</th>
                   {!inventoryItemId && <th scope="col" className="px-6 py-3 font-medium">Item</th>}
@@ -54,39 +60,39 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
                   <th scope="col" className="px-6 py-3 font-medium">Note</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-border/50">
                 {movements.map((m: any) => (
-                  <tr key={m._id} className="hover:bg-neutral-50/50 transition-colors">
-                    <td className="px-6 py-3 text-neutral-900 whitespace-nowrap">
+                  <tr key={m._id} className="hover:bg-surface-raised/50 transition-colors">
+                    <td className="px-6 py-3 text-foreground whitespace-nowrap">
                       {new Date(m.createdAt).toLocaleString(undefined, {
                         dateStyle: 'short', timeStyle: 'short'
                       })}
                     </td>
                     {!inventoryItemId && (
-                      <td className="px-6 py-3 text-neutral-900 max-w-[120px] truncate" title={m.itemName}>
+                      <td className="px-6 py-3 text-foreground max-w-[120px] truncate font-medium" title={m.itemName}>
                         {m.itemName}
                       </td>
                     )}
                     <td className="px-6 py-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${
-                        m.type === 'delivery' ? 'bg-emerald-50 text-emerald-700' :
-                        m.type === 'sale' ? 'bg-blue-50 text-blue-700' :
-                        m.type === 'wastage' ? 'bg-red-50 text-red-700' :
-                        m.type === 'adjustment' ? 'bg-amber-50 text-amber-700' :
-                        'bg-neutral-100 text-neutral-700'
+                        m.type === 'delivery' ? 'bg-success-subtle text-success' :
+                        m.type === 'sale' ? 'bg-accent-subtle text-accent' :
+                        m.type === 'wastage' ? 'bg-danger-subtle text-danger' :
+                        m.type === 'adjustment' ? 'bg-warning-subtle text-warning' :
+                        'bg-surface-raised text-muted'
                       }`}>
                         {m.type}
                       </span>
                     </td>
                     <td className={`px-6 py-3 text-right font-medium whitespace-nowrap ${
-                      m.quantity > 0 ? 'text-emerald-600' : m.quantity < 0 ? 'text-red-600' : 'text-neutral-900'
+                      m.quantity > 0 ? 'text-success' : m.quantity < 0 ? 'text-danger' : 'text-foreground'
                     }`}>
                       {m.quantity > 0 ? '+' : ''}{m.quantity}
                     </td>
-                    <td className="px-6 py-3 text-neutral-600 max-w-[100px] truncate" title={m.userName}>
+                    <td className="px-6 py-3 text-muted max-w-[100px] truncate" title={m.userName}>
                       {m.userName}
                     </td>
-                    <td className="px-6 py-3 text-neutral-500 max-w-[150px] truncate" title={m.note}>
+                    <td className="px-6 py-3 text-muted max-w-[150px] truncate" title={m.note}>
                       {m.note || '-'}
                     </td>
                   </tr>
@@ -96,10 +102,10 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-neutral-200 flex items-center justify-end bg-neutral-50 mt-auto">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-end bg-subtle mt-auto">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-raised transition-colors focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-1"
           >
             Close
           </button>

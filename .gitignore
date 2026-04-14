@@ -20,6 +20,9 @@ coverage/
 logs/security/
 
 .*
+*.planning
+*_bmad
+_bmad*
 
 *.md
 .omx/*

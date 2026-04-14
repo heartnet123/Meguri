@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useQuery } from 'convex/react';
+import { useQuery, useConvexAuth } from 'convex/react';
 import Link from 'next/link';
 import { api } from '@/convex/_generated/api';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
@@ -32,7 +32,7 @@ function SkeletonRow() {
     <tr aria-hidden="true" className="animate-pulse">
       {SKEL_WIDTHS.map((w, i) => (
         <td key={i} className="px-6 py-4">
-          <div className={`h-4 bg-neutral-100 rounded ${w}`} />
+          <div className={`h-4 bg-surface-raised rounded-lg ${w}`} />
         </td>
       ))}
     </tr>
@@ -40,7 +40,7 @@ function SkeletonRow() {
 }
 
 function StatSkeleton() {
-  return <div className="h-7 w-24 bg-neutral-100 rounded animate-pulse" />;
+  return <div className="h-7 w-24 bg-surface-raised rounded-lg animate-pulse" />;
 }
 
 function formatDateTime(ts: number) {
@@ -55,15 +55,11 @@ function formatCurrency(amount: number) {
 }
 
 export default function SalesPage() {
+  const { isAuthenticated } = useConvexAuth();
   const workspaceId = useWorkspaceId();
-  const transactions = useQuery(
-    api.sales.list,
-    workspaceId ? { workspaceId } : 'skip'
-  ) as Transaction[] | undefined;
-  const todayStats = useQuery(
-    api.sales.todayStats,
-    workspaceId ? { workspaceId } : 'skip'
-  );
+  const args = (workspaceId && isAuthenticated) ? { workspaceId } : 'skip';
+  const transactions = useQuery(api.sales.list, args) as Transaction[] | undefined;
+  const todayStats = useQuery(api.sales.todayStats, args);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -92,83 +88,83 @@ export default function SalesPage() {
   const noResults = !isLoading && (transactions ?? []).length > 0 && filtered.length === 0;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight text-neutral-900">Sales &amp; Transactions</h1>
-          <p className="text-sm text-neutral-500 mt-1">Track your daily sales, orders, and revenue performance.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Sales Registry</h1>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">Comprehensive audit log of all commercial transactions and revenue flow.</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
-            <iconify-icon icon="solar:export-linear" width="18" height="18" aria-hidden="true" />
-            Export Report
+          <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.98]">
+            <iconify-icon icon="solar:export-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
+            Export Audit
           </button>
-          <Link href="/sales/new" className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2">
-            <iconify-icon icon="solar:add-circle-linear" width="18" height="18" aria-hidden="true" />
-            New Order
+          <Link href="/sales/new" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 active:scale-[0.98]">
+            <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
+            New Transaction
           </Link>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600" aria-hidden="true">
-              <iconify-icon icon="solar:wallet-money-linear" width="16" height="16" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-success/20 transition-all">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-success-subtle/50 flex items-center justify-center text-success border border-success/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+              <iconify-icon icon="solar:wallet-money-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-sm font-medium text-neutral-600">Today&apos;s Revenue</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Gross Revenue</h3>
           </div>
-          <div className="text-2xl font-medium tracking-tight text-neutral-900 tabular-nums">
+          <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {todayStats === undefined ? <StatSkeleton /> : formatCurrency(todayStats.revenue)}
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600" aria-hidden="true">
-              <iconify-icon icon="solar:cart-large-linear" width="16" height="16" />
+        <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-accent/20 transition-all">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-accent-subtle/50 flex items-center justify-center text-accent border border-accent/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+              <iconify-icon icon="solar:cart-large-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-sm font-medium text-neutral-600">Orders Today</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Total Orders</h3>
           </div>
-          <div className="text-2xl font-medium tracking-tight text-neutral-900 tabular-nums">
+          <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums text-foreground">
             {todayStats === undefined ? <StatSkeleton /> : todayStats.orderCount.toLocaleString()}
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600" aria-hidden="true">
-              <iconify-icon icon="solar:graph-up-linear" width="16" height="16" />
+        <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-indigo-500/20 transition-all">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+              <iconify-icon icon="solar:graph-up-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-sm font-medium text-neutral-600">Average Order Value</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Avg Ticket Size</h3>
           </div>
-          <div className="text-2xl font-medium tracking-tight text-neutral-900 tabular-nums">
+          <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums text-foreground">
             {todayStats === undefined ? <StatSkeleton /> : formatCurrency(todayStats.avgOrder)}
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-50/50">
+      <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-raised/30">
           <div className="relative max-w-md w-full">
             <iconify-icon
               icon="solar:magnifer-linear" width="18" height="18"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
               aria-hidden="true"
             />
             <input
               type="search"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search transactions, customers…"
+              placeholder="Filter by ID, Customer, or Reference…"
               aria-label="Search transactions"
-              className="w-full pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:border-neutral-900 transition-all bg-white"
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
             />
           </div>
           <select
             aria-label="Filter by status"
             value={statusFilter}
             onChange={(e) => handleStatus(e.target.value)}
-            className="px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+            className="px-4 py-2.5 bg-surface border border-border rounded-xl text-xs font-bold uppercase tracking-widest text-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
           >
             <option value="">All Statuses</option>
             <option value="completed">Completed</option>
@@ -180,73 +176,86 @@ export default function SalesPage() {
 
         <div className="overflow-x-auto" aria-busy={isLoading} aria-live="polite">
           <table className="w-full text-sm text-left">
-            <caption className="sr-only">Sales transactions list</caption>
-            <thead className="text-xs text-neutral-500 uppercase bg-neutral-50/50 border-b border-neutral-200">
+            <caption className="sr-only">Sales transactions list representing commercial audit log</caption>
+            <thead className="text-[10px] text-muted/60 font-bold uppercase tracking-widest bg-surface-raised/50 border-b border-border">
               <tr>
-                <th scope="col" className="px-6 py-3 font-medium">Transaction ID</th>
-                <th scope="col" className="px-6 py-3 font-medium">Date &amp; Time</th>
-                <th scope="col" className="px-6 py-3 font-medium">Customer</th>
-                <th scope="col" className="px-6 py-3 font-medium text-right">Items</th>
-                <th scope="col" className="px-6 py-3 font-medium text-right">Total</th>
-                <th scope="col" className="px-6 py-3 font-medium text-center">Payment</th>
-                <th scope="col" className="px-6 py-3 font-medium text-center">Status</th>
-                <th scope="col" className="px-6 py-3 font-medium text-right">Actions</th>
+                <th scope="col" className="px-6 py-4">Ref ID</th>
+                <th scope="col" className="px-6 py-4">Timestamp</th>
+                <th scope="col" className="px-6 py-4">Client Representative</th>
+                <th scope="col" className="px-6 py-4 text-right">Items</th>
+                <th scope="col" className="px-6 py-4 text-right">Settlement</th>
+                <th scope="col" className="px-6 py-4 text-center">Method</th>
+                <th scope="col" className="px-6 py-4 text-center">Lifecycle</th>
+                <th scope="col" className="px-6 py-4 text-right">Access</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-border">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
               ) : isEmpty ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-20 text-center">
-                    <iconify-icon icon="solar:cart-large-linear" width="32" height="32" className="text-neutral-300 mx-auto mb-3 block" aria-hidden="true" />
-                    <p className="text-sm font-medium text-neutral-700">No transactions yet</p>
-                    <p className="text-xs text-neutral-500 mt-1">Record your first sale to get started.</p>
+                  <td colSpan={8} className="px-6 py-24 text-center">
+                    <div className="w-20 h-20 rounded-3xl bg-surface-raised flex items-center justify-center mx-auto mb-6 border border-border shadow-inner">
+                      <iconify-icon icon="solar:cart-large-bold-duotone" width="40" height="40" className="text-muted/20" aria-hidden="true" />
+                    </div>
+                    <p className="text-lg font-bold text-foreground">Transaction Log Empty</p>
+                    <p className="text-sm text-muted mt-2 leading-relaxed max-w-xs mx-auto">Your sales ledger is currently empty. Initialize a transaction to begin tracking revenue.</p>
+                    <Link href="/sales/new" className="mt-8 inline-flex items-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-[0.15em] text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 hover:scale-105 active:scale-95">
+                      <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" />
+                      Initiate Transaction
+                    </Link>
                   </td>
                 </tr>
               ) : noResults ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center text-sm text-neutral-500">
-                    No transactions match your search.
+                  <td colSpan={8} className="px-6 py-16 text-center">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40 text-muted/60">
+                      No matching records found in the audit ledger
+                    </div>
                   </td>
                 </tr>
               ) : (
                 pageItems.map((trx) => (
-                  <tr key={trx._id} className="hover:bg-neutral-50/50 transition-colors group">
-                    <td className="px-6 py-4 font-mono text-xs text-neutral-900 font-medium whitespace-nowrap">{trx.displayId}</td>
-                    <td className="px-6 py-4 text-neutral-600 whitespace-nowrap">
+                  <tr key={trx._id} className="hover:bg-accent-subtle/5 transition-colors group">
+                    <td className="px-6 py-5 font-mono text-[10px] text-foreground font-black tracking-widest whitespace-nowrap">
+                      <span className="text-accent/60">#</span>{trx.displayId}
+                    </td>
+                    <td className="px-6 py-5 text-muted/60 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest">
                       <time dateTime={new Date(trx.createdAt).toISOString()}>
                         {formatDateTime(trx.createdAt)}
                       </time>
                     </td>
-                    <td className="px-6 py-4 max-w-[180px]">
-                      <span className="block font-medium text-neutral-900 truncate" title={trx.customer}>
-                        {trx.customer || 'Walk-in Customer'}
+                    <td className="px-6 py-5 max-w-[180px]">
+                      <span className="block font-bold text-foreground truncate group-hover:text-accent transition-colors" title={trx.customer}>
+                        {trx.customer || 'Standard Walk-in'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right text-neutral-600 tabular-nums">{trx.itemCount}</td>
-                    <td className="px-6 py-4 text-right font-medium text-neutral-900 tabular-nums whitespace-nowrap">
+                    <td className="px-6 py-5 text-right text-muted tabular-nums font-black text-xs">{trx.itemCount}</td>
+                    <td className="px-6 py-5 text-right font-black text-foreground tabular-nums whitespace-nowrap tracking-tight text-sm">
                       {formatCurrency(trx.totalAmount)}
                     </td>
-                    <td className="px-6 py-4 text-center text-neutral-600 whitespace-nowrap">
+                    <td className="px-6 py-5 text-center text-muted/60 whitespace-nowrap text-[10px] font-black uppercase tracking-widest">
                       {PAYMENT_LABELS[trx.paymentMethod] ?? trx.paymentMethod}
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
-                        trx.status === 'completed' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20' :
-                        trx.status === 'pending' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20' :
-                        trx.status === 'refunded' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20' :
-                        'bg-neutral-100 text-neutral-700 ring-1 ring-neutral-600/20'
+                    <td className="px-6 py-5 text-center">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap shadow-sm border ${
+                        trx.status === 'completed' ? 'bg-success-subtle/50 text-success border-success/10' :
+                        trx.status === 'pending' ? 'bg-warning-subtle/50 text-warning border-warning/10' :
+                        trx.status === 'refunded' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                        'bg-surface-raised text-muted/40 border-border/50'
                       }`}>
-                        {trx.status.charAt(0).toUpperCase() + trx.status.slice(1)}
+                        <span className={`w-1.5 h-1.5 rounded-full mr-2 shadow-sm ${
+                          trx.status === 'completed' ? 'bg-success' : trx.status === 'pending' ? 'bg-warning' : trx.status === 'refunded' ? 'bg-blue-500' : 'bg-muted/30'
+                        }`} />
+                        {trx.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-5 text-right">
                       <button
-                        className="p-1 text-neutral-400 hover:text-neutral-900 rounded-md hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+                        className="w-9 h-9 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.9] border border-transparent hover:border-accent/10"
                         aria-label={`Actions for transaction ${trx.displayId}`}
                       >
-                        <iconify-icon icon="solar:menu-dots-bold" width="20" height="20" aria-hidden="true" />
+                        <iconify-icon icon="solar:menu-dots-bold-duotone" width="22" height="22" aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -256,26 +265,35 @@ export default function SalesPage() {
           </table>
         </div>
 
-        <div className="p-4 border-t border-neutral-200 flex items-center justify-between text-sm text-neutral-500 bg-neutral-50/50">
-          <div>
+        <div className="p-5 border-t border-border flex items-center justify-between text-sm bg-surface-raised/30">
+          <div className="text-[10px] font-black uppercase tracking-widest text-muted/40">
             {isLoading
-              ? <div className="h-4 w-48 bg-neutral-100 rounded animate-pulse" />
-              : `Showing ${Math.min((page - 1) * PER_PAGE + 1, filtered.length)}–${Math.min(page * PER_PAGE, filtered.length)} of ${filtered.length.toLocaleString()} transactions`
+              ? <div className="h-4 w-48 bg-surface-raised rounded-lg animate-pulse" />
+              : <>View Index <span className="text-foreground/60">{Math.min((page - 1) * PER_PAGE + 1, filtered.length)}</span>–<span className="text-foreground/60">{Math.min(page * PER_PAGE, filtered.length)}</span> of <span className="text-foreground/60">{filtered.length.toLocaleString()}</span> Records</>
             }
           </div>
           {totalPages > 1 && (
             <nav aria-label="Pagination">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-3 py-1.5 border border-neutral-200 rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-                >Previous</button>
+                  className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]"
+                  aria-label="Previous Page"
+                >
+                  <iconify-icon icon="solar:alt-arrow-left-linear" width="18" height="18" />
+                </button>
+                <div className="flex items-center px-4 text-[10px] font-black uppercase tracking-widest text-muted/60">
+                  Batch {page} of {totalPages}
+                </div>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-3 py-1.5 border border-neutral-200 rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-                >Next</button>
+                  className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]"
+                  aria-label="Next Page"
+                >
+                  <iconify-icon icon="solar:alt-arrow-right-linear" width="18" height="18" />
+                </button>
               </div>
             </nav>
           )}

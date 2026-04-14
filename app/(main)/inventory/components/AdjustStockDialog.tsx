@@ -66,38 +66,38 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col">
-        <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-neutral-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-surface rounded-xl shadow-xl border border-border w-full max-w-sm overflow-hidden flex flex-col translate-y-[-10%] sm:translate-y-0">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface">
+          <h2 className="text-lg font-semibold text-foreground">
             Adjust Stock
           </h2>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-900 transition-colors"
+            className="text-muted hover:text-foreground transition-colors p-1 rounded-lg hover:bg-surface-raised"
           >
             <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
           </button>
         </div>
 
         <div className="p-6">
-          <p className="text-sm text-neutral-600 mb-4">
-            Current stock for <strong>{item.name}</strong>: {item.currentStock} {item.unit}
+          <p className="text-sm text-muted mb-4">
+            Current stock for <strong className="text-foreground">{item.name}</strong>: <span className="text-foreground font-medium">{item.currentStock} {item.unit}</span>
           </p>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+            <div className="mb-4 p-3 bg-danger-subtle text-danger text-sm rounded-lg border border-danger/20">
               {error}
             </div>
           )}
 
           <form id="adjust-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-neutral-700">Type</label>
+              <label className="text-sm font-medium text-foreground">Type</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as any)}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
               >
                 <option value="adjustment">Manual Adjustment (+/-)</option>
                 <option value="wastage">Record Wastage (-)</option>
@@ -105,7 +105,7 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-neutral-700">
+              <label className="text-sm font-medium text-foreground">
                 Quantity {type === 'wastage' ? 'Lost' : 'Change'} ({item.unit})
               </label>
               <input
@@ -115,34 +115,34 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
                 min={type === 'wastage' ? "0.01" : undefined}
                 value={quantity || ''}
                 onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
                 placeholder={type === 'wastage' ? "e.g. 5" : "e.g. -5 or 10"}
               />
               {type === 'adjustment' && (
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-muted">
                   Use negative values to reduce stock, positive to increase.
                 </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-neutral-700">Reason / Note</label>
+              <label className="text-sm font-medium text-foreground">Reason / Note</label>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
                 placeholder="e.g. Spilled, Found extra, etc."
               />
             </div>
           </form>
         </div>
 
-        <div className="px-6 py-4 border-t border-neutral-200 flex items-center justify-end gap-3 bg-neutral-50">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3 bg-subtle">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-raised transition-colors focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-1"
           >
             Cancel
           </button>
@@ -150,7 +150,7 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
             type="submit"
             form="adjust-form"
             disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
           >
             {loading ? 'Saving...' : 'Confirm'}
           </button>
