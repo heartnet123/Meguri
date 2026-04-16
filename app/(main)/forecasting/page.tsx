@@ -73,7 +73,7 @@ export default function ForecastingPage() {
 
   const forecasts = useQuery(
     api.forecasting.latestByItem,
-    (workspaceId && isAuthenticated) ? { ...args, periodDays } : 'skip'
+    (workspaceId && isAuthenticated && typeof args === 'object') ? { ...args, periodDays } : 'skip'
   ) as ForecastRow[] | undefined;
 
   const stats = useQuery(
