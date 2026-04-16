@@ -368,8 +368,9 @@ export default function AlertsPage() {
 
                     <div className="grid gap-5 md:grid-cols-[240px_1fr_auto] md:items-end p-5 bg-surface-raised/40 rounded-2xl border border-border/60">
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">Assignee</span>
+                        <label htmlFor={`assignee-${alert._id}`} className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">Assignee</label>
                         <select
+                          id={`assignee-${alert._id}`}
                           value={alert.assignedTo ?? ''}
                           onChange={(e) => handleAssign(alert._id, e.target.value)}
                           disabled={assigningId === alert._id || !workspaceUsers}
@@ -386,8 +387,9 @@ export default function AlertsPage() {
 
                       {alert.status === 'open' ? (
                         <div className="space-y-1.5">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">Resolution Note</span>
+                          <label htmlFor={`resolution-${alert._id}`} className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">Resolution Note</label>
                           <input
+                            id={`resolution-${alert._id}`}
                             type="text"
                             value={resolutionDrafts[alert._id] ?? ''}
                             onChange={(e) =>
@@ -430,7 +432,7 @@ export default function AlertsPage() {
                           <button
                             onClick={() => handleResolve(alert._id)}
                             disabled={resolvingId === alert._id}
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised hover:text-success hover:border-success/20 transition-all shadow-sm active:scale-[0.98]"
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised hover:text-success hover:border-success/20 transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <iconify-icon icon="solar:check-circle-bold-duotone" width="16" height="16" />
                             {resolvingId === alert._id ? 'Resolving…' : 'Resolve'}
@@ -439,7 +441,7 @@ export default function AlertsPage() {
                           <button
                             onClick={() => handleReopen(alert._id)}
                             disabled={reopeningId === alert._id}
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised hover:text-accent hover:border-accent/20 transition-all shadow-sm active:scale-[0.98]"
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised hover:text-accent hover:border-accent/20 transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <iconify-icon icon="solar:refresh-bold-duotone" width="16" height="16" />
                             {reopeningId === alert._id ? 'Reopening…' : 'Reopen'}
