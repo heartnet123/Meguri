@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useConvexAuth } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 import { InventoryItemDialog } from './components/InventoryItemDialog';
 import { ArchiveItemDialog } from './components/ArchiveItemDialog';
@@ -11,7 +12,7 @@ import { AdjustStockDialog } from './components/AdjustStockDialog';
 import { MovementHistoryDialog } from './components/MovementHistoryDialog';
 
 type InventoryItem = {
-  _id: string;
+  _id: Id<'inventoryItems'>;
   name: string;
   sku: string;
   category: string;
@@ -73,7 +74,7 @@ export default function InventoryPage() {
   const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
   const [itemToAdjust, setItemToAdjust] = useState<InventoryItem | null>(null);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
-  const [historyItemId, setHistoryItemId] = useState<string | null>(null);
+  const [historyItemId, setHistoryItemId] = useState<Id<'inventoryItems'> | null>(null);
 
   const isLoading = workspaceId !== undefined && rawItems === undefined;
 

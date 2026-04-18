@@ -1,6 +1,9 @@
 'use client';
 
+import Image from 'next/image';
+import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { api } from '@/convex/_generated/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,7 +43,10 @@ type PasswordStrength = 'weak' | 'fair' | 'strong';
 
 // ─── Helpers & Static Data ────────────────────────────────────────────────────
 
-const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_PROFILE_IMAGE_FILE_BYTES = 700 * 1024;
+const MAX_PROFILE_IMAGE_DATA_URL_BYTES = 900 * 1024;
+const PROFILE_TOO_LARGE_MESSAGE =
+  'Your profile photo is too large to save. Please choose an image smaller than 700 KB.';
 
 function getPasswordStrength(pw: string): PasswordStrength | null {
   if (!pw) return null;
@@ -99,50 +105,111 @@ const DATE_FORMATS: SelectOption[] = [
   { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO 8601)' },
 ];
 
-// Simulate existing user data (replace with real auth/API data)
-const CURRENT_USER = {
-  firstName: 'Jane',
-  lastName: 'Smith',
-  displayName: 'Jane Smith',
-  email: 'jane@mainstoregroup.com',
-  phone: '+66 81 234 5678',
-  jobTitle: 'Store Manager',
-  department: 'management',
-  avatarUrl: 'https://picsum.photos/seed/user/200/200',
+type CurrentUser = {
+  _id: string;
+  name: string;
+  email: string;
+  role: 'owner' | 'admin' | 'manager' | 'staff';
+  avatarUrl?: string;
+  phone?: string;
+  jobTitle?: string;
+  department?: string;
+  timezone?: string;
+  language?: string;
+  currency?: string;
+  dateFormat?: string;
+  createdAt: number;
+};
+
+const DEFAULT_PREFERENCES = {
+  department: '',
   timezone: 'Asia/Bangkok',
   language: 'en',
   currency: 'THB',
   dateFormat: 'DD/MM/YYYY',
-  memberSince: 'March 2024',
-  role: 'Admin',
-};
+} as const;
+
+function splitName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] ?? '',
+    lastName: parts.slice(1).join(' '),
+  };
+}
+
+function getProfileSaveErrorMessage(error: unknown) {
+  const rawMessage =
+    typeof error === 'object' && error !== null && 'data' in error && typeof error.data === 'string'
+      ? error.data
+      : error instanceof Error
+        ? error.message
+        : '';
+
+  if (rawMessage.includes('Value is too large')) {
+    return PROFILE_TOO_LARGE_MESSAGE;
+  }
+
+  return rawMessage || 'Failed to save your profile.';
+}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
+  const currentUser = useQuery(api.users.me) as CurrentUser | null | undefined;
+  const updateProfile = useMutation(api.users.updateProfile);
+
+  const baseProfile = useMemo(() => {
+    const names = splitName(currentUser?.name ?? '');
+    return {
+      avatarSrc: currentUser?.avatarUrl ?? '',
+      firstName: names.firstName,
+      lastName: names.lastName,
+      displayName: currentUser?.name ?? '',
+      email: currentUser?.email ?? '',
+      phone: currentUser?.phone ?? '',
+      jobTitle: currentUser?.jobTitle ?? '',
+      department: currentUser?.department ?? DEFAULT_PREFERENCES.department,
+      timezone: currentUser?.timezone ?? DEFAULT_PREFERENCES.timezone,
+      language: currentUser?.language ?? DEFAULT_PREFERENCES.language,
+      currency: currentUser?.currency ?? DEFAULT_PREFERENCES.currency,
+      dateFormat: currentUser?.dateFormat ?? DEFAULT_PREFERENCES.dateFormat,
+    };
+  }, [currentUser]);
+
   // Identity
-  const [avatarSrc, setAvatarSrc] = useState<string>(CURRENT_USER.avatarUrl);
+  const [avatarSrcOverride, setAvatarSrcOverride] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
-  const [firstName, setFirstName] = useState(CURRENT_USER.firstName);
-  const [lastName, setLastName] = useState(CURRENT_USER.lastName);
-  const [displayNameOverride, setDisplayNameOverride] = useState<string | null>(CURRENT_USER.displayName);
-  const [displayNameTouched, setDisplayNameTouched] = useState(true); // pre-filled, don't auto-overwrite
+  const [firstNameOverride, setFirstNameOverride] = useState<string | null>(null);
+  const [lastNameOverride, setLastNameOverride] = useState<string | null>(null);
+  const [displayNameOverride, setDisplayNameOverride] = useState<string | null>(null);
+  const [displayNameTouched, setDisplayNameTouched] = useState(false);
   // Derived display name: falls back to first+last when not manually set
+  const avatarSrc = avatarSrcOverride ?? baseProfile.avatarSrc;
+  const firstName = firstNameOverride ?? baseProfile.firstName;
+  const lastName = lastNameOverride ?? baseProfile.lastName;
   const displayName = useMemo(
     () => displayNameOverride ?? [firstName, lastName].filter(Boolean).join(' '),
     [displayNameOverride, firstName, lastName]
   );
   const setDisplayName = (val: string) => setDisplayNameOverride(val);
   // Contact
-  const [email, setEmail] = useState(CURRENT_USER.email);
-  const [phone, setPhone] = useState(CURRENT_USER.phone);
-  const [jobTitle, setJobTitle] = useState(CURRENT_USER.jobTitle);
-  const [department, setDepartment] = useState(CURRENT_USER.department);
+  const [emailOverride, setEmailOverride] = useState<string | null>(null);
+  const [phoneOverride, setPhoneOverride] = useState<string | null>(null);
+  const [jobTitleOverride, setJobTitleOverride] = useState<string | null>(null);
+  const [departmentOverride, setDepartmentOverride] = useState<string | null>(null);
   // Preferences
-  const [timezone, setTimezone] = useState(CURRENT_USER.timezone);
-  const [language, setLanguage] = useState(CURRENT_USER.language);
-  const [currency, setCurrency] = useState(CURRENT_USER.currency);
-  const [dateFormat, setDateFormat] = useState(CURRENT_USER.dateFormat);
+  const [timezoneOverride, setTimezoneOverride] = useState<string | null>(null);
+  const [languageOverride, setLanguageOverride] = useState<string | null>(null);
+  const [currencyOverride, setCurrencyOverride] = useState<string | null>(null);
+  const [dateFormatOverride, setDateFormatOverride] = useState<string | null>(null);
+  const email = emailOverride ?? baseProfile.email;
+  const phone = phoneOverride ?? baseProfile.phone;
+  const jobTitle = jobTitleOverride ?? baseProfile.jobTitle;
+  const department = departmentOverride ?? baseProfile.department;
+  const timezone = timezoneOverride ?? baseProfile.timezone;
+  const language = languageOverride ?? baseProfile.language;
+  const currency = currencyOverride ?? baseProfile.currency;
+  const dateFormat = dateFormatOverride ?? baseProfile.dateFormat;
   // Security
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -173,12 +240,23 @@ export default function ProfilePage() {
       setAvatarError('File must be a PNG, JPEG, or WebP image.');
       return;
     }
-    if (file.size > MAX_FILE_BYTES) {
-      setAvatarError('File exceeds the 5 MB limit. Choose a smaller image.');
+    if (file.size > MAX_PROFILE_IMAGE_FILE_BYTES) {
+      setAvatarError(PROFILE_TOO_LARGE_MESSAGE);
       return;
     }
     const reader = new FileReader();
-    reader.onload = (ev) => setAvatarSrc(ev.target?.result as string);
+    reader.onload = (ev) => {
+      const result = typeof ev.target?.result === 'string' ? ev.target.result : '';
+      if (!result) {
+        setAvatarError('Could not read the selected image. Please try again.');
+        return;
+      }
+      if (new TextEncoder().encode(result).length > MAX_PROFILE_IMAGE_DATA_URL_BYTES) {
+        setAvatarError(PROFILE_TOO_LARGE_MESSAGE);
+        return;
+      }
+      setAvatarSrcOverride(result);
+    };
     reader.readAsDataURL(file);
   }
 
@@ -200,7 +278,7 @@ export default function ProfilePage() {
     return errs;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate();
     setErrors(errs);
@@ -208,20 +286,46 @@ export default function ProfilePage() {
       document.getElementById(Object.keys(errs)[0])?.focus();
       return;
     }
+    if (!currentUser) return;
+
     setSaving(true);
     setSaved(false);
-    // Replace with real API call
-    setTimeout(() => {
+    try {
+      await updateProfile({
+        name: displayName.trim() || [firstName, lastName].filter(Boolean).join(' '),
+        email: email.trim(),
+        avatarUrl: avatarSrc || undefined,
+        phone: phone.trim() || undefined,
+        jobTitle: jobTitle.trim() || undefined,
+        department: department || undefined,
+        timezone: timezone || undefined,
+        language: language || undefined,
+        currency: currency || undefined,
+        dateFormat: dateFormat || undefined,
+      });
       setSaving(false);
       setSaved(true);
-      // Clear password fields on success
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    }, 1400);
+    } catch (error) {
+      setSaving(false);
+      setErrors((existing) => ({
+        ...existing,
+        submit: getProfileSaveErrorMessage(error),
+      }));
+    }
   }
 
   const pwStrength = getPasswordStrength(newPassword);
+  const memberSinceLabel = currentUser
+    ? new Date(currentUser.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    : '—';
+  const roleLabel = currentUser?.role ? currentUser.role.replace('_', ' ') : 'account';
+  const profileInitials = useMemo(() => {
+    const parts = [firstName, lastName].filter(Boolean);
+    return parts.map((part) => part[0]?.toUpperCase() ?? '').join('').slice(0, 2) || 'SS';
+  }, [firstName, lastName]);
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -235,13 +339,20 @@ export default function ProfilePage() {
       {/* ── Identity card ─────────────────────────────────────────────── */}
       <div className="bg-surface border border-border rounded-3xl shadow-2xl shadow-black/5 p-8 flex items-center gap-6 relative overflow-hidden group/card">
         <div className="relative shrink-0">
-          <img
-            src={avatarSrc}
-            alt={`${firstName} ${lastName}`}
-            className="w-20 h-20 rounded-2xl object-cover border border-border bg-surface-raised ring-4 ring-transparent group-hover/card:ring-accent/10 transition-all duration-500"
-            width={80}
-            height={80}
-          />
+          {avatarSrc ? (
+            <Image
+              src={avatarSrc}
+              alt={`${firstName} ${lastName}`}
+              className="w-20 h-20 rounded-2xl object-cover border border-border bg-surface-raised ring-4 ring-transparent group-hover/card:ring-accent/10 transition-all duration-500"
+              width={80}
+              height={80}
+              unoptimized
+            />
+          ) : (
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-surface-raised text-lg font-black tracking-widest text-accent ring-4 ring-transparent transition-all duration-500 group-hover/card:ring-accent/10">
+              {profileInitials}
+            </div>
+          )}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -273,9 +384,9 @@ export default function ProfilePage() {
         <div className="shrink-0 hidden sm:flex flex-col items-end gap-2 text-right">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-black uppercase tracking-widest text-accent">
             <iconify-icon icon="solar:shield-check-bold-duotone" width="14" height="14" aria-hidden="true"></iconify-icon>
-            {CURRENT_USER.role} LEVEL
+            {roleLabel} LEVEL
           </div>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/50 leading-none">Active since {CURRENT_USER.memberSince}</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/50 leading-none">Active since {memberSinceLabel}</span>
         </div>
         {/* Decorative corner accent */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-[4rem] -mr-8 -mt-8 blur-2xl" />
@@ -296,7 +407,7 @@ export default function ProfilePage() {
                   id="firstName"
                   type="text"
                   value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  onChange={(e) => setFirstNameOverride(e.target.value)}
                   autoComplete="given-name"
                   maxLength={50}
                   hasError={!!errors.firstName}
@@ -310,7 +421,7 @@ export default function ProfilePage() {
                   id="lastName"
                   type="text"
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => setLastNameOverride(e.target.value)}
                   autoComplete="family-name"
                   maxLength={50}
                   hasError={!!errors.lastName}
@@ -350,7 +461,7 @@ export default function ProfilePage() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmailOverride(e.target.value)}
                 autoComplete="email"
                 maxLength={254}
                 hasError={!!errors.email}
@@ -366,7 +477,7 @@ export default function ProfilePage() {
                   id="phone"
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => setPhoneOverride(e.target.value)}
                   autoComplete="tel"
                   maxLength={30}
                 />
@@ -376,7 +487,7 @@ export default function ProfilePage() {
                   id="jobTitle"
                   type="text"
                   value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
+                  onChange={(e) => setJobTitleOverride(e.target.value)}
                   autoComplete="organization-title"
                   maxLength={100}
                 />
@@ -387,7 +498,7 @@ export default function ProfilePage() {
               <SelectInput
                 id="department"
                 value={department}
-                onChange={(e) => setDepartment(e.target.value)}
+                onChange={(e) => setDepartmentOverride(e.target.value)}
                 options={DEPARTMENTS}
               />
             </FormField>
@@ -404,7 +515,7 @@ export default function ProfilePage() {
                 <SelectInput
                   id="timezone"
                   value={timezone}
-                  onChange={(e) => setTimezone(e.target.value)}
+                  onChange={(e) => setTimezoneOverride(e.target.value)}
                   options={TIMEZONES}
                 />
               </FormField>
@@ -412,7 +523,7 @@ export default function ProfilePage() {
                 <SelectInput
                   id="language"
                   value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
+                  onChange={(e) => setLanguageOverride(e.target.value)}
                   options={LANGUAGES}
                 />
               </FormField>
@@ -423,7 +534,7 @@ export default function ProfilePage() {
                 <SelectInput
                   id="currency"
                   value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
+                  onChange={(e) => setCurrencyOverride(e.target.value)}
                   options={CURRENCIES}
                 />
               </FormField>
@@ -431,7 +542,7 @@ export default function ProfilePage() {
                 <SelectInput
                   id="dateFormat"
                   value={dateFormat}
-                  onChange={(e) => setDateFormat(e.target.value)}
+                  onChange={(e) => setDateFormatOverride(e.target.value)}
                   options={DATE_FORMATS}
                 />
               </FormField>
@@ -525,6 +636,12 @@ export default function ProfilePage() {
 
           {/* ── Form actions ──────────────────────────────────────────── */}
           <div className="flex items-center justify-end gap-5 border-t border-border mt-12 pt-8">
+            {errors.submit && (
+              <span className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.15em] text-danger mr-auto px-5 py-2.5 bg-danger/5 rounded-2xl border border-danger/20">
+                <iconify-icon icon="solar:danger-circle-bold-duotone" width="18" height="18" aria-hidden="true"></iconify-icon>
+                {errors.submit}
+              </span>
+            )}
             {saved && (
               <span
                 className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.15em] text-success mr-auto px-5 py-2.5 bg-success/5 rounded-2xl border border-success/20 animate-in fade-in slide-in-from-left-4"

@@ -5,7 +5,7 @@
 ### Authentication
 - [x] **AUTH-01**: User can sign up, sign in, and sign out via Better Auth.
 - [x] **AUTH-02**: First user can automatically create a workspace.
-- [ ] **AUTH-03**: User can invite additional users to a workspace.
+- [x] **AUTH-03**: User can invite additional users to a workspace.
 - [x] **AUTH-04**: Workspace-level access control blocks cross-workspace data.
 
 ### Inventory
@@ -20,26 +20,26 @@
 - [x] **SALE-02**: Completing a sale automatically deducts corresponding ingredients.
 - [x] **SALE-03**: Warning prevents sale if stock is insufficient.
 - [x] **SALE-04**: Stock movements have traceability back to the parent sale.
-- [ ] **SALE-05**: Present visible margin and stock impacts directly in the sales UI.
+- [x] **SALE-05**: Present visible margin and stock impacts directly in the sales UI.
 
 ### Suppliers & POs
 - [x] **PO-01**: Basic supplier profile management.
-- [ ] **PO-02**: User can create a draft purchase order.
+- [x] **PO-02**: User can create and review purchase planning recommendations.
 - [ ] **PO-03**: User can mark PO as sent and record receipt (including partials).
 - [ ] **PO-04**: Receiving a PO automatically updates local inventory stock.
 
 ### Forecasting
-- [ ] **FORE-01**: System generates forecast snapshots from recent sales.
-- [ ] **FORE-02**: System calculates reorder recommendations utilizing lead times.
-- [ ] **FORE-03**: Produce 7, 14, and 30-day forecast windows.
+- [x] **FORE-01**: System generates forecast snapshots from recent sales.
+- [x] **FORE-02**: System calculates reorder recommendations utilizing lead times.
+- [x] **FORE-03**: Produce 7, 14, and 30-day forecast windows.
 - [ ] **FORE-04**: Provide manual refresh and show AI confidence/warning flags on the dashboard.
 
 ### Alerts
-- [ ] **WARN-01**: Aggregate stock levels and anomalies into an actionable Alert Inbox.
-- [ ] **WARN-02**: Allow filtering by severity/status and taking resolution notes.
+- [x] **WARN-01**: Aggregate stock levels and anomalies into an actionable Alert Inbox.
+- [x] **WARN-02**: Allow filtering by severity/status and taking resolution notes.
 
 ### Onboarding
-- [ ] **ONB-01**: Guided flow providing sample/demo workspace data to explore.
+- [x] **ONB-01**: Guided flow for workspace bootstrap and first-run setup.
 - [ ] **ONB-02**: Ability to seamlessly transition from demo data to live production space.
 
 ## v2 Requirements

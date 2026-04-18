@@ -13,12 +13,13 @@ type Transaction = {
   customer: string;
   itemCount: number;
   totalAmount: number;
+  totalCost?: number;
   paymentMethod: 'cash' | 'credit_card' | 'mobile_pay' | 'invoice';
   status: 'completed' | 'pending' | 'refunded' | 'cancelled';
 };
 
 const PER_PAGE = 25;
-const SKEL_WIDTHS = ['w-1/4', 'w-1/3', 'w-2/5', 'w-12', 'w-1/5', 'w-1/4', 'w-1/5', 'w-8'];
+const SKEL_WIDTHS = ['w-1/4', 'w-1/3', 'w-2/5', 'w-12', 'w-1/5', 'w-16', 'w-1/4', 'w-1/5', 'w-8'];
 
 const PAYMENT_LABELS: Record<Transaction['paymentMethod'], string> = {
   cash: 'Cash',
@@ -107,7 +108,7 @@ export default function SalesPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-success/20 transition-all">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-10 h-10 rounded-xl bg-success-subtle/50 flex items-center justify-center text-success border border-success/10 group-hover:scale-110 transition-transform" aria-hidden="true">
@@ -117,6 +118,21 @@ export default function SalesPage() {
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {todayStats === undefined ? <StatSkeleton /> : formatCurrency(todayStats.revenue)}
+          </div>
+        </div>
+        <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-emerald-500/20 transition-all">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+              <iconify-icon icon="solar:chart-2-bold-duotone" width="22" height="22" />
+            </div>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Gross Margin</h3>
+          </div>
+          <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
+            {todayStats === undefined ? <StatSkeleton /> : (
+              <span className={todayStats.marginPct >= 30 ? 'text-emerald-600' : todayStats.marginPct >= 15 ? 'text-amber-600' : 'text-red-600'}>
+                {formatCurrency(todayStats.margin)} <span className="text-lg font-semibold text-muted">({todayStats.marginPct}%)</span>
+              </span>
+            )}
           </div>
         </div>
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-accent/20 transition-all">
@@ -184,6 +200,7 @@ export default function SalesPage() {
                 <th scope="col" className="px-6 py-4">Client Representative</th>
                 <th scope="col" className="px-6 py-4 text-right">Items</th>
                 <th scope="col" className="px-6 py-4 text-right">Settlement</th>
+                <th scope="col" className="px-6 py-4 text-right">Margin</th>
                 <th scope="col" className="px-6 py-4 text-center">Method</th>
                 <th scope="col" className="px-6 py-4 text-center">Lifecycle</th>
                 <th scope="col" className="px-6 py-4 text-right">Access</th>
@@ -194,7 +211,7 @@ export default function SalesPage() {
                 Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
               ) : isEmpty ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-24 text-center">
+                  <td colSpan={9} className="px-6 py-24 text-center">
                     <div className="w-20 h-20 rounded-3xl bg-surface-raised flex items-center justify-center mx-auto mb-6 border border-border shadow-inner">
                       <iconify-icon icon="solar:cart-large-bold-duotone" width="40" height="40" className="text-muted/20" aria-hidden="true" />
                     </div>
@@ -208,7 +225,7 @@ export default function SalesPage() {
                 </tr>
               ) : noResults ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center">
+                  <td colSpan={9} className="px-6 py-16 text-center">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40 text-muted/60">
                       No matching records found in the audit ledger
                     </div>
@@ -233,6 +250,18 @@ export default function SalesPage() {
                     <td className="px-6 py-5 text-right text-muted tabular-nums font-black text-xs">{trx.itemCount}</td>
                     <td className="px-6 py-5 text-right font-black text-foreground tabular-nums whitespace-nowrap tracking-tight text-sm">
                       {formatCurrency(trx.totalAmount)}
+                    </td>
+                    <td className="px-6 py-5 text-right tabular-nums whitespace-nowrap text-xs">
+                      {trx.totalCost != null && trx.totalAmount > 0 ? (() => {
+                        const marginPct = Math.round(((trx.totalAmount - trx.totalCost) / trx.totalAmount) * 100);
+                        return (
+                          <span className={`font-bold ${marginPct >= 30 ? 'text-emerald-600' : marginPct >= 15 ? 'text-amber-600' : 'text-red-600'}`}>
+                            {marginPct}%
+                          </span>
+                        );
+                      })() : (
+                        <span className="text-muted/40">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-5 text-center text-muted/60 whitespace-nowrap text-[10px] font-black uppercase tracking-widest">
                       {PAYMENT_LABELS[trx.paymentMethod] ?? trx.paymentMethod}

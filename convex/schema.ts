@@ -2,35 +2,29 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
 export default defineSchema({
-  // ─── MULTI-TENANT ────────────────────────────────────────────────────────────
-
   workspaces: defineTable({
     name: v.string(),
-    slug: v.string(),           // used in join-workspace URL
-    currency: v.string(),       // e.g. "THB", "USD"
+    slug: v.string(),
+    currency: v.string(),
     timezone: v.string(),
-    plan: v.union(
-      v.literal('free'),
-      v.literal('pro'),
-      v.literal('enterprise'),
-    ),
+    plan: v.union(v.literal('free'), v.literal('pro'), v.literal('enterprise')),
     createdAt: v.number(),
   }).index('by_slug', ['slug']),
 
-  // ─── USERS & AUTH ────────────────────────────────────────────────────────────
-
   users: defineTable({
-    workspaceId: v.optional(v.id('workspaces')), // optional until onboarding completes
-    betterAuthId: v.optional(v.string()),  // Better Auth user ID (ctx.auth.getUserIdentity().subject)
+    workspaceId: v.optional(v.id('workspaces')),
+    betterAuthId: v.optional(v.string()),
     name: v.string(),
     email: v.string(),
-    role: v.union(
-      v.literal('owner'),
-      v.literal('admin'),
-      v.literal('manager'),
-      v.literal('staff'),
-    ),
+    role: v.union(v.literal('owner'), v.literal('admin'), v.literal('manager'), v.literal('staff')),
     avatarUrl: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    jobTitle: v.optional(v.string()),
+    department: v.optional(v.string()),
+    timezone: v.optional(v.string()),
+    language: v.optional(v.string()),
+    currency: v.optional(v.string()),
+    dateFormat: v.optional(v.string()),
     notificationsEnabled: v.boolean(),
     createdAt: v.number(),
   })
@@ -38,23 +32,41 @@ export default defineSchema({
     .index('by_email', ['email'])
     .index('by_better_auth_id', ['betterAuthId']),
 
-  // ─── SUPPLIERS ───────────────────────────────────────────────────────────────
+  workspaceMemberships: defineTable({
+    workspaceId: v.id('workspaces'),
+    userId: v.id('users'),
+    role: v.union(v.literal('owner'), v.literal('admin'), v.literal('manager'), v.literal('staff')),
+    joinedAt: v.number(),
+  })
+    .index('by_workspace', ['workspaceId'])
+    .index('by_user', ['userId'])
+    .index('by_user_workspace', ['userId', 'workspaceId']),
+
+  invitations: defineTable({
+    workspaceId: v.id('workspaces'),
+    email: v.string(),
+    role: v.union(v.literal('admin'), v.literal('manager'), v.literal('staff')),
+    token: v.string(),
+    status: v.union(v.literal('pending'), v.literal('accepted'), v.literal('cancelled')),
+    invitedBy: v.id('users'),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+  })
+    .index('by_workspace', ['workspaceId'])
+    .index('by_token', ['token'])
+    .index('by_email', ['email']),
 
   suppliers: defineTable({
     workspaceId: v.id('workspaces'),
-    displayId: v.string(),          // e.g. "SUP-001" shown in UI
+    displayId: v.string(),
     name: v.string(),
-    category: v.string(),           // Raw Materials, Packaging, Perishables, Ingredients
+    category: v.string(),
     contactName: v.string(),
     email: v.string(),
     phone: v.string(),
-    rating: v.number(),             // 0.0 – 5.0
-    status: v.union(
-      v.literal('active'),
-      v.literal('needs_review'),
-      v.literal('inactive'),
-    ),
-    leadTimeMinDays: v.number(),    // lead time stored as range e.g. {1, 2}
+    rating: v.number(),
+    status: v.union(v.literal('active'), v.literal('needs_review'), v.literal('inactive')),
+    leadTimeMinDays: v.number(),
     leadTimeMaxDays: v.number(),
     notes: v.optional(v.string()),
     createdAt: v.number(),
@@ -62,16 +74,15 @@ export default defineSchema({
     .index('by_workspace', ['workspaceId'])
     .index('by_workspace_status', ['workspaceId', 'status']),
 
-  // ─── INVENTORY ITEMS (raw materials / stock items) ───────────────────────────
-
   inventoryItems: defineTable({
     workspaceId: v.id('workspaces'),
-    sku: v.string(),                // e.g. "DAI-001"
+    sku: v.string(),
     name: v.string(),
-    category: v.string(),           // Dairy, Coffee, Bakery, Packaging, Ingredients
-    unit: v.string(),               // kg, L, pcs, btl
+    category: v.string(),
+    unit: v.string(),
     currentStock: v.number(),
-    minStockLevel: v.number(),      // reorder threshold
+    minStockLevel: v.number(),
+    isArchived: v.optional(v.boolean()),
     supplierId: v.optional(v.id('suppliers')),
     costPerUnit: v.optional(v.number()),
     notes: v.optional(v.string()),
@@ -79,43 +90,44 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index('by_workspace', ['workspaceId'])
+    .index('by_workspace_and_is_archived', ['workspaceId', 'isArchived'])
     .index('by_workspace_sku', ['workspaceId', 'sku'])
     .index('by_workspace_category', ['workspaceId', 'category']),
 
-  // ─── PRODUCTS (finished goods, bundles, for-sale items) ──────────────────────
-
-  products: defineTable({
+  sellableItems: defineTable({
     workspaceId: v.id('workspaces'),
-    displayId: v.string(),          // e.g. "PRD-001"
+    displayId: v.string(),
     name: v.string(),
     sku: v.string(),
-    category: v.union(
-      v.literal('finished_goods'),
-      v.literal('bundles'),
-      v.literal('raw_materials'),
-    ),
-    price: v.number(),              // selling price
-    cost: v.number(),               // production/purchase cost
+    purchaseCost: v.number(),
+    salePrice: v.number(),
+    profit: v.number(),
+    marginPct: v.number(),
+    trackStock: v.boolean(),
     currentStock: v.number(),
+    minStockLevel: v.number(),
     isActive: v.boolean(),
+    notes: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index('by_workspace', ['workspaceId'])
-    .index('by_workspace_sku', ['workspaceId', 'sku']),
-
-  // ─── RECIPES (how products are made from inventory items) ────────────────────
+    .index('by_workspace_sku', ['workspaceId', 'sku'])
+    .index('by_workspace_active', ['workspaceId', 'isActive']),
 
   recipes: defineTable({
     workspaceId: v.id('workspaces'),
-    productId: v.id('products'),
+    displayId: v.string(),
     name: v.string(),
-    yieldQty: v.number(),           // units produced per batch
+    sku: v.string(),
+    category: v.union(v.literal('finished_goods'), v.literal('bundles'), v.literal('raw_materials')),
+    price: v.number(),
+    yieldQty: v.number(),
     yieldUnit: v.string(),
     isActive: v.boolean(),
     createdAt: v.number(),
-  }).index('by_product', ['productId'])
-    .index('by_workspace', ['workspaceId']),
+    updatedAt: v.optional(v.number()),
+  }).index('by_workspace', ['workspaceId']).index('by_workspace_sku', ['workspaceId', 'sku']),
 
   recipeIngredients: defineTable({
     recipeId: v.id('recipes'),
@@ -124,26 +136,15 @@ export default defineSchema({
     unit: v.string(),
   }).index('by_recipe', ['recipeId']),
 
-  // ─── SALES TRANSACTIONS ──────────────────────────────────────────────────────
-
   salesTransactions: defineTable({
     workspaceId: v.id('workspaces'),
-    displayId: v.string(),          // e.g. "TRX-8921"
-    customer: v.string(),           // "Walk-in Customer" or named
+    displayId: v.string(),
+    customer: v.string(),
     itemCount: v.number(),
     totalAmount: v.number(),
-    paymentMethod: v.union(
-      v.literal('cash'),
-      v.literal('credit_card'),
-      v.literal('mobile_pay'),
-      v.literal('invoice'),
-    ),
-    status: v.union(
-      v.literal('completed'),
-      v.literal('pending'),
-      v.literal('refunded'),
-      v.literal('cancelled'),
-    ),
+    totalCost: v.optional(v.number()),
+    paymentMethod: v.union(v.literal('cash'), v.literal('credit_card'), v.literal('mobile_pay'), v.literal('invoice')),
+    status: v.union(v.literal('completed'), v.literal('pending'), v.literal('refunded'), v.literal('cancelled')),
     createdAt: v.number(),
   })
     .index('by_workspace', ['workspaceId'])
@@ -152,26 +153,21 @@ export default defineSchema({
 
   saleItems: defineTable({
     transactionId: v.id('salesTransactions'),
-    productId: v.id('products'),
+    recipeId: v.optional(v.id('recipes')),
+    sellableItemId: v.optional(v.id('sellableItems')),
     quantity: v.number(),
     unitPrice: v.number(),
     subtotal: v.number(),
-  }).index('by_transaction', ['transactionId'])
-    .index('by_product', ['productId']),
-
-  // ─── PURCHASE ORDERS ─────────────────────────────────────────────────────────
+  })
+    .index('by_transaction', ['transactionId'])
+    .index('by_recipe', ['recipeId'])
+    .index('by_sellable_item', ['sellableItemId']),
 
   purchaseOrders: defineTable({
     workspaceId: v.id('workspaces'),
-    poNumber: v.string(),           // e.g. "PO-2094"
+    poNumber: v.string(),
     supplierId: v.id('suppliers'),
-    status: v.union(
-      v.literal('draft'),
-      v.literal('sent'),
-      v.literal('pending'),
-      v.literal('received'),
-      v.literal('cancelled'),
-    ),
+    status: v.union(v.literal('draft'), v.literal('sent'), v.literal('pending'), v.literal('received'), v.literal('cancelled')),
     totalAmount: v.optional(v.number()),
     expectedDeliveryAt: v.optional(v.number()),
     receivedAt: v.optional(v.number()),
@@ -189,70 +185,36 @@ export default defineSchema({
     quantity: v.number(),
     unitCost: v.number(),
     subtotal: v.number(),
-    receivedQuantity: v.optional(v.number()),  // filled when PO is received
+    receivedQuantity: v.optional(v.number()),
   }).index('by_purchase_order', ['purchaseOrderId']),
-
-  // ─── STOCK MOVEMENTS (audit log) ─────────────────────────────────────────────
 
   stockMovements: defineTable({
     workspaceId: v.id('workspaces'),
     inventoryItemId: v.id('inventoryItems'),
-    type: v.union(
-      v.literal('delivery'),    // received from a PO
-      v.literal('sale'),        // consumed by a sale
-      v.literal('adjustment'),  // manual stock correction
-      v.literal('wastage'),     // spoilage / waste
-      v.literal('transfer'),    // between locations
-    ),
-    quantity: v.number(),         // positive = stock in, negative = stock out
-    referenceId: v.optional(v.string()),  // e.g. PO number or TRX display ID
+    type: v.union(v.literal('delivery'), v.literal('sale'), v.literal('adjustment'), v.literal('wastage'), v.literal('transfer'), v.literal('initial_stock'), v.literal('archive')),
+    quantity: v.number(),
+    referenceId: v.optional(v.string()),
     note: v.optional(v.string()),
     performedBy: v.id('users'),
     createdAt: v.number(),
   })
     .index('by_workspace', ['workspaceId'])
     .index('by_item', ['inventoryItemId'])
+    .index('by_workspace_inventory_item', ['workspaceId', 'inventoryItemId'])
     .index('by_workspace_date', ['workspaceId', 'createdAt']),
-
-  // ─── ALERTS ──────────────────────────────────────────────────────────────────
 
   alerts: defineTable({
     workspaceId: v.id('workspaces'),
-    displayId: v.string(),          // e.g. "ALT-1042"
-    category: v.union(
-      v.literal('stock'),
-      v.literal('anomaly'),
-      v.literal('supplier'),
-      v.literal('system'),
-    ),
-    type: v.union(
-      v.literal('low_stock'),
-      v.literal('unusual_demand'),
-      v.literal('supplier'),
-      v.literal('price_change'),
-      v.literal('system'),
-    ),
-    severity: v.union(
-      v.literal('critical'),
-      v.literal('high'),
-      v.literal('medium'),
-      v.literal('low'),
-    ),
+    displayId: v.string(),
+    category: v.union(v.literal('stock'), v.literal('anomaly'), v.literal('supplier'), v.literal('system')),
+    type: v.union(v.literal('low_stock'), v.literal('unusual_demand'), v.literal('supplier'), v.literal('price_change'), v.literal('system')),
+    severity: v.union(v.literal('critical'), v.literal('high'), v.literal('medium'), v.literal('low')),
     title: v.string(),
     description: v.string(),
-    status: v.union(
-      v.literal('open'),
-      v.literal('resolved'),
-    ),
+    status: v.union(v.literal('open'), v.literal('resolved')),
     assignedTo: v.optional(v.id('users')),
     relatedItemId: v.optional(v.id('inventoryItems')),
-    relatedEntityType: v.optional(v.union(
-      v.literal('inventory_item'),
-      v.literal('supplier'),
-      v.literal('dashboard'),
-      v.literal('forecast'),
-      v.literal('system'),
-    )),
+    relatedEntityType: v.optional(v.union(v.literal('inventory_item'), v.literal('supplier'), v.literal('dashboard'), v.literal('forecast'), v.literal('system'))),
     relatedEntityId: v.optional(v.string()),
     resolutionNote: v.optional(v.string()),
     resolvedAt: v.optional(v.number()),
@@ -261,32 +223,27 @@ export default defineSchema({
   })
     .index('by_workspace', ['workspaceId'])
     .index('by_workspace_status', ['workspaceId', 'status'])
+    .index('by_workspace_status_and_severity', ['workspaceId', 'status', 'severity'])
+    .index('by_workspace_status_and_category', ['workspaceId', 'status', 'category'])
+    .index('by_workspace_status_related_item_type', ['workspaceId', 'status', 'relatedItemId', 'type'])
     .index('by_workspace_severity', ['workspaceId', 'severity'])
     .index('by_workspace_category', ['workspaceId', 'category'])
     .index('by_workspace_assigned_to', ['workspaceId', 'assignedTo']),
 
-  // ─── DEMAND FORECASTS (AI-generated snapshots) ───────────────────────────────
-
   forecastSnapshots: defineTable({
     workspaceId: v.id('workspaces'),
     inventoryItemId: v.id('inventoryItems'),
-    periodDays: v.number(),         // 7, 14, or 30
+    periodDays: v.number(),
     predictedQty: v.number(),
     unit: v.string(),
-    trendPct: v.optional(v.number()),   // e.g. 15 = +15%, -2 = -2%
-    confidence: v.union(
-      v.literal('high'),
-      v.literal('medium'),
-      v.literal('low'),
-    ),
-    model: v.string(),              // "SARIMA", "XGBoost", "Moving Average", "Baseline"
+    trendPct: v.optional(v.number()),
+    confidence: v.union(v.literal('high'), v.literal('medium'), v.literal('low')),
+    model: v.string(),
     warning: v.optional(v.string()),
     generatedAt: v.number(),
   })
     .index('by_workspace', ['workspaceId'])
     .index('by_item_date', ['inventoryItemId', 'generatedAt']),
-
-  // ─── REORDER RECOMMENDATIONS (AI purchase planning) ──────────────────────────
 
   reorderRecommendations: defineTable({
     workspaceId: v.id('workspaces'),
@@ -294,17 +251,9 @@ export default defineSchema({
     supplierId: v.optional(v.id('suppliers')),
     forecastId: v.optional(v.id('forecastSnapshots')),
     recommendedQty: v.number(),
-    urgency: v.union(
-      v.literal('high'),
-      v.literal('medium'),
-      v.literal('low'),
-    ),
-    reason: v.string(),             // AI-generated explanation
-    status: v.union(
-      v.literal('pending'),         // awaiting user action
-      v.literal('accepted'),        // added to a draft PO
-      v.literal('dismissed'),
-    ),
+    urgency: v.union(v.literal('high'), v.literal('medium'), v.literal('low')),
+    reason: v.string(),
+    status: v.union(v.literal('pending'), v.literal('accepted'), v.literal('dismissed')),
     generatedAt: v.number(),
   })
     .index('by_workspace', ['workspaceId'])

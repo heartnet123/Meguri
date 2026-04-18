@@ -1,24 +1,32 @@
 import { useQuery } from 'convex/react';
-// @ts-ignore
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
+
+type StockMovementRow = {
+  _id: Id<'stockMovements'>;
+  createdAt: number;
+  quantity: number;
+  type: 'delivery' | 'sale' | 'adjustment' | 'wastage' | 'transfer' | 'initial_stock' | 'archive';
+  note?: string;
+  itemName: string;
+  userName: string;
+};
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  workspaceId?: string;
-  inventoryItemId?: string | null;
+  workspaceId?: Id<'workspaces'>;
+  inventoryItemId?: Id<'inventoryItems'> | null;
 };
 
 export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryItemId }: Props) {
   const movements = useQuery(
-    // @ts-ignore
     api.stockMovements.list,
     isOpen && workspaceId ? {
-      workspaceId: workspaceId as Id<"workspaces">,
-      inventoryItemId: inventoryItemId ? (inventoryItemId as Id<"inventoryItems">) : undefined
+      workspaceId,
+      inventoryItemId: inventoryItemId ?? undefined,
     } : 'skip'
-  );
+  ) as StockMovementRow[] | undefined;
 
   if (!isOpen) return null;
 
@@ -61,7 +69,7 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {movements.map((m: any) => (
+                {movements.map((m) => (
                   <tr key={m._id} className="hover:bg-surface-raised/50 transition-colors">
                     <td className="px-6 py-3 text-foreground whitespace-nowrap">
                       {new Date(m.createdAt).toLocaleString(undefined, {

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 
 const containerVariants = {
@@ -26,6 +27,8 @@ const slideUpVariants = {
 };
 
 export default function LandingPage() {
+  const dashboardHref = '/dashboard';
+
   return (
     <div className="min-h-screen bg-background overflow-hidden text-foreground">
       {/* Navbar */}
@@ -40,11 +43,12 @@ export default function LandingPage() {
             <a href="#ai" className="text-sm font-medium hover:text-accent transition-colors py-3 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg">AI Forecasting</a>
             <a href="#audience" className="text-sm font-medium hover:text-accent transition-colors py-3 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg">For Who</a>
           </div>
-          <div>
-            <button className="bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium hover:bg-accent/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent">
-              Get Started
-            </button>
-          </div>
+          <Link
+            href={dashboardHref}
+            className="bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium hover:bg-accent/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent"
+          >
+            Open Dashboard
+          </Link>
         </div>
       </nav>
 
@@ -71,15 +75,27 @@ export default function LandingPage() {
               The all-in-one platform for bakeries, cafés, and small retailers. Track stock in real-time, connect recipes to sales, and let AI predict your demand so you never run out of what matters.
             </motion.p>
             
-            <motion.div variants={slideUpVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
-              <button className="w-full sm:w-auto bg-accent text-accent-fg px-8 py-4 text-sm font-semibold tracking-wide uppercase hover:bg-accent/90 transition-colors flex items-center justify-center gap-2">
-                Start Free Trial
-                <iconify-icon icon="solar:arrow-right-linear" width="20" height="20" aria-hidden="true"></iconify-icon>
-              </button>
-              <button className="w-full sm:w-auto bg-surface text-foreground border border-border px-8 py-4 text-sm font-semibold tracking-wide uppercase hover:bg-subtle transition-colors flex items-center justify-center gap-2">
-                <iconify-icon icon="solar:play-circle-linear" width="20" height="20" aria-hidden="true"></iconify-icon>
-                Watch Demo
-              </button>
+            <motion.div variants={slideUpVariants} className="flex flex-col items-center justify-center gap-4 pt-6">
+              <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
+                <Link
+                  href={dashboardHref}
+                  className="w-full sm:w-auto bg-accent text-accent-fg px-8 py-4 text-sm font-semibold tracking-wide uppercase hover:bg-accent/90 transition-colors flex items-center justify-center gap-2"
+                >
+                  Go to Dashboard
+                  <iconify-icon icon="solar:arrow-right-linear" width="20" height="20" aria-hidden="true"></iconify-icon>
+                </Link>
+                <a href="#features" className="w-full sm:w-auto bg-surface text-foreground border border-border px-8 py-4 text-sm font-semibold tracking-wide uppercase hover:bg-subtle transition-colors flex items-center justify-center gap-2">
+                  <iconify-icon icon="solar:play-circle-linear" width="20" height="20" aria-hidden="true"></iconify-icon>
+                  Explore Features
+                </a>
+              </div>
+              <p className="text-sm text-muted">
+                Already have an account?{' '}
+                <Link href={dashboardHref} className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-accent">
+                  Jump straight into the dashboard
+                </Link>
+                .
+              </p>
             </motion.div>
           </motion.div>
 

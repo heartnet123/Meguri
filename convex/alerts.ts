@@ -1,4 +1,4 @@
-import { mutation, query } from './_generated/server';
+import { mutation, query, MutationCtx, QueryCtx } from './_generated/server';
 import { v } from 'convex/values';
 import { Id } from './_generated/dataModel';
 import { verifyWorkspace, checkRole } from './utils';
@@ -6,12 +6,20 @@ import { getAlertCategory, getAlertHref } from '../lib/alerts/inbox.js';
 
 type AlertType = 'low_stock' | 'unusual_demand' | 'supplier' | 'price_change' | 'system';
 
-async function loadUserNames(ctx: any, ids: Id<'users'>[]) {
+async function loadUserNames(ctx: QueryCtx | MutationCtx, ids: Id<'users'>[]) {
   const uniqueIds = Array.from(new Set(ids));
   const users = await Promise.all(uniqueIds.map((id) => ctx.db.get(id)));
   return new Map(
     users.flatMap((user) => (user ? [[user._id, user.name]] : []))
   );
+}
+
+async function countQuery<T>(query: AsyncIterable<T>) {
+  let count = 0;
+  for await (const _row of query) {
+    count += 1;
+  }
+  return count;
 }
 
 function buildAlertSummary(alert: {
@@ -35,11 +43,13 @@ export const list = query({
   handler: async (ctx, { workspaceId }) => {
     await verifyWorkspace(ctx, workspaceId);
 
-    const alerts = await ctx.db
+    const alerts = [];
+    for await (const alert of ctx.db
       .query('alerts')
       .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
-      .order('desc')
-      .collect();
+      .order('desc')) {
+      alerts.push(alert);
+    }
 
     const userNameMap = await loadUserNames(
       ctx,
@@ -67,17 +77,41 @@ export const stats = query({
   handler: async (ctx, { workspaceId }) => {
     await verifyWorkspace(ctx, workspaceId);
 
-    const all = await ctx.db
-      .query('alerts')
-      .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
-      .collect();
+    const open = await countQuery(
+      ctx.db
+        .query('alerts')
+        .withIndex('by_workspace_status', (q) => q.eq('workspaceId', workspaceId).eq('status', 'open'))
+    );
 
-    const open = all.filter((alert) => alert.status === 'open');
+    const critical = await countQuery(
+      ctx.db
+        .query('alerts')
+        .withIndex('by_workspace_status_and_severity', (q) =>
+          q.eq('workspaceId', workspaceId).eq('status', 'open').eq('severity', 'critical')
+        )
+    );
+
+    const unusual = await countQuery(
+      ctx.db
+        .query('alerts')
+        .withIndex('by_workspace_status_and_category', (q) =>
+          q.eq('workspaceId', workspaceId).eq('status', 'open').eq('category', 'anomaly')
+        )
+    );
+
+    const lowStock = await countQuery(
+      ctx.db
+        .query('alerts')
+        .withIndex('by_workspace_status_and_category', (q) =>
+          q.eq('workspaceId', workspaceId).eq('status', 'open').eq('category', 'stock')
+        )
+    );
+
     return {
-      open: open.length,
-      critical: open.filter((alert) => alert.severity === 'critical').length,
-      unusual: open.filter((alert) => (alert.category ?? getAlertCategory(alert.type)) === 'anomaly').length,
-      lowStock: open.filter((alert) => (alert.category ?? getAlertCategory(alert.type)) === 'stock').length,
+      open,
+      critical,
+      unusual,
+      lowStock,
     };
   },
 });
@@ -152,22 +186,15 @@ export const resolveAll = mutation({
     const user = await verifyWorkspace(ctx, workspaceId);
     checkRole(user, ['owner', 'admin', 'manager', 'staff']);
 
-    const open = await ctx.db
-      .query('alerts')
-      .withIndex('by_workspace_status', (q) =>
-        q.eq('workspaceId', workspaceId).eq('status', 'open')
-      )
-      .collect();
-
     const now = Date.now();
-    await Promise.all(
-      open.map((alert) =>
-        ctx.db.patch(alert._id, {
-          status: 'resolved',
-          resolvedAt: now,
-          resolvedBy: user._id,
-        })
-      )
-    );
+    for await (const alert of ctx.db
+      .query('alerts')
+      .withIndex('by_workspace_status', (q) => q.eq('workspaceId', workspaceId).eq('status', 'open'))) {
+      await ctx.db.patch(alert._id, {
+        status: 'resolved',
+        resolvedAt: now,
+        resolvedBy: user._id,
+      });
+    }
   },
 });

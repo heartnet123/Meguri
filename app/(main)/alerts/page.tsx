@@ -412,7 +412,7 @@ export default function AlertsPage() {
                           </div>
                           {alert.resolutionNote && (
                             <p className="mt-2 text-sm text-foreground font-bold leading-relaxed italic border-l-2 border-border pl-3">
-                              "{alert.resolutionNote}"
+                              &ldquo;{alert.resolutionNote}&rdquo;
                             </p>
                           )}
                         </div>

@@ -35,22 +35,23 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     /* ── Industrial Cyber-Minimalism Light Theme ── */
     --bg:          #f3f4f6;
     --fg:          #0f172a;
     --surface:     #ffffff;
     --subtle:      #f8fafc;
     --border:      #cbd5e1;
-    --accent:      #0f766e;   /* Deep Teal */
+    --accent:      #0f766e;
     --accent-fg:   #ffffff;
     --accent-subtle: #f0fdfa;
     --muted:       #64748b;
 
     /* Neutral scale */
-    --surface-raised: #f1f5f9;  /* hover/pressed surfaces */
-    --border-subtle:  #e2e8f0;  /* light dividers */
-    --muted-fg:       #94a3b8;  /* tertiary text */
-    --faint:          #f8fafc;  /* nearly-invisible backgrounds */
+    --surface-raised: #f1f5f9;
+    --border-subtle:  #e2e8f0;
+    --muted-fg:       #94a3b8;
+    --faint:          #f8fafc;
 
     /* Semantic */
     --success:        #059669;
@@ -63,16 +64,15 @@
     --danger-fg:      #ffffff;
     --danger-subtle:  #fef2f2;
   }
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
+  :root[data-theme='dark'] {
+    color-scheme: dark;
     --bg:          #0b0f1a;
     --fg:          #f1f5f9;
     --surface:     #111827;
     --subtle:      #1e293b;
     --border:      #334155;
-    --accent:      #14b8a6;   /* Lighter teal for dark bg */
+    --accent:      #14b8a6;
     --accent-fg:   #0b0f1a;
     --accent-subtle: #0f2d29;
     --muted:       #94a3b8;

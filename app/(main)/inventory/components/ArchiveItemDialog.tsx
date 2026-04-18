@@ -15,9 +15,10 @@ type Props = {
 };
 
 export function ArchiveItemDialog({ isOpen, onClose, item }: Props) {
-  const remove = useMutation(api.inventory.remove);
+  const archive = useMutation(api.inventory.archive);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState('');
 
   if (!isOpen || !item) return null;
 
@@ -25,10 +26,13 @@ export function ArchiveItemDialog({ isOpen, onClose, item }: Props) {
     setLoading(true);
     setError(null);
     try {
-      await remove({ id: item._id as Id<"inventoryItems"> });
+      await archive({ id: item._id as Id<'inventoryItems'>, note: note || undefined });
+      setNote('');
       onClose();
     } catch (err: any) {
-      setError(err.message);
+      // Surface the domain error message (ConvexError.message)
+      const msg: string = err?.data ?? err?.message ?? 'An unexpected error occurred.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -36,26 +40,41 @@ export function ArchiveItemDialog({ isOpen, onClose, item }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-surface rounded-xl shadow-xl border border-border w-full max-w-sm overflow-hidden flex flex-col translate-y-[-10%] sm:translate-y-0">
+      <div className="bg-surface rounded-xl shadow-xl border border-border w-full max-w-sm overflow-hidden flex flex-col">
         <div className="p-6">
-          <div className="w-12 h-12 rounded-full bg-danger-subtle flex items-center justify-center mx-auto mb-4">
-            <iconify-icon icon="solar:trash-bin-trash-bold" width="24" height="24" className="text-danger" />
+          <div className="w-12 h-12 rounded-full bg-warning-subtle flex items-center justify-center mx-auto mb-4">
+            <iconify-icon icon="solar:archive-bold" width="24" height="24" className="text-warning" />
           </div>
           <h2 className="text-lg font-semibold text-foreground text-center mb-2">
             Archive Item
           </h2>
           <p className="text-sm text-muted text-center leading-relaxed">
-            Are you sure you want to archive <strong className="text-foreground">{item.name}</strong>? This action cannot be undone.
+            Archive <strong className="text-foreground">{item.name}</strong>? The item will be hidden from
+            all operational views, but its stock history is preserved and the item can be found in the
+            archive.
           </p>
+
+          <div className="mt-4 space-y-1.5">
+            <label className="text-sm font-medium text-foreground">Reason (optional)</label>
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="e.g. Discontinued product"
+              className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
+            />
+          </div>
+
           {error && (
-            <div className="mt-4 p-3 bg-danger-subtle text-danger text-sm rounded-lg border border-danger/20">
-              {error}
+            <div className="mt-4 p-3 bg-danger-subtle text-danger text-sm rounded-lg border border-danger/20 flex items-start gap-2">
+              <iconify-icon icon="solar:danger-triangle-linear" width="16" height="16" className="shrink-0 mt-0.5" />
+              <span>{error}</span>
             </div>
           )}
         </div>
         <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3 bg-subtle">
           <button
-            onClick={onClose}
+            onClick={() => { setNote(''); setError(null); onClose(); }}
             className="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-raised transition-colors focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-1"
           >
             Cancel
@@ -63,9 +82,9 @@ export function ArchiveItemDialog({ isOpen, onClose, item }: Props) {
           <button
             onClick={handleArchive}
             disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-white bg-danger rounded-lg hover:bg-danger/90 transition-colors disabled:opacity-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-warning rounded-lg hover:bg-warning/90 transition-colors disabled:opacity-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-2"
           >
-            {loading ? 'Archiving...' : 'Archive'}
+            {loading ? 'Archiving…' : 'Archive Item'}
           </button>
         </div>
       </div>

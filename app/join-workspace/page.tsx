@@ -1,81 +1,161 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useQuery, useMutation, useConvexAuth } from 'convex/react';
 import Link from 'next/link';
+import { api } from '@/convex/_generated/api';
 
 export default function JoinWorkspacePage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-neutral-200">
-        <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
-            <iconify-icon icon="lucide:building-2" width="24" height="24" className="text-neutral-600"></iconify-icon>
-          </div>
-          <h2 className="text-3xl font-medium tracking-tight text-neutral-900">Join Workspace</h2>
-          <p className="mt-2 text-sm text-neutral-500">
-            You&apos;ve been invited to join <span className="font-semibold text-neutral-900">Acme Bakery</span>
-          </p>
-        </div>
-        
-        <div className="mt-8 space-y-6">
-          <div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600 font-medium">
-                JD
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-900">Invited by John Doe</p>
-                <p className="text-xs text-neutral-500">john@acmebakery.com</p>
-              </div>
-            </div>
-          </div>
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
 
-          <form className="space-y-6" action="#" method="POST">
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="full-name" className="block text-sm font-medium text-neutral-700">
-                  Your Full Name
-                </label>
-                <input
-                  id="full-name"
-                  name="name"
-                  type="text"
-                  required
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-500 text-neutral-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 focus:z-10 sm:text-sm"
-                  placeholder="Jane Smith"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
-                  Create Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-500 text-neutral-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 focus:z-10 sm:text-sm"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
+  const token = searchParams.get('token') ?? '';
 
-            <div>
-              <Link
-                href="/dashboard"
-                className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-600 shadow-sm transition-colors"
-              >
-                Accept Invitation
-              </Link>
-            </div>
-          </form>
+  const invitation = useQuery(
+    api.invitations.getByToken,
+    token ? { token } : 'skip',
+  );
+
+  const acceptInvitation = useMutation(api.invitations.accept);
+
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleAccept = async () => {
+    if (!token) return;
+    setIsAccepting(true);
+    setError('');
+
+    try {
+      await acceptInvitation({ token });
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.data ?? err.message ?? 'Failed to accept invitation.');
+      setIsAccepting(false);
+    }
+  };
+
+  const inviterInitials = invitation?.inviterName
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  const shell = (children: React.ReactNode) => (
+    <div className="min-h-screen bg-subtle px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-lg items-center">
+        <div className="w-full rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+          {children}
         </div>
-        
-        <p className="mt-6 text-center text-sm text-neutral-600">
-          Not you?{' '}
-          <Link href="/login" className="font-medium text-neutral-900 hover:underline">
-            Sign in with a different account
-          </Link>
-        </p>
       </div>
     </div>
   );
+
+  if (!token) {
+    return shell(
+      <div className="space-y-6 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-danger-subtle text-danger">
+          <iconify-icon icon="solar:danger-triangle-bold-duotone" width="24" height="24" aria-hidden="true" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">Invalid invitation link</h2>
+          <p className="text-sm text-muted">
+            This link is missing a valid invitation token. Ask your workspace administrator to send a new invite.
+          </p>
+        </div>
+        <Link
+          href="/login"
+          className="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg transition-colors hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
+          Go to sign in
+        </Link>
+      </div>,
+    );
+  }
+
+  if (authLoading || invitation === undefined) {
+    return shell(
+      <div className="flex flex-col items-center gap-3 py-8 text-center">
+        <iconify-icon icon="solar:refresh-circle-bold-duotone" width="40" height="40" className="animate-spin text-accent" aria-hidden="true" />
+        <p className="text-sm text-muted">Loading invitation…</p>
+      </div>,
+    );
+  }
+
+  if (invitation === null) {
+    return shell(
+      <div className="space-y-6 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-warning-subtle text-warning">
+          <iconify-icon icon="solar:clock-circle-bold-duotone" width="24" height="24" aria-hidden="true" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">Invitation expired or invalid</h2>
+          <p className="text-sm text-muted">
+            This invitation may have expired, been cancelled, or already been used. Ask your workspace administrator for a new link.
+          </p>
+        </div>
+        <Link
+          href="/login"
+          className="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg transition-colors hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
+          Go to sign in
+        </Link>
+      </div>,
+    );
+  }
+
+  const content = (
+    <div className="space-y-6">
+      <div className="space-y-3 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised text-muted">
+          <iconify-icon icon="solar:buildings-bold-duotone" width="24" height="24" aria-hidden="true" />
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Workspace invitation</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">Join {invitation.workspaceName}</h2>
+          <p className="text-sm text-muted">
+            You&apos;ve been invited as <span className="font-medium text-foreground capitalize">{invitation.role}</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-subtle p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-subtle text-sm font-semibold text-accent">
+            {inviterInitials}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground">Invited by {invitation.inviterName}</p>
+            <p className="truncate text-xs text-muted">{invitation.inviterEmail}</p>
+          </div>
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-2xl border border-danger/20 bg-danger-subtle px-4 py-3">
+          <p className="text-sm font-medium text-danger">{error}</p>
+        </div>
+      )}
+
+      <button
+        onClick={handleAccept}
+        disabled={isAccepting}
+        className="flex w-full items-center justify-center rounded-xl bg-accent px-4 py-3 text-sm font-medium text-accent-fg transition-colors hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {isAccepting ? 'Joining workspace…' : 'Accept invitation'}
+      </button>
+
+      <p className="text-center text-sm text-muted">
+        Not the right account?{' '}
+        <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+          Sign in with a different account
+        </Link>
+      </p>
+    </div>
+  );
+
+  return shell(content);
 }

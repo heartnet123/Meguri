@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
 const TIMEZONES = [
@@ -35,6 +35,7 @@ function slugify(text: string) {
 export default function OnboardingPage() {
   const router = useRouter();
   const createWorkspace = useMutation(api.workspaces.create);
+  const myWorkspace = useQuery(api.workspaces.myWorkspace);
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -42,6 +43,12 @@ export default function OnboardingPage() {
   const [timezone, setTimezone] = useState('Asia/Bangkok');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (myWorkspace) {
+      router.replace('/dashboard');
+    }
+  }, [myWorkspace, router]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -58,7 +65,7 @@ export default function OnboardingPage() {
 
     try {
       await createWorkspace({ name: name.trim(), slug, currency, timezone });
-      router.push('/dashboard');
+      router.replace('/dashboard');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to create workspace.';
       setError(message);

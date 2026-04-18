@@ -20,7 +20,7 @@ export async function getCurrentUser(ctx: QueryCtx | MutationCtx): Promise<User 
 
   return await ctx.db
     .query('users')
-    .withIndex('by_better_auth_id', (q) => q.eq('betterAuthId', identity.subject))
+    .withIndex('by_better_auth_id', (q) => q.eq('betterAuthId', identity.tokenIdentifier))
     .unique();
 }
 
@@ -36,7 +36,12 @@ export async function verifyWorkspace(
     throw new Error('Unauthenticated');
   }
 
-  if (user.workspaceId !== workspaceId) {
+  const membership = await ctx.db
+    .query('workspaceMemberships')
+    .withIndex('by_user_workspace', (q) => q.eq('userId', user._id).eq('workspaceId', workspaceId))
+    .unique();
+
+  if (!membership) {
     throw new Error('Unauthorized: You do not belong to this workspace');
   }
 

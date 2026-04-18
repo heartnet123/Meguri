@@ -69,16 +69,17 @@ export default function ForecastingPage() {
     }
   };
 
-  const args = (workspaceId && isAuthenticated) ? { workspaceId } : 'skip';
+  const statsArgs = workspaceId && isAuthenticated ? { workspaceId } : 'skip';
+  const forecastArgs = workspaceId && isAuthenticated ? { workspaceId, periodDays } : 'skip';
 
   const forecasts = useQuery(
     api.forecasting.latestByItem,
-    (workspaceId && isAuthenticated) ? { ...args, periodDays } : 'skip'
+    forecastArgs
   ) as ForecastRow[] | undefined;
 
   const stats = useQuery(
     api.forecasting.stats,
-    args
+    statsArgs
   ) as ForecastStats | undefined;
 
   const isLoading = workspaceId !== undefined && forecasts === undefined;

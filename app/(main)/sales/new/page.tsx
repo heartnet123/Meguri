@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
@@ -10,22 +10,20 @@ import { Id } from '@/convex/_generated/dataModel';
 
 /* ─── Types ────────────────────────────────────────────────────────────────── */
 
-type Product = {
-  _id: Id<'products'>;
+type RecipeItem = {
+  _id: Id<'recipes'>;
   displayId: string;
   name: string;
   sku: string;
-  category: 'finished_goods' | 'bundles' | 'raw_materials';
+  category: string;
   price: number;
-  cost: number;
-  currentStock: number;
-  isActive: boolean;
+  unitCost: number;
   marginPct: number;
-  status: 'In Stock' | 'Low Stock' | 'Critical';
+  isActive: boolean;
 };
 
 type CartItem = {
-  productId: Id<'products'>;
+  recipeId: Id<'recipes'>;
   name: string;
   price: number;
   cost: number;
@@ -42,7 +40,7 @@ function generateDisplayId() {
   return `TRX-${Math.floor(1000 + Math.random() * 9000)}`;
 }
 
-const CATEGORY_LABELS: Record<Product['category'], string> = {
+const CATEGORY_LABELS: Record<string, string> = {
   finished_goods: 'Finished Goods',
   bundles: 'Bundles',
   raw_materials: 'Raw Materials',
@@ -50,10 +48,78 @@ const CATEGORY_LABELS: Record<Product['category'], string> = {
 
 const PAYMENT_OPTIONS = [
   { value: 'cash' as const, label: 'Cash', icon: 'solar:wallet-money-linear' },
-  { value: 'credit_card' as const, label: 'Credit Card', icon: 'solar:card-linear' },
-  { value: 'mobile_pay' as const, label: 'Mobile Pay', icon: 'solar:smartphone-2-linear' },
+  { value: 'credit_card' as const, label: 'Credit', icon: 'solar:card-linear' },
+  { value: 'mobile_pay' as const, label: 'Mobile', icon: 'solar:smartphone-2-linear' },
   { value: 'invoice' as const, label: 'Invoice', icon: 'solar:document-text-linear' },
 ];
+
+/* ─── CustomDropdown ───────────────────────────────────────────────────────── */
+
+function CustomDropdown({
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  placeholder: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedLabel = value ? options.find((o) => o.value === value)?.label : placeholder;
+
+  return (
+    <div className="relative min-w-max" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full gap-4 px-3 py-2 text-sm bg-white border rounded-md border-neutral-200 text-neutral-800 hover:border-neutral-300 focus:outline-none focus-visible:border-neutral-900 transition-colors"
+      >
+        <span className={value ? 'text-neutral-900 font-medium' : 'text-neutral-500'}>
+          {selectedLabel}
+        </span>
+        <iconify-icon icon="solar:alt-arrow-down-linear" width="16" height="16" className="text-neutral-400" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-sm border-neutral-200 py-1 max-h-60 overflow-auto">
+          <button
+            onClick={() => { onChange(''); setIsOpen(false); }}
+            className="w-full text-left px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+          >
+            {placeholder}
+          </button>
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setIsOpen(false); }}
+              className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
+                value === opt.value
+                  ? 'bg-neutral-50 text-neutral-900 font-medium'
+                  : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ─── Component ────────────────────────────────────────────────────────────── */
 
@@ -61,10 +127,10 @@ export default function NewOrderPage() {
   const workspaceId = useWorkspaceId();
   const router = useRouter();
 
-  const products = useQuery(
-    api.products.list,
+  const recipes = useQuery(
+    api.recipes.list,
     workspaceId ? { workspaceId } : 'skip'
-  ) as Product[] | undefined;
+  ) as RecipeItem[] | undefined;
 
   const addSale = useMutation(api.sales.add);
 
@@ -81,57 +147,57 @@ export default function NewOrderPage() {
     if (!workspaceId || cart.length === 0) return 'skip' as const;
     return {
       workspaceId,
-      items: cart.map((c) => ({ productId: c.productId, quantity: c.quantity })),
+      items: cart.map((c) => ({ recipeId: c.recipeId, quantity: c.quantity })),
     };
   }, [workspaceId, cart]);
 
   const impact = useQuery(api.sales.getImpactPreview, previewArgs);
 
-  // Filter products for the grid
-  const filteredProducts = useMemo(() => {
-    if (!products) return [];
+  // Filter recipes for the grid
+  const filteredRecipes = useMemo(() => {
+    if (!recipes) return [];
     const s = search.toLowerCase();
-    return products.filter((p) => {
+    return recipes.filter((p) => {
       if (!p.isActive) return false;
       if (s && !p.name.toLowerCase().includes(s) && !p.sku.toLowerCase().includes(s)) return false;
       if (categoryFilter && p.category !== categoryFilter) return false;
       return true;
     });
-  }, [products, search, categoryFilter]);
+  }, [recipes, search, categoryFilter]);
 
   // Cart operations
-  const addToCart = useCallback((product: Product) => {
+  const addToCart = useCallback((recipe: RecipeItem) => {
     setCart((prev) => {
-      const existing = prev.find((c) => c.productId === product._id);
+      const existing = prev.find((c) => c.recipeId === recipe._id);
       if (existing) {
         return prev.map((c) =>
-          c.productId === product._id ? { ...c, quantity: c.quantity + 1 } : c
+          c.recipeId === recipe._id ? { ...c, quantity: c.quantity + 1 } : c
         );
       }
       return [...prev, {
-        productId: product._id,
-        name: product.name,
-        price: product.price,
-        cost: product.cost,
+        recipeId: recipe._id,
+        name: recipe.name,
+        price: recipe.price,
+        cost: recipe.unitCost,
         quantity: 1,
       }];
     });
     setError(null);
   }, []);
 
-  const updateQuantity = useCallback((productId: Id<'products'>, quantity: number) => {
+  const updateQuantity = useCallback((recipeId: Id<'recipes'>, quantity: number) => {
     if (quantity <= 0) {
-      setCart((prev) => prev.filter((c) => c.productId !== productId));
+      setCart((prev) => prev.filter((c) => c.recipeId !== recipeId));
     } else {
       setCart((prev) => prev.map((c) =>
-        c.productId === productId ? { ...c, quantity } : c
+        c.recipeId === recipeId ? { ...c, quantity } : c
       ));
     }
     setError(null);
   }, []);
 
-  const removeFromCart = useCallback((productId: Id<'products'>) => {
-    setCart((prev) => prev.filter((c) => c.productId !== productId));
+  const removeFromCart = useCallback((recipeId: Id<'recipes'>) => {
+    setCart((prev) => prev.filter((c) => c.recipeId !== recipeId));
     setError(null);
   }, []);
 
@@ -153,17 +219,14 @@ export default function NewOrderPage() {
   // Check if any item has insufficient stock
   const hasInsufficientStock = useMemo(() => {
     if (!impact) return false;
-    return (
-      impact.ingredientImpacts.some((i: any) => i.insufficient) ||
-      impact.productImpacts.some((i: any) => i.insufficient)
-    );
+    return impact.ingredientImpacts.some((i: any) => i.insufficient);
   }, [impact]);
 
   // Checkout handler
   const handleCheckout = async () => {
     if (!workspaceId || cart.length === 0) return;
     if (hasInsufficientStock) {
-      setError('Cannot complete order — some items have insufficient stock.');
+      setError('Cannot complete order — some ingredients have insufficient stock.');
       return;
     }
 
@@ -180,7 +243,8 @@ export default function NewOrderPage() {
         paymentMethod,
         status: 'completed',
         items: cart.map((c) => ({
-          productId: c.productId,
+          kind: 'recipe' as const,
+          recipeId: c.recipeId,
           quantity: c.quantity,
           unitPrice: c.price,
         })),
@@ -193,29 +257,31 @@ export default function NewOrderPage() {
     }
   };
 
-  const isLoading = workspaceId !== undefined && products === undefined;
+  const isLoading = workspaceId !== undefined && recipes === undefined;
+  const categoryOptions = Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
 
   return (
     <div className="max-w-full mx-auto space-y-0">
-      {/* Header */}
+
+      {/* ─── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Link
             href="/sales"
-            className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+            className="p-2 text-neutral-500 hover:text-neutral-900 rounded-md hover:bg-neutral-100 transition-colors focus:outline-none"
             aria-label="Back to sales"
           >
             <iconify-icon icon="solar:arrow-left-linear" width="20" height="20" aria-hidden="true" />
           </Link>
           <div>
             <h1 className="text-2xl font-medium tracking-tight text-neutral-900">New Order</h1>
-            <p className="text-sm text-neutral-500 mt-0.5">Select products, review stock impact, and complete the sale.</p>
+            <p className="text-sm text-neutral-500 mt-0.5">Select items from catalog. Stock deductions are based on recipe BOM.</p>
           </div>
         </div>
         {cart.length > 0 && (
           <button
             onClick={clearCart}
-            className="text-sm text-neutral-500 hover:text-red-600 transition-colors focus:outline-none"
+            className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
           >
             Clear cart
           </button>
@@ -223,96 +289,89 @@ export default function NewOrderPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* ─── Left: Product Catalog ─────────────────────── */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-4">
+
+        {/* ─── Left: Recipe Catalog ─────────────────────────────────────────── */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
           {/* Search + Filter */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
+            <div className="relative flex-1 group">
               <iconify-icon
-                icon="solar:magnifer-linear" width="18" height="18"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+                icon="solar:magnifer-linear" width="16" height="16"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-neutral-900 transition-colors pointer-events-none"
                 aria-hidden="true"
               />
               <input
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search products…"
-                aria-label="Search products"
-                className="w-full pl-9 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:border-neutral-900 transition-all bg-white"
+                placeholder="Search catalog by name or SKU…"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-transparent border border-neutral-200 rounded-md focus:outline-none focus-visible:border-neutral-900 transition-colors placeholder:text-neutral-400"
               />
             </div>
-            <select
-              aria-label="Filter by category"
+            <CustomDropdown
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2.5 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-            >
-              <option value="">All Categories</option>
-              {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
+              onChange={setCategoryFilter}
+              options={categoryOptions}
+              placeholder="All Categories"
+            />
           </div>
 
-          {/* Product Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3" aria-busy={isLoading} aria-live="polite">
+          {/* Catalog Grid */}
+          <div
+            className="grid grid-cols-2 xl:grid-cols-3 gap-3 content-start"
+            aria-busy={isLoading}
+            aria-live="polite"
+          >
             {isLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="bg-white border border-neutral-200 rounded-xl p-4 animate-pulse">
-                  <div className="h-4 bg-neutral-100 rounded w-3/4 mb-3" />
-                  <div className="h-3 bg-neutral-100 rounded w-1/2 mb-4" />
-                  <div className="h-6 bg-neutral-100 rounded w-1/3" />
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white border border-neutral-100 rounded-md p-4 animate-pulse">
+                  <div className="h-3 bg-neutral-100 rounded-sm w-3/4 mb-3" />
+                  <div className="h-2 bg-neutral-100 rounded-sm w-1/2 mb-6" />
+                  <div className="h-4 bg-neutral-100 rounded-sm w-1/3" />
                 </div>
               ))
-            ) : filteredProducts.length === 0 ? (
-              <div className="col-span-full py-16 text-center">
-                <iconify-icon icon="solar:box-linear" width="32" height="32" className="text-neutral-300 mx-auto mb-3 block" aria-hidden="true" />
-                <p className="text-sm font-medium text-neutral-700">No products found</p>
-                <p className="text-xs text-neutral-500 mt-1">Try adjusting your search or filters.</p>
+            ) : filteredRecipes.length === 0 ? (
+              <div className="col-span-full py-16 text-center border border-dashed border-neutral-200 rounded-md">
+                <p className="text-sm font-medium text-neutral-500">No items match your criteria.</p>
+                <p className="text-xs text-neutral-400 mt-1">Try adjusting your search or filter.</p>
               </div>
             ) : (
-              filteredProducts.map((product) => {
-                const inCart = cart.find((c) => c.productId === product._id);
+              filteredRecipes.map((recipe) => {
+                const inCart = cart.find((c) => c.recipeId === recipe._id);
                 return (
                   <button
-                    key={product._id}
-                    onClick={() => addToCart(product)}
-                    className={`group relative bg-white border rounded-xl p-4 text-left transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
-                      inCart ? 'border-teal-300 ring-1 ring-teal-200' : 'border-neutral-200 hover:border-neutral-300'
+                    key={recipe._id}
+                    onClick={() => addToCart(recipe)}
+                    className={`group relative bg-white border rounded-md p-4 text-left transition-all focus:outline-none flex flex-col justify-between min-h-[110px] ${
+                      inCart
+                        ? 'border-neutral-400 bg-neutral-50'
+                        : 'border-neutral-200 hover:border-neutral-400'
                     }`}
                   >
-                    {inCart && (
-                      <span className="absolute -top-2 -right-2 w-6 h-6 bg-teal-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-sm">
-                        {inCart.quantity}
-                      </span>
-                    )}
-                    <div className="font-medium text-neutral-900 text-sm truncate" title={product.name}>
-                      {product.name}
+                    {/* Top: name, SKU, in-cart badge */}
+                    <div className="w-full">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="font-medium text-neutral-900 text-sm tracking-tight leading-snug">
+                          {recipe.name}
+                        </div>
+                        {inCart && (
+                          <span className="shrink-0 bg-neutral-900 text-white text-xs font-medium px-1.5 py-0.5 rounded-sm">
+                            {inCart.quantity}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-neutral-400 mt-1 font-mono">{recipe.sku}</div>
                     </div>
-                    <div className="text-xs text-neutral-500 mt-0.5 font-mono">{product.sku}</div>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-base font-semibold text-neutral-900 tabular-nums">
-                        {formatCurrency(product.price)}
+
+                    {/* Bottom: price + hover hint */}
+                    <div className="flex items-end justify-between w-full mt-4">
+                      <span className="text-sm font-medium text-neutral-900 tabular-nums">
+                        {formatCurrency(recipe.price)}
                       </span>
-                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
-                        product.marginPct >= 50 ? 'bg-emerald-50 text-emerald-700' :
-                        product.marginPct >= 25 ? 'bg-amber-50 text-amber-700' :
-                        'bg-red-50 text-red-700'
-                      }`}>
-                        {product.marginPct}%
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-neutral-500">
-                        Stock: {product.currentStock}
-                      </span>
-                      <span className={`text-xs font-medium ${
-                        product.status === 'In Stock' ? 'text-emerald-600' :
-                        product.status === 'Low Stock' ? 'text-amber-600' :
-                        'text-red-600'
-                      }`}>
-                        {product.status}
+                      <span className="text-xs text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                        <iconify-icon icon="solar:add-circle-linear" width="14" height="14" aria-hidden="true" />
+                        Add
                       </span>
                     </div>
                   </button>
@@ -322,31 +381,35 @@ export default function NewOrderPage() {
           </div>
         </div>
 
-        {/* ─── Right: Cart + Impact + Checkout ────────────── */}
-        <div className="lg:col-span-5 xl:col-span-4 space-y-4">
-          {/* Customer + Payment */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm space-y-3">
+        {/* ─── Right: Cart + Impact + Checkout ──────────────────────────────── */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+          {/* Customer & Payment */}
+          <div className="bg-white border border-neutral-200 rounded-md p-4 space-y-5">
             <div>
-              <label htmlFor="customer-name" className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Customer</label>
+              <label htmlFor="customer-name" className="text-xs text-neutral-500 mb-1.5 block">
+                Customer
+              </label>
               <input
                 id="customer-name"
                 type="text"
                 value={customer}
                 onChange={(e) => setCustomer(e.target.value)}
-                className="mt-1 w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 bg-white"
+                className="w-full px-3 py-2 text-sm bg-transparent border border-neutral-200 rounded-md focus:outline-none focus-visible:border-neutral-900 transition-colors"
               />
             </div>
+
             <div>
-              <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Payment Method</label>
-              <div className="grid grid-cols-2 gap-2 mt-1">
+              <label className="text-xs text-neutral-500 mb-1.5 block">Payment</label>
+              <div className="flex bg-neutral-50 border border-neutral-200 rounded-md p-1">
                 {PAYMENT_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setPaymentMethod(opt.value)}
-                    className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 ${
+                    className={`flex-1 flex flex-col items-center gap-1 py-2 text-xs rounded-sm transition-colors focus:outline-none ${
                       paymentMethod === opt.value
-                        ? 'border-teal-300 bg-teal-50 text-teal-700 font-medium'
-                        : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                        ? 'bg-white shadow-sm border border-neutral-200/50 text-neutral-900 font-medium'
+                        : 'text-neutral-500 hover:text-neutral-700'
                     }`}
                   >
                     <iconify-icon icon={opt.icon} width="16" height="16" aria-hidden="true" />
@@ -357,144 +420,120 @@ export default function NewOrderPage() {
             </div>
           </div>
 
-          {/* Cart Items */}
-          <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-neutral-200 bg-neutral-50/50">
-              <h2 className="text-sm font-medium text-neutral-900 flex items-center gap-2">
-                <iconify-icon icon="solar:cart-large-linear" width="16" height="16" aria-hidden="true" />
-                Cart
-                {cart.length > 0 && (
-                  <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">
-                    {cartTotals.itemCount} items
-                  </span>
-                )}
-              </h2>
+          {/* Cart — Line Items */}
+          <div className="bg-white border border-neutral-200 rounded-md flex flex-col">
+            <div className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
+              <h2 className="text-sm font-medium text-neutral-900">Line Items</h2>
+              <span className="text-xs text-neutral-500">{cartTotals.itemCount} units</span>
             </div>
 
             {cart.length === 0 ? (
               <div className="px-4 py-12 text-center">
-                <iconify-icon icon="solar:cart-large-linear" width="28" height="28" className="text-neutral-300 mx-auto mb-2 block" aria-hidden="true" />
-                <p className="text-sm text-neutral-500">Click products to add them here</p>
+                <p className="text-sm text-neutral-400">Cart is empty</p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-100 max-h-64 overflow-y-auto">
                 {cart.map((item) => (
-                  <div key={item.productId} className="px-4 py-3 flex items-center gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-neutral-900 truncate">{item.name}</div>
-                      <div className="text-xs text-neutral-500">
-                        {formatCurrency(item.price)} × {item.quantity} = {formatCurrency(item.price * item.quantity)}
+                  <div key={item.recipeId} className="px-4 py-3 flex items-start gap-3">
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <div className="text-sm font-medium text-neutral-900 truncate tracking-tight">
+                        {item.name}
+                      </div>
+                      <div className="text-xs text-neutral-500 mt-0.5">
+                        {formatCurrency(item.price)}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                        className="w-7 h-7 rounded-md border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 transition-colors text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-                        aria-label={`Decrease quantity of ${item.name}`}
-                      >
-                        −
-                      </button>
-                      <span className="w-8 text-center text-sm font-medium tabular-nums">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                        className="w-7 h-7 rounded-md border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 transition-colors text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-                        aria-label={`Increase quantity of ${item.name}`}
-                      >
-                        +
-                      </button>
-                      <button
-                        onClick={() => removeFromCart(item.productId)}
-                        className="w-7 h-7 rounded-md flex items-center justify-center text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors ml-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                        aria-label={`Remove ${item.name} from cart`}
-                      >
-                        <iconify-icon icon="solar:trash-bin-minimalistic-linear" width="14" height="14" aria-hidden="true" />
-                      </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center border border-neutral-200 rounded-sm bg-neutral-50">
+                        <button
+                          onClick={() => updateQuantity(item.recipeId, item.quantity - 1)}
+                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
+                          aria-label="Decrease quantity"
+                        >
+                          <iconify-icon icon="solar:minus-linear" width="12" height="12" aria-hidden="true" />
+                        </button>
+                        <span className="w-6 text-center text-xs font-medium tabular-nums">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.recipeId, item.quantity + 1)}
+                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
+                          aria-label="Increase quantity"
+                        >
+                          <iconify-icon icon="solar:add-linear" width="12" height="12" aria-hidden="true" />
+                        </button>
+                      </div>
+                      <span className="text-sm font-medium tabular-nums w-14 text-right">
+                        {formatCurrency(item.price * item.quantity)}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Margin Summary */}
+            {/* Ledger Totals */}
             {cart.length > 0 && (
-              <div className="px-4 py-3 border-t border-neutral-200 bg-neutral-50/30 space-y-1.5">
-                <div className="flex justify-between text-sm text-neutral-600">
+              <div className="p-4 border-t border-neutral-200 bg-neutral-50 space-y-2">
+                <div className="flex justify-between text-xs text-neutral-500">
                   <span>Subtotal</span>
-                  <span className="font-medium tabular-nums">{formatCurrency(cartTotals.revenue)}</span>
+                  <span className="tabular-nums">{formatCurrency(cartTotals.revenue)}</span>
                 </div>
-                <div className="flex justify-between text-sm text-neutral-500">
-                  <span>COGS</span>
+                <div className="flex justify-between text-xs text-neutral-500">
+                  <span>Est. Cost</span>
                   <span className="tabular-nums">{formatCurrency(cartTotals.cost)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-medium pt-1.5 border-t border-neutral-100">
-                  <span className="text-neutral-900">Gross Margin</span>
-                  <span className={`tabular-nums ${cartTotals.marginPct >= 30 ? 'text-emerald-700' : cartTotals.marginPct >= 15 ? 'text-amber-700' : 'text-red-700'}`}>
-                    {formatCurrency(cartTotals.margin)} ({cartTotals.marginPct}%)
-                  </span>
+                <div className="flex justify-between text-sm font-medium pt-2 mt-1 border-t border-neutral-200 text-neutral-900">
+                  <span>Total</span>
+                  <span className="tabular-nums">{formatCurrency(cartTotals.revenue)}</span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Stock Impact Preview */}
+          {/* BOM Stock Impact */}
           {cart.length > 0 && (
-            <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
-              <div className="px-4 py-3 border-b border-neutral-200 bg-neutral-50/50">
+            <div className="bg-white border border-neutral-200 rounded-md overflow-hidden">
+              <div className="px-4 py-3 border-b border-neutral-100">
                 <h2 className="text-sm font-medium text-neutral-900 flex items-center gap-2">
-                  <iconify-icon icon="solar:danger-triangle-linear" width="16" height="16" aria-hidden="true" />
-                  Stock Impact Preview
+                  <iconify-icon icon="solar:danger-triangle-linear" width="14" height="14" aria-hidden="true" />
+                  BOM Stock Impact
                 </h2>
               </div>
 
               {!impact ? (
                 <div className="px-4 py-6 text-center">
-                  <div className="h-4 w-48 bg-neutral-100 rounded animate-pulse mx-auto" />
+                  <div className="h-3 w-40 bg-neutral-100 rounded-sm animate-pulse mx-auto" />
                 </div>
               ) : (
                 <div className="divide-y divide-neutral-100 max-h-48 overflow-y-auto">
-                  {impact.ingredientImpacts.length === 0 && impact.productImpacts.length === 0 ? (
-                    <div className="px-4 py-4 text-xs text-neutral-500 text-center">No stock deductions for this order.</div>
+                  {impact.ingredientImpacts.length === 0 ? (
+                    <div className="px-4 py-4 text-xs text-neutral-500 text-center">
+                      No ingredients found for these items.
+                    </div>
                   ) : (
-                    <>
-                      {impact.ingredientImpacts.map((item: any) => (
-                        <div key={item.inventoryItemId} className={`px-4 py-2.5 flex items-center justify-between text-xs ${item.insufficient ? 'bg-red-50' : ''}`}>
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.insufficient ? 'bg-red-500' : 'bg-emerald-500'}`} />
-                            <span className={`font-medium truncate ${item.insufficient ? 'text-red-700' : 'text-neutral-900'}`}>
-                              {item.name}
-                            </span>
-                          </div>
-                          <div className="text-right shrink-0 ml-3">
-                            <span className="text-neutral-500">{item.currentStock}</span>
-                            <span className="text-neutral-400 mx-1">→</span>
-                            <span className="text-red-600 font-medium">−{item.deduction}</span>
-                            <span className="text-neutral-400 mx-1">=</span>
-                            <span className={`font-semibold ${item.insufficient ? 'text-red-700' : 'text-neutral-900'}`}>
-                              {item.remainingStock} {item.unit}
-                            </span>
-                          </div>
+                    impact.ingredientImpacts.map((item: any) => (
+                      <div
+                        key={item.inventoryItemId}
+                        className={`px-4 py-2.5 flex items-center justify-between text-xs ${item.insufficient ? 'bg-red-50' : ''}`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.insufficient ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                          <span className={`font-medium truncate ${item.insufficient ? 'text-red-700' : 'text-neutral-900'}`}>
+                            {item.name}
+                          </span>
                         </div>
-                      ))}
-                      {impact.productImpacts.map((item: any) => (
-                        <div key={item.productId} className={`px-4 py-2.5 flex items-center justify-between text-xs ${item.insufficient ? 'bg-red-50' : ''}`}>
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.insufficient ? 'bg-red-500' : 'bg-emerald-500'}`} />
-                            <span className={`font-medium truncate ${item.insufficient ? 'text-red-700' : 'text-neutral-900'}`}>
-                              {item.name} (direct)
-                            </span>
-                          </div>
-                          <div className="text-right shrink-0 ml-3">
-                            <span className="text-neutral-500">{item.currentStock}</span>
-                            <span className="text-neutral-400 mx-1">→</span>
-                            <span className="text-red-600 font-medium">−{item.deduction}</span>
-                            <span className="text-neutral-400 mx-1">=</span>
-                            <span className={`font-semibold ${item.insufficient ? 'text-red-700' : 'text-neutral-900'}`}>
-                              {item.remainingStock}
-                            </span>
-                          </div>
+                        <div className="text-right shrink-0 ml-3">
+                          <span className="text-neutral-500">{item.currentStock}</span>
+                          <span className="text-neutral-400 mx-1">→</span>
+                          <span className="text-red-600 font-medium">−{item.deduction}</span>
+                          <span className="text-neutral-400 mx-1">=</span>
+                          <span className={`font-semibold ${item.insufficient ? 'text-red-700' : 'text-neutral-900'}`}>
+                            {item.remainingStock} {item.unit}
+                          </span>
                         </div>
-                      ))}
-                    </>
+                      </div>
+                    ))
                   )}
                 </div>
               )}
@@ -503,7 +542,7 @@ export default function NewOrderPage() {
                 <div className="px-4 py-3 bg-red-50 border-t border-red-200">
                   <p className="text-xs font-medium text-red-700 flex items-center gap-1.5">
                     <iconify-icon icon="solar:danger-circle-linear" width="14" height="14" aria-hidden="true" />
-                    Insufficient stock — this order cannot be completed.
+                    BOM deficiency — check inventory levels.
                   </p>
                 </div>
               )}
@@ -512,8 +551,12 @@ export default function NewOrderPage() {
 
           {/* Error message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="bg-white border border-neutral-200 rounded-md px-4 py-3 flex items-start gap-2">
+              <iconify-icon
+                icon="solar:danger-triangle-linear" width="16" height="16"
+                className="text-neutral-900 shrink-0 mt-0.5" aria-hidden="true"
+              />
+              <p className="text-xs text-neutral-900 leading-relaxed">{error}</p>
             </div>
           )}
 
@@ -521,20 +564,18 @@ export default function NewOrderPage() {
           <button
             onClick={handleCheckout}
             disabled={cart.length === 0 || isSubmitting || hasInsufficientStock}
-            className="w-full py-3.5 px-4 text-sm font-medium text-white bg-teal-600 rounded-xl hover:bg-teal-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
+            className="w-full py-3.5 px-4 text-sm font-medium text-white bg-neutral-900 rounded-md hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <>
-                <iconify-icon icon="solar:loading-linear" width="18" height="18" className="animate-spin" aria-hidden="true" />
+                <iconify-icon icon="solar:refresh-linear" width="16" height="16" className="animate-spin" aria-hidden="true" />
                 Processing…
               </>
             ) : (
-              <>
-                <iconify-icon icon="solar:check-circle-linear" width="18" height="18" aria-hidden="true" />
-                Complete Sale — {formatCurrency(cartTotals.revenue)}
-              </>
+              <span>Charge {formatCurrency(cartTotals.revenue)}</span>
             )}
           </button>
+
         </div>
       </div>
     </div>

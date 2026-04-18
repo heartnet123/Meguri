@@ -12,21 +12,31 @@
 ## Phase 2: Operations & Data Deductions
 **Goal:** Finalize the manual inventory workflows and automated tracking via recipe linkages.
 - [x] F-02 Complete Inventory Operations (CRUD, Adjustments, Wastage)
-- [ ] F-03 Sales Capture with Recipe/BOM Deduction (Automated decrements, Margin Visibility)
+- [x] F-03 Sales Capture with Recipe/BOM Deduction (Automated decrements, Margin Visibility)
 
 ***
 
 ## Phase 3: Suppliers & Forecasting Engine
 **Goal:** Hook purchasing into the system dynamically utilizing the AI engine.
 - [ ] F-06 Supplier and Purchase-Order Workflow (Drafts, Receipts, Auto-Stock)
+  - [x] Supplier directory and vendor performance view
+  - [ ] Draft purchase orders, send flow, and receipt handling
+  - [ ] PO receipt auto-increments inventory stock
 - [ ] F-04 Forecasting + Reorder Engine v1 (7/14/30 snapshots, algorithm suggestions)
+  - [x] Forecasting dashboard with 7/14/30-day views
+  - [x] Purchase planning recommendations with accept/dismiss actions
+  - [ ] Confidence flags and warning quality signals fully wired into reorder workflow
 
 ***
 
 ## Phase 4: Workflow Streamlining
 **Goal:** Support triaging of anomalies and smooth adoption for new users via onboarding.
 - [ ] F-07 Alert Inbox and Anomaly Triage (Resolution tracking, anomaly flags)
+  - [x] Alert inbox UI with filters, assignment, resolve, and reopen flows
+  - [ ] Broader anomaly coverage and production-grade alert generation polish
 - [ ] F-09 Self-Serve Onboarding and Demo Workspace (First-value flow, sample data)
+  - [x] Workspace bootstrap onboarding flow
+  - [ ] Demo workspace/sample data and transition-to-live flow
 
 ***
 

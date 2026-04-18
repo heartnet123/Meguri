@@ -7,18 +7,22 @@ export const list = query({
   handler: async (ctx, { workspaceId, inventoryItemId }) => {
     await verifyWorkspace(ctx, workspaceId);
 
-    let q = ctx.db.query('stockMovements').withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId));
+    const baseQuery = inventoryItemId
+      ? ctx.db
+          .query('stockMovements')
+          .withIndex('by_workspace_inventory_item', (q) =>
+            q.eq('workspaceId', workspaceId).eq('inventoryItemId', inventoryItemId)
+          )
+      : ctx.db.query('stockMovements').withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId));
 
-    const movements = await q.order('desc').collect();
-
-    let filtered = movements;
-    if (inventoryItemId) {
-      filtered = movements.filter((m) => m.inventoryItemId === inventoryItemId);
+    const movements = [];
+    for await (const movement of baseQuery.order('desc')) {
+      movements.push(movement);
     }
 
     // Enhance with item names and user names
     return Promise.all(
-      filtered.map(async (m) => {
+      movements.map(async (m) => {
         const item = await ctx.db.get(m.inventoryItemId);
         const user = await ctx.db.get(m.performedBy);
         return {

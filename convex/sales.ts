@@ -1,5 +1,5 @@
 import { query, mutation } from './_generated/server';
-import { v } from 'convex/values';
+import { v, ConvexError } from 'convex/values';
 import { verifyWorkspace, checkRole } from './utils';
 
 export const list = query({
@@ -33,10 +33,13 @@ export const todayStats = query({
 
     const completed = all.filter((t) => t.status === 'completed');
     const revenue = completed.reduce((s, t) => s + t.totalAmount, 0);
+    const cost = completed.reduce((s, t) => s + (t.totalCost ?? 0), 0);
     const orderCount = completed.length;
     const avgOrder = orderCount > 0 ? revenue / orderCount : 0;
+    const margin = revenue - cost;
+    const marginPct = revenue > 0 ? Math.round((margin / revenue) * 100) : 0;
 
-    return { revenue, orderCount, avgOrder };
+    return { revenue, cost, margin, marginPct, orderCount, avgOrder };
   },
 });
 
@@ -51,65 +54,66 @@ export const add = mutation({
       v.literal('cash'),
       v.literal('credit_card'),
       v.literal('mobile_pay'),
-      v.literal('invoice')
+      v.literal('invoice'),
     ),
     status: v.union(
       v.literal('completed'),
       v.literal('pending'),
       v.literal('refunded'),
-      v.literal('cancelled')
+      v.literal('cancelled'),
     ),
     items: v.optional(v.array(
-      v.object({
-        productId: v.id('products'),
-        quantity: v.number(),
-        unitPrice: v.number(),
-      })
+      v.union(
+        v.object({
+          kind: v.literal('recipe'),
+          recipeId: v.id('recipes'),
+          quantity: v.number(),
+          unitPrice: v.number(),
+        }),
+        v.object({
+          kind: v.literal('sellableItem'),
+          sellableItemId: v.id('sellableItems'),
+          quantity: v.number(),
+          unitPrice: v.number(),
+        }),
+      ),
     )),
   },
   handler: async (ctx, args) => {
     const user = await verifyWorkspace(ctx, args.workspaceId);
     checkRole(user, ['owner', 'admin', 'manager', 'staff']);
 
-    // 1. Initial validation of all items
+    // ── 1. Validate item-level fields ──
     if (args.items && args.items.length > 0) {
       for (const item of args.items) {
-        if (item.quantity <= 0) throw new Error(`Invalid item quantity for product ${item.productId}: ${item.quantity}. Must be > 0.`);
-        if (item.unitPrice <= 0) throw new Error(`Invalid unit price for product ${item.productId}: ${item.unitPrice}. Must be > 0.`);
-        
-        const product = await ctx.db.get(item.productId);
-        if (!product) throw new Error(`Product not found: ${item.productId}`);
+        if (item.quantity <= 0) {
+          throw new ConvexError('Invalid quantity. Must be > 0.');
+        }
+        if (item.kind === 'recipe') {
+          const recipe = await ctx.db.get(item.recipeId);
+          if (!recipe) throw new ConvexError(`Recipe/Product not found: ${item.recipeId}`);
+        } else {
+          const sellableItem = await ctx.db.get(item.sellableItemId);
+          if (!sellableItem) throw new ConvexError(`Sellable item not found: ${item.sellableItemId}`);
+        }
       }
     }
 
-    // Map to keep track of required inventory items
+    // ── 2. For completed sales only — pre-compute and validate deductions ──
+    // Maps: inventoryItemId → required quantity
     const inventoryDeductions = new Map<string, number>();
-    // Cache for validated inventory items to avoid re-fetching
     const inventoryItemCache = new Map<string, any>();
-
-    // Map to keep track of product stock deductions
-    const productDeductions = new Map<string, number>();
-    // Cache for product records if needed
-    const productCache = new Map<string, any>();
+    const sellableItemCache = new Map<string, any>();
 
     if (args.status === 'completed' && args.items && args.items.length > 0) {
       for (const item of args.items) {
-        const product = (await ctx.db.get(item.productId))!; // Already validated above
-        productCache.set(item.productId, product);
-
-        // Try to find an active recipe for this product
-        const recipes = await ctx.db
-          .query('recipes')
-          .withIndex('by_product', (q) => q.eq('productId', item.productId))
-          .filter((q) => q.eq(q.field('isActive'), true))
-          .collect();
-
-        if (recipes.length > 0) {
-          // If product has a recipe, it's made from inventory items
-          const recipe = recipes[0]; // Assuming only one active recipe per product
+        if (item.kind === 'recipe') {
+          const recipe = (await ctx.db.get(item.recipeId))!;
 
           if (recipe.yieldQty <= 0) {
-            throw new Error(`Invalid recipe yield for product ${product.name} (Recipe: ${recipe._id}). Yield must be > 0.`);
+            throw new ConvexError(
+              `Recipe for "${recipe.name}" has invalid yield (${recipe.yieldQty}). Yield must be > 0.`,
+            );
           }
 
           const ingredients = await ctx.db
@@ -118,86 +122,151 @@ export const add = mutation({
             .collect();
 
           for (const ingredient of ingredients) {
+            if (ingredient.quantity <= 0) continue;
+
             const requiredQty = (item.quantity / recipe.yieldQty) * ingredient.quantity;
-            const currentReq = inventoryDeductions.get(ingredient.inventoryItemId) || 0;
-            inventoryDeductions.set(ingredient.inventoryItemId, currentReq + requiredQty);
+            const current = inventoryDeductions.get(ingredient.inventoryItemId) ?? 0;
+            inventoryDeductions.set(ingredient.inventoryItemId, current + requiredQty);
           }
         } else {
-          // If no recipe, we might deduct from product's direct stock
-          const currentReq = productDeductions.get(item.productId) || 0;
-          productDeductions.set(item.productId, currentReq + item.quantity);
+          const sellableItem = (await ctx.db.get(item.sellableItemId))!;
+          sellableItemCache.set(item.sellableItemId, sellableItem);
+
+          if (sellableItem.trackStock) {
+            if ((sellableItem as any).currentStock < item.quantity) {
+              throw new ConvexError(
+                `Insufficient stock for "${sellableItem.name}". Required: ${item.quantity}, Available: ${(sellableItem as any).currentStock}.`,
+              );
+            }
+
+            if ((sellableItem as any).inventoryItemId) {
+              const current = inventoryDeductions.get((sellableItem as any).inventoryItemId) ?? 0;
+              inventoryDeductions.set((sellableItem as any).inventoryItemId, current + item.quantity);
+            }
+          }
         }
       }
 
-      // Check stock sufficiency for inventory items
       for (const [inventoryItemId, requiredQty] of inventoryDeductions.entries()) {
-        const invItem = (await ctx.db.get(inventoryItemId as any)) as any;
-        if (!invItem) throw new Error(`Inventory item not found: ${inventoryItemId}`);
-        inventoryItemCache.set(inventoryItemId, invItem);
-        
-        if (invItem.currentStock < requiredQty) {
-          throw new Error(`Insufficient stock for ingredient: ${invItem.name}. Required: ${requiredQty}, Available: ${invItem.currentStock}`);
+        const invItem = await ctx.db.get(inventoryItemId as any);
+        if (!invItem) throw new ConvexError(`Inventory item not found: ${inventoryItemId}`);
+        if ((invItem as any).isArchived) {
+          throw new ConvexError(`Inventory item "${(invItem as any).name}" is archived and cannot be used.`);
         }
-      }
+        inventoryItemCache.set(inventoryItemId, invItem);
 
-      // Check stock sufficiency for products sold directly
-      for (const [productId, requiredQty] of productDeductions.entries()) {
-        const product = productCache.get(productId) as any;
-        if (product.currentStock < requiredQty) {
-          throw new Error(`Insufficient stock for product: ${product.name}. Required: ${requiredQty}, Available: ${product.currentStock}`);
+        if ((invItem as any).currentStock < requiredQty) {
+          throw new ConvexError(
+            `Insufficient stock for "${(invItem as any).name}". ` +
+              `Required: ${requiredQty.toFixed(2)}, Available: ${(invItem as any).currentStock}.`,
+          );
         }
       }
     }
 
-    const now = Date.now();
-    const { items, ...transactionArgs } = args;
+    // ── 4. Compute estimated COGS from BOM ingredients / sellable item cost ──
+    let totalCost = 0;
+    if (args.items && args.items.length > 0) {
+      for (const item of args.items) {
+        if (item.kind === 'recipe') {
+          const recipe = (await ctx.db.get(item.recipeId))!;
+          const ingredients = await ctx.db
+            .query('recipeIngredients')
+            .withIndex('by_recipe', (q) => q.eq('recipeId', recipe._id))
+            .collect();
 
-    // 1. Create Transaction
+          let itemUnitCost = 0;
+          for (const ingredient of ingredients) {
+            const invItem = inventoryItemCache.get(ingredient.inventoryItemId as string)
+              ?? await ctx.db.get(ingredient.inventoryItemId);
+            const costPerUnit = (invItem as any)?.costPerUnit ?? 0;
+            const singleQty = recipe.yieldQty > 0 ? ingredient.quantity / recipe.yieldQty : 0;
+            itemUnitCost += singleQty * costPerUnit;
+          }
+          totalCost += itemUnitCost * item.quantity;
+        } else {
+          const sellableItem = sellableItemCache.get(item.sellableItemId as string)
+            ?? await ctx.db.get(item.sellableItemId);
+          totalCost += ((sellableItem as any)?.purchaseCost ?? 0) * item.quantity;
+        }
+      }
+    }
+
+    // ── 5. Write transaction and lines — all checks passed ──
+    const now = Date.now();
+    
     const transactionId = await ctx.db.insert('salesTransactions', {
-      ...transactionArgs,
-      createdAt: now
+      workspaceId: args.workspaceId,
+      displayId: args.displayId,
+      customer: args.customer,
+      itemCount: args.itemCount,
+      totalAmount: args.totalAmount,
+      totalCost: Math.round(totalCost * 100) / 100,
+      paymentMethod: args.paymentMethod,
+      status: args.status,
+      createdAt: now,
     });
 
-    if (items && items.length > 0) {
-      // 2. Create Sale Items
-      for (const item of items) {
-        await ctx.db.insert('saleItems', {
-          transactionId,
-          productId: item.productId,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          subtotal: item.quantity * item.unitPrice,
-        });
+    if (args.items && args.items.length > 0) {
+      for (const item of args.items) {
+        if (item.kind === 'recipe') {
+          await ctx.db.insert('saleItems', {
+            transactionId,
+            recipeId: item.recipeId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            subtotal: item.quantity * item.unitPrice,
+          });
+        } else {
+          await ctx.db.insert('saleItems', {
+            transactionId,
+            recipeId: undefined as any,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            subtotal: item.quantity * item.unitPrice,
+          });
+        }
       }
 
       if (args.status === 'completed') {
-        // 3. Deduct Inventory Items & Record Stock Movements
         for (const [inventoryItemId, deductionQty] of inventoryDeductions.entries()) {
           const invItem = inventoryItemCache.get(inventoryItemId) as any;
-          // Deduction quantity might be 0 for some items, but typically it will be > 0 if in the map
-          await ctx.db.patch(invItem._id, {
-            currentStock: invItem.currentStock - deductionQty,
-            updatedAt: now,
-          });
+          const newStock = invItem.currentStock - deductionQty;
+
+          await ctx.db.patch(invItem._id, { currentStock: newStock, updatedAt: now });
 
           await ctx.db.insert('stockMovements', {
             workspaceId: args.workspaceId,
             inventoryItemId: invItem._id,
             type: 'sale',
-            quantity: -deductionQty, // negative for deductions
+            quantity: -deductionQty,
             referenceId: args.displayId,
+            note: `Deducted by sale ${args.displayId}`,
             performedBy: user._id,
             createdAt: now,
           });
         }
 
-        // 4. Deduct Product Stock (if sold directly without recipe)
-        for (const [productId, deductionQty] of productDeductions.entries()) {
-          const product = productCache.get(productId) as any;
-          await ctx.db.patch(product._id, {
-            currentStock: product.currentStock - deductionQty,
-            updatedAt: now,
-          });
+        for (const item of args.items) {
+          if (item.kind !== 'sellableItem') continue;
+          const sellableItem = sellableItemCache.get(item.sellableItemId as string) as any;
+          if (!sellableItem.trackStock) continue;
+
+          const newStock = (sellableItem.currentStock ?? 0) - item.quantity;
+          await ctx.db.patch(sellableItem._id, { currentStock: newStock, updatedAt: now });
+
+          if (sellableItem.inventoryItemId) {
+            await ctx.db.insert('stockMovements', {
+              workspaceId: args.workspaceId,
+              inventoryItemId: sellableItem.inventoryItemId,
+              type: 'sale',
+              quantity: -item.quantity,
+              referenceId: args.displayId,
+              note: `Sold sellable item ${sellableItem.displayId}`,
+              performedBy: user._id,
+              createdAt: now,
+            });
+          }
         }
       }
     }
@@ -211,70 +280,53 @@ export const getImpactPreview = query({
     workspaceId: v.id('workspaces'),
     items: v.array(
       v.object({
-        productId: v.id('products'),
+        recipeId: v.id('recipes'),
         quantity: v.number(),
-      })
+      }),
     ),
   },
   handler: async (ctx, { workspaceId, items }) => {
     await verifyWorkspace(ctx, workspaceId);
 
     if (items.length === 0) {
-      return { ingredientImpacts: [], productImpacts: [], totals: { revenue: 0, cost: 0, margin: 0, marginPct: 0 } };
+      return { ingredientImpacts: [], totals: { revenue: 0, cost: 0, margin: 0, marginPct: 0 } };
     }
 
-    // Aggregate required inventory deductions (via recipes)
     const inventoryDeductions = new Map<string, number>();
-    // Aggregate direct product stock deductions (no recipe)
-    const productDeductions = new Map<string, number>();
-
     let totalRevenue = 0;
-    let totalCost = 0;
-
-    const productInfoMap = new Map<string, { name: string; price: number; cost: number; currentStock: number }>();
+    let totalEstimatedCost = 0;
 
     for (const item of items) {
-      const product = await ctx.db.get(item.productId);
-      if (!product) continue;
+      const recipe = await ctx.db.get(item.recipeId);
+      if (!recipe) continue;
 
-      productInfoMap.set(item.productId, {
-        name: product.name,
-        price: product.price,
-        cost: product.cost,
-        currentStock: product.currentStock,
-      });
+      totalRevenue += recipe.price * item.quantity;
 
-      totalRevenue += product.price * item.quantity;
-      totalCost += product.cost * item.quantity;
-
-      // Look for an active recipe
-      const recipes = await ctx.db
-        .query('recipes')
-        .withIndex('by_product', (q) => q.eq('productId', item.productId))
-        .filter((q) => q.eq(q.field('isActive'), true))
+      const ingredients = await ctx.db
+        .query('recipeIngredients')
+        .withIndex('by_recipe', (q) => q.eq('recipeId', recipe._id))
         .collect();
 
-      if (recipes.length > 0) {
-        const recipe = recipes[0];
-        const ingredients = await ctx.db
-          .query('recipeIngredients')
-          .withIndex('by_recipe', (q) => q.eq('recipeId', recipe._id))
-          .collect();
-
-        for (const ingredient of ingredients) {
-          const requiredQty = recipe.yieldQty > 0
-            ? (item.quantity / recipe.yieldQty) * ingredient.quantity
-            : 0;
-          const current = inventoryDeductions.get(ingredient.inventoryItemId) || 0;
-          inventoryDeductions.set(ingredient.inventoryItemId, current + requiredQty);
-        }
-      } else {
-        const current = productDeductions.get(item.productId) || 0;
-        productDeductions.set(item.productId, current + item.quantity);
+      let itemUnitCost = 0;
+      for (const ingredient of ingredients) {
+        const invItem = await ctx.db.get(ingredient.inventoryItemId);
+        const costPerUnit = (invItem as any)?.costPerUnit ?? 0;
+        
+        const requiredQty = recipe.yieldQty > 0
+          ? (item.quantity / recipe.yieldQty) * ingredient.quantity
+          : 0;
+        
+        const current = inventoryDeductions.get(ingredient.inventoryItemId) ?? 0;
+        inventoryDeductions.set(ingredient.inventoryItemId, current + requiredQty);
+        
+        // Single unit cost contribution
+        const singleQty = recipe.yieldQty > 0 ? ingredient.quantity / recipe.yieldQty : 0;
+        itemUnitCost += singleQty * costPerUnit;
       }
+      
+      totalEstimatedCost += itemUnitCost * item.quantity;
     }
 
-    // Build ingredient impact list
     const ingredientImpacts = [];
     for (const [inventoryItemId, deduction] of inventoryDeductions.entries()) {
       const invItem = await ctx.db.get(inventoryItemId as any);
@@ -291,31 +343,14 @@ export const getImpactPreview = query({
       });
     }
 
-    // Build product impact list (direct stock deductions)
-    const productImpacts = [];
-    for (const [productId, deduction] of productDeductions.entries()) {
-      const info = productInfoMap.get(productId);
-      if (!info) continue;
-      const remaining = info.currentStock - deduction;
-      productImpacts.push({
-        productId,
-        name: info.name,
-        currentStock: info.currentStock,
-        deduction,
-        remainingStock: remaining,
-        insufficient: remaining < 0,
-      });
-    }
-
-    const margin = totalRevenue - totalCost;
+    const margin = totalRevenue - totalEstimatedCost;
     const marginPct = totalRevenue > 0 ? Math.round((margin / totalRevenue) * 100) : 0;
 
     return {
       ingredientImpacts,
-      productImpacts,
       totals: {
         revenue: Math.round(totalRevenue * 100) / 100,
-        cost: Math.round(totalCost * 100) / 100,
+        cost: Math.round(totalEstimatedCost * 100) / 100,
         margin: Math.round(margin * 100) / 100,
         marginPct,
       },

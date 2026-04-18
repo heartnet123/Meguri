@@ -6,167 +6,7 @@ import { useQuery, useConvexAuth } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
 
-// ─── Skeleton helpers ────────────────────────────────────────────────────────
-
-function StatSkeleton({ wide }: { wide?: boolean }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`h-8 bg-surface-raised rounded-xl animate-pulse ${wide ? 'w-32' : 'w-16'}`}
-    />
-  );
-}
-
-function TextSkeleton({ className = 'w-24' }: { className?: string }) {
-  return <div aria-hidden="true" className={`h-3.5 bg-surface-raised rounded-lg animate-pulse ${className}`} />;
-}
-
-// ─── Currency formatter ───────────────────────────────────────────────────────
-
-function fmt(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
-}
-
-// ─── KPI Card ────────────────────────────────────────────────────────────────
-
-function KpiCard({
-  title,
-  value,
-  change,
-  subtitle,
-  positive,
-  negative,
-  icon,
-  loading,
-}: {
-  title: string;
-  value?: string | number;
-  change?: string;
-  subtitle?: string;
-  positive?: boolean;
-  negative?: boolean;
-  icon: string;
-  loading?: boolean;
-}) {
-  return (
-    <div className="bg-surface border border-border rounded-2xl shadow-sm p-6 group transition-all hover:border-accent/20">
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60 leading-snug pr-2">{title}</h3>
-        <div className="p-2.5 rounded-xl bg-accent-subtle text-accent shrink-0 group-hover:scale-110 transition-transform" aria-hidden="true">
-          <iconify-icon icon={icon} width="22" height="22" />
-        </div>
-      </div>
-      <div className="text-3xl font-bold tracking-tight text-foreground mb-1 tabular-nums">
-        {loading ? <StatSkeleton wide /> : (value ?? '—')}
-      </div>
-      {loading ? (
-        <TextSkeleton className="w-20 mt-1" />
-      ) : change ? (
-        <div
-          className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${
-            positive ? 'text-success' : negative ? 'text-danger' : 'text-muted'
-          }`}
-        >
-          {positive && <iconify-icon icon="solar:graph-up-bold-duotone" width="14" height="14" />}
-          {negative && <iconify-icon icon="solar:graph-down-bold-duotone" width="14" height="14" />}
-          {change}
-        </div>
-      ) : subtitle ? (
-        <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40">{subtitle}</div>
-      ) : null}
-    </div>
-  );
-}
-
-// ─── Live Sales vs Forecast Bar Chart ────────────────────────────────────────
-
 type TrendDay = { label: string; revenue: number; orderCount: number };
-
-function SalesTrendChart({ data, loading }: { data: TrendDay[] | undefined; loading: boolean }) {
-  const maxRevenue = useMemo(
-    () => (data && data.length > 0 ? Math.max(...data.map((d) => d.revenue), 1) : 1),
-    [data]
-  );
-
-  if (loading) {
-    return (
-      <div className="h-64 w-full flex items-end gap-3" aria-hidden="true">
-        {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="flex-1 flex flex-col justify-end gap-2">
-            <div
-              className="w-full bg-surface-raised rounded-t-xl animate-pulse"
-              style={{ height: `${30 + Math.sin(i) * 20 + 30}%` }}
-            />
-            <div className="h-3 bg-surface-raised rounded-full animate-pulse mx-2 mt-2" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  const isEmpty = !data || data.every((d) => d.revenue === 0);
-
-  return (
-    <div
-      className="h-64 w-full relative flex items-end gap-3 group/chart"
-      role="img"
-      aria-label={
-        isEmpty
-          ? 'Sales bar chart — no sales recorded this week yet.'
-          : `Weekly sales bar chart. Highest day: ${fmt(maxRevenue)}.`
-      }
-    >
-      {(data ?? Array.from({ length: 7 }, (_, i) => ({ label: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i], revenue: 0, orderCount: 0 }))).map((day, i) => {
-        const heightPct = isEmpty ? 0 : Math.max((day.revenue / maxRevenue) * 100, day.revenue > 0 ? 4 : 0);
-        return (
-          <div key={i} className="flex-1 flex flex-col justify-end gap-2 group/bar">
-            <div
-              className="relative w-full rounded-t-xl overflow-hidden transition-all duration-700 ease-out"
-              style={{ height: isEmpty ? '8%' : `${Math.max(heightPct, 8)}%` }}
-            >
-              {/* Background track */}
-              <div className="absolute inset-0 bg-surface-raised/50 rounded-t-xl" />
-              {/* Actual revenue bar */}
-              {!isEmpty && (
-                <div
-                  className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-accent to-accent-light rounded-t-xl transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]"
-                  style={{ height: `${heightPct > 0 ? 100 : 0}%` }}
-                />
-              )}
-              {/* Hover tooltip */}
-              {!isEmpty && day.revenue > 0 && (
-                <div
-                  className="absolute -top-10 left-1/2 -translate-x-1/2 bg-foreground text-surface text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full whitespace-nowrap opacity-0 group-hover/bar:opacity-100 transition-all pointer-events-none z-10 shadow-xl"
-                  aria-hidden="true"
-                >
-                  {fmt(day.revenue)}
-                </div>
-              )}
-            </div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-center text-muted/40 mt-2 transition-colors group-hover/bar:text-accent" aria-hidden="true">
-              {day.label}
-            </div>
-          </div>
-        );
-      })}
-
-      {/* Empty state overlay */}
-      {isEmpty && !loading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <div className="p-3 bg-surface-raised rounded-2xl mb-3 border border-border">
-            <iconify-icon icon="solar:gallery-wide-bold-duotone" width="24" height="24" className="text-muted/20" />
-          </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted/60 text-center leading-relaxed">
-            Awaiting sales data<br />for visualization
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Low Stock row ────────────────────────────────────────────────────────────
-
 type LowStockItem = {
   _id: string;
   name: string;
@@ -175,52 +15,6 @@ type LowStockItem = {
   unit: string;
   status: 'Critical' | 'Warning';
 };
-
-function LowStockRow({ item }: { item: LowStockItem }) {
-  const isCritical = item.status === 'Critical';
-  return (
-    <div className="flex items-center justify-between py-3.5 border-b border-border/50 last:border-0 last:pb-0 gap-4 group/row">
-      <div className="min-w-0">
-        <div className="text-sm font-bold text-foreground truncate group-hover/row:text-accent transition-colors" title={item.name}>
-          {item.name}
-        </div>
-        <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40 mt-0.5">
-          Min Level: {item.minStockLevel.toLocaleString()} {item.unit}
-        </div>
-      </div>
-      <div className="text-right shrink-0">
-        <div className={`text-sm font-black tabular-nums tracking-tight ${isCritical ? 'text-danger' : 'text-warning'}`}>
-          {item.currentStock.toLocaleString()} <span className="text-[10px] font-bold text-muted/40 uppercase tracking-widest">{item.unit}</span>
-        </div>
-        <div
-          className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full inline-block mt-1.5 border shadow-sm ${
-            isCritical ? 'bg-danger-subtle/50 text-danger border-danger/10' : 'bg-warning-subtle/50 text-warning border-warning/10'
-          }`}
-        >
-          {item.status}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LowStockSkeleton() {
-  return (
-    <div className="flex items-center justify-between py-3.5 border-b border-border/50 last:border-0 animate-pulse">
-      <div className="space-y-2 flex-1 mr-4">
-        <div className="h-4 bg-surface-raised rounded-lg w-3/4" />
-        <div className="h-3 bg-surface-raised rounded-md w-1/3" />
-      </div>
-      <div className="space-y-2 text-right">
-        <div className="h-4 bg-surface-raised rounded-lg w-16" />
-        <div className="h-4 bg-surface-raised rounded-full w-12 ml-auto" />
-      </div>
-    </div>
-  );
-}
-
-// ─── Recommendation card ──────────────────────────────────────────────────────
-
 type Recommendation = {
   _id: string;
   itemName: string;
@@ -228,72 +22,217 @@ type Recommendation = {
   recommendedQty: number;
   reason: string;
 };
+type Anomaly = {
+  _id: string;
+  title: string;
+  description: string;
+};
 
-function RecommendationCard({ rec }: { rec: Recommendation }) {
+const DEFAULT_TREND_DAYS: TrendDay[] = [
+  { label: 'Mon', revenue: 0, orderCount: 0 },
+  { label: 'Tue', revenue: 0, orderCount: 0 },
+  { label: 'Wed', revenue: 0, orderCount: 0 },
+  { label: 'Thu', revenue: 0, orderCount: 0 },
+  { label: 'Fri', revenue: 0, orderCount: 0 },
+  { label: 'Sat', revenue: 0, orderCount: 0 },
+  { label: 'Sun', revenue: 0, orderCount: 0 },
+];
+
+function StatSkeleton({ wide }: { wide?: boolean }) {
+  return <div aria-hidden="true" className={`h-8 rounded-lg bg-surface-raised ${wide ? 'w-32' : 'w-20'} animate-pulse`} />;
+}
+
+function TextSkeleton({ className = 'w-24' }: { className?: string }) {
+  return <div aria-hidden="true" className={`h-4 rounded-md bg-surface-raised ${className} animate-pulse`} />;
+}
+
+function fmtCurrency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function metaToneClass(tone: 'muted' | 'success' | 'danger') {
+  if (tone === 'success') return 'text-success';
+  if (tone === 'danger') return 'text-danger';
+  return 'text-muted';
+}
+
+function KpiCard({
+  title,
+  value,
+  meta,
+  tone = 'muted',
+  loading,
+}: {
+  title: string;
+  value?: string | number;
+  meta?: string;
+  tone?: 'muted' | 'success' | 'danger';
+  loading?: boolean;
+}) {
   return (
-    <div className="p-4 rounded-2xl border border-border bg-surface-raised/30 hover:bg-surface-raised/60 transition-all hover:border-accent/20 group/rec">
-      <div className="flex justify-between items-start mb-3 gap-3">
-        <div className="min-w-0">
-          <div className="text-sm font-bold text-foreground truncate group-hover/rec:text-accent transition-colors" title={rec.itemName}>
-            {rec.itemName}
-          </div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40 truncate mt-0.5" title={rec.supplierName}>
-            Proprietary Supplier: <span className="text-foreground/70">{rec.supplierName}</span>
-          </div>
-        </div>
-        <div className="text-[10px] font-black uppercase tracking-widest text-accent bg-accent-subtle/50 px-2.5 py-1.5 rounded-xl border border-accent/10 shrink-0 tabular-nums shadow-sm">
-          + {rec.recommendedQty.toLocaleString()} units
-        </div>
+    <section className="rounded-xl border border-border bg-surface p-5">
+      <p className="text-sm font-medium text-muted">{title}</p>
+      <div className="mt-3 text-3xl font-semibold tracking-tight text-foreground tabular-nums">
+        {loading ? <StatSkeleton wide /> : (value ?? '—')}
       </div>
-      <div className="text-xs text-muted leading-relaxed flex gap-2 items-start font-medium">
-        <div className="p-1 bg-accent/5 rounded-md mt-0.5 shrink-0">
-          <iconify-icon icon="solar:magic-stick-bold-duotone" width="14" height="14" className="text-accent" aria-hidden="true" />
+      {loading ? (
+        <div className="mt-2">
+          <TextSkeleton className="w-28" />
         </div>
-        <span className="line-clamp-2 italic">&ldquo;{rec.reason}&rdquo;</span>
+      ) : meta ? (
+        <p className={`mt-2 text-sm ${metaToneClass(tone)}`}>{meta}</p>
+      ) : null}
+    </section>
+  );
+}
+
+function SalesTrendChart({ data, loading }: { data: TrendDay[] | undefined; loading: boolean }) {
+  const chartData = data ?? DEFAULT_TREND_DAYS;
+  const maxRevenue = useMemo(
+    () => (chartData.length > 0 ? Math.max(...chartData.map((day) => day.revenue), 1) : 1),
+    [chartData]
+  );
+  const isEmpty = chartData.every((day) => day.revenue === 0);
+
+  if (loading) {
+    return (
+      <div className="grid h-56 grid-cols-7 items-end gap-3" aria-hidden="true">
+        {DEFAULT_TREND_DAYS.map((day, index) => (
+          <div key={day.label} className="flex flex-col gap-3">
+            <div className="h-44 rounded-t-lg bg-surface-raised/70 animate-pulse" style={{ opacity: 0.6 + index * 0.04 }} />
+            <div className="mx-2 h-3 rounded-full bg-surface-raised animate-pulse" />
+          </div>
+        ))}
       </div>
-      <div className="mt-4 flex gap-2">
-        <button className="flex-1 bg-accent text-white text-[10px] font-bold uppercase tracking-widest py-2.5 rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/10 active:scale-[0.98]">
-          Accept &amp; Order
-        </button>
-        <button className="px-4 bg-surface text-muted text-[10px] font-bold uppercase tracking-widest py-2.5 rounded-xl border border-border hover:bg-surface-raised transition-all active:scale-[0.98]">
-          Review
-        </button>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div
+        className="grid h-56 grid-cols-7 items-end gap-3"
+        role="img"
+        aria-label={
+          isEmpty
+            ? 'No sales have been recorded this week yet.'
+            : `Weekly sales chart. Highest day reached ${fmtCurrency(maxRevenue)} in revenue.`
+        }
+      >
+        {chartData.map((day) => {
+          const height = isEmpty ? 8 : Math.max((day.revenue / maxRevenue) * 100, day.revenue > 0 ? 12 : 0);
+
+          return (
+            <div key={day.label} className="flex flex-col gap-3">
+              <div className="relative h-44 overflow-hidden rounded-t-lg bg-faint">
+                <div
+                  className={`absolute inset-x-0 bottom-0 rounded-t-lg transition-[height] duration-500 ${
+                    isEmpty ? 'bg-surface-raised' : 'bg-accent'
+                  }`}
+                  style={{ height: `${height}%` }}
+                />
+              </div>
+              <div className="text-center text-xs text-muted">{day.label}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {isEmpty && <p className="text-sm text-muted">Sales appear here as soon as transactions are recorded.</p>}
+    </div>
+  );
+}
+
+function LowStockRow({ item }: { item: LowStockItem }) {
+  const isCritical = item.status === 'Critical';
+
+  return (
+    <div className="flex items-start justify-between gap-4 border-t border-border py-4 first:border-0 first:pt-0 last:pb-0">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-foreground" title={item.name}>
+          {item.name}
+        </p>
+        <p className="mt-1 text-xs text-muted">
+          Minimum {item.minStockLevel.toLocaleString()} {item.unit}
+        </p>
+      </div>
+
+      <div className="text-right">
+        <p className={`text-sm font-semibold tabular-nums ${isCritical ? 'text-danger' : 'text-warning'}`}>
+          {item.currentStock.toLocaleString()} {item.unit}
+        </p>
+        <p className={`mt-1 text-xs ${isCritical ? 'text-danger' : 'text-warning'}`}>{item.status}</p>
       </div>
     </div>
   );
 }
 
-function RecSkeleton() {
+function LowStockSkeleton() {
   return (
-    <div className="p-4 rounded-2xl border border-border animate-pulse space-y-3">
-      <div className="flex justify-between gap-3">
-        <div className="space-y-2 flex-1">
-          <div className="h-4 bg-surface-raised rounded-lg w-2/3" />
-          <div className="h-3 bg-surface-raised rounded-md w-1/3" />
-        </div>
-        <div className="h-10 w-20 bg-surface-raised rounded-xl" />
+    <div className="flex items-center justify-between gap-4 border-t border-border py-4 first:border-0 first:pt-0 animate-pulse">
+      <div className="space-y-2">
+        <div className="h-4 w-32 rounded-md bg-surface-raised" />
+        <div className="h-3 w-24 rounded-md bg-surface-raised" />
       </div>
-      <div className="h-3 bg-surface-raised rounded-md w-full" />
-      <div className="h-3 bg-surface-raised rounded-md w-3/4" />
-      <div className="flex gap-2 mt-2">
-        <div className="flex-1 h-9 bg-surface-raised rounded-xl" />
-        <div className="w-16 h-9 bg-surface-raised rounded-xl" />
+      <div className="space-y-2 text-right">
+        <div className="h-4 w-16 rounded-md bg-surface-raised" />
+        <div className="h-3 w-14 rounded-md bg-surface-raised" />
       </div>
     </div>
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+function RecommendationRow({ rec }: { rec: Recommendation }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-t border-border py-4 first:border-0 first:pt-0 last:pb-0">
+      <div className="min-w-0 space-y-1">
+        <p className="truncate text-sm font-semibold text-foreground" title={rec.itemName}>
+          {rec.itemName}
+        </p>
+        <p className="truncate text-xs text-muted" title={rec.supplierName}>
+          {rec.supplierName}
+        </p>
+        <p className="line-clamp-2 text-sm text-muted">{rec.reason}</p>
+      </div>
+      <div className="shrink-0 text-right">
+        <p className="text-xl font-semibold tabular-nums text-foreground">{rec.recommendedQty.toLocaleString()}</p>
+        <p className="text-xs text-muted">units</p>
+      </div>
+    </div>
+  );
+}
+
+function RecommendationSkeleton() {
+  return (
+    <div className="space-y-2 border-t border-border py-4 first:border-0 first:pt-0 animate-pulse">
+      <div className="h-4 w-32 rounded-md bg-surface-raised" />
+      <div className="h-3 w-24 rounded-md bg-surface-raised" />
+      <div className="h-3 w-full rounded-md bg-surface-raised" />
+    </div>
+  );
+}
+
+function AnomalyRow({ anomaly }: { anomaly: Anomaly }) {
+  return (
+    <div className="border-t border-border py-4 first:border-0 first:pt-0 last:pb-0">
+      <p className="text-sm font-semibold text-foreground">{anomaly.title}</p>
+      <p className="mt-1 text-sm text-muted">{anomaly.description}</p>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { isAuthenticated } = useConvexAuth();
   const workspaceId = useWorkspaceId();
-  const args = (workspaceId && isAuthenticated) ? { workspaceId } : 'skip';
+  const args = workspaceId && isAuthenticated ? { workspaceId } : 'skip';
 
   const summary = useQuery(api.dashboard.summary, args);
   const lowStockItems = useQuery(api.dashboard.lowStockItems, args) as LowStockItem[] | undefined;
   const reorderRecs = useQuery(api.dashboard.reorderRecommendations, args) as Recommendation[] | undefined;
-  const anomalies = useQuery(api.dashboard.anomalies, args);
+  const anomalies = useQuery(api.dashboard.anomalies, args) as Anomaly[] | undefined;
   const salesTrend = useQuery(api.dashboard.salesTrend, args) as TrendDay[] | undefined;
 
   const isLoadingSummary = workspaceId !== undefined && summary === undefined;
@@ -302,203 +241,164 @@ export default function DashboardPage() {
   const isLoadingAnomalies = workspaceId !== undefined && anomalies === undefined;
   const isLoadingTrend = workspaceId !== undefined && salesTrend === undefined;
 
+  const weeklyRevenue = useMemo(
+    () => (salesTrend ?? []).reduce((total, day) => total + day.revenue, 0),
+    [salesTrend]
+  );
+  const weeklyOrders = useMemo(
+    () => (salesTrend ?? []).reduce((total, day) => total + day.orderCount, 0),
+    [salesTrend]
+  );
+
+  const stockRiskCount = lowStockItems?.length ?? 0;
+  const displayedRecommendations = reorderRecs?.slice(0, 3) ?? [];
+  const displayedAnomalies = anomalies?.slice(0, 3) ?? [];
+
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Operational Overview</h1>
-          <p className="text-sm text-muted mt-1.5 leading-relaxed">
-            Welcome back. Here&apos;s a strategic pulse of your inventory and sales performance.
+    <div className="mx-auto max-w-6xl space-y-10">
+      <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="max-w-2xl">
+          <p className="text-sm font-medium text-muted">Today at a glance</p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground">Dashboard</h1>
+          <p className="mt-3 text-sm leading-6 text-muted">
+            Monitor sales, stock risks, and purchase signals without leaving this page.
           </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none">
-            <iconify-icon icon="solar:calendar-bold-duotone" width="18" height="18" aria-hidden="true" />
-            Live Feed
-          </button>
-          <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 active:scale-[0.98]">
-            <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
-            Record Entry
-          </button>
-        </div>
-      </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Link
+          href="/sales"
+          className="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-accent-fg transition-colors hover:bg-accent/90"
+        >
+          Record entry
+        </Link>
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          title="Daily Gross Revenue"
-          value={summary ? fmt(summary.todayRevenue) : undefined}
-          change={summary ? `${summary.todayOrderCount} successful orders` : undefined}
-          positive
-          icon="solar:wallet-money-bold-duotone"
+          title="Revenue today"
+          value={summary ? fmtCurrency(summary.todayRevenue) : undefined}
+          meta={summary ? `${summary.todayOrderCount} orders recorded` : undefined}
+          tone="success"
           loading={isLoadingSummary}
         />
         <KpiCard
-          title="Inventory Alerts"
+          title="Low-stock items"
           value={summary?.lowStockCount}
-          change={summary ? `${summary.criticalCount} priority items` : undefined}
-          negative={summary ? summary.criticalCount > 0 : undefined}
-          icon="solar:danger-triangle-bold-duotone"
+          meta={summary ? `${summary.criticalCount} need attention` : undefined}
+          tone={summary && summary.criticalCount > 0 ? 'danger' : 'muted'}
           loading={isLoadingSummary}
         />
         <KpiCard
-          title="AI Replenishment"
+          title="Recommended orders"
           value={summary?.pendingRecommendations}
-          subtitle="Smart optimizations"
-          icon="solar:graph-up-bold-duotone"
+          meta="Ready for review"
           loading={isLoadingSummary}
         />
         <KpiCard
-          title="System Security"
+          title="Open alerts"
           value={summary?.openAlertCount}
-          change={summary?.openAlertCount === 0 ? 'Protocol optimal' : undefined}
-          positive={summary?.openAlertCount === 0}
-          negative={summary ? summary.openAlertCount > 0 : undefined}
-          icon="solar:shield-warning-bold-duotone"
+          meta={summary?.openAlertCount === 0 ? 'All clear' : 'Review pending issues'}
+          tone={summary?.openAlertCount === 0 ? 'success' : 'danger'}
           loading={isLoadingSummary}
         />
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Sales Trend Chart — live data from salesTrend query */}
-        <div className="lg:col-span-2 bg-surface border border-border rounded-2xl shadow-sm p-7">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-base font-bold text-foreground tracking-tight">Weekly Performance Velocity</h2>
-            <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-accent shadow-md shadow-accent/20" aria-hidden="true" />
-                <span className="text-muted">Recorded Sales</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-surface-raised" aria-hidden="true" />
-                <span className="text-muted/40">Projection</span>
-              </div>
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+        <div className="rounded-xl border border-border bg-surface p-6">
+          <div className="flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Sales this week</h2>
+              <p className="mt-1 text-sm text-muted">Daily revenue from recorded orders.</p>
             </div>
-          </div>
-          <SalesTrendChart data={salesTrend} loading={isLoadingTrend} />
-        </div>
-
-        {/* Low Stock Widget */}
-        <div className="bg-surface border border-border rounded-2xl shadow-sm p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-base font-bold text-foreground tracking-tight">Stock Deviations</h2>
-            <Link
-              href="/alerts"
-              className="text-[10px] font-bold uppercase tracking-widest text-accent hover:text-accent/80 transition-colors"
-            >
-              Monitor All
-            </Link>
-          </div>
-          <div className="flex-1 space-y-1" aria-live="polite" aria-busy={isLoadingLowStock}>
-            {isLoadingLowStock ? (
-              Array.from({ length: 4 }).map((_, i) => <LowStockSkeleton key={i} />)
-            ) : (lowStockItems ?? []).length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="w-16 h-16 bg-success-subtle/30 rounded-full flex items-center justify-center mx-auto mb-4 border border-success/10">
-                  <iconify-icon icon="solar:check-circle-bold-duotone" width="32" height="32" className="text-success shadow-sm" aria-hidden="true" />
-                </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Inventory Optimized</p>
-              </div>
-            ) : (
-              lowStockItems!.map((item) => <LowStockRow key={item._id} item={item} />)
+            {!isLoadingTrend && weeklyRevenue > 0 && (
+              <p className="text-sm text-muted">
+                {fmtCurrency(weeklyRevenue)} across {weeklyOrders.toLocaleString()} orders
+              </p>
             )}
           </div>
-          {!isLoadingLowStock && (lowStockItems ?? []).length > 0 && (
+
+          <div className="pt-6">
+            <SalesTrendChart data={salesTrend} loading={isLoadingTrend} />
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-surface p-6">
+          <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Stock risks</h2>
+              <p className="mt-1 text-sm text-muted">Items close to or below their minimum level.</p>
+            </div>
+            <Link href="/alerts" className="text-sm font-medium text-accent hover:text-accent/80">
+              View all
+            </Link>
+          </div>
+
+          <div className="pt-6" aria-live="polite" aria-busy={isLoadingLowStock}>
+            {isLoadingLowStock ? (
+              Array.from({ length: 4 }).map((_, index) => <LowStockSkeleton key={index} />)
+            ) : stockRiskCount === 0 ? (
+              <p className="text-sm text-muted">Nothing needs restocking right now.</p>
+            ) : (
+              lowStockItems?.map((item) => <LowStockRow key={item._id} item={item} />)
+            )}
+          </div>
+
+          {!isLoadingLowStock && stockRiskCount > 0 && (
             <Link
               href="/purchase-planning"
-              className="w-full mt-6 py-3 bg-surface border border-border rounded-xl text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-surface-raised transition-all text-center block active:scale-[0.98]"
+              className="mt-6 inline-flex text-sm font-medium text-accent hover:text-accent/80"
             >
-              Initiate Bulk Restock
+              Open purchase plan
             </Link>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* AI Reorder Recommendations */}
-        <div className="bg-surface border border-border rounded-2xl shadow-sm p-7">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3 min-w-0">
-              <h2 className="text-base font-bold text-foreground tracking-tight truncate">Smart Replenishment</h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-success-subtle/50 text-success border border-success/10 shadow-sm">
-                Active AI
-              </span>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-surface p-6">
+          <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Purchase recommendations</h2>
+              <p className="mt-1 text-sm text-muted">The next items worth ordering based on current demand.</p>
             </div>
-            <Link href="/purchase-planning" className="text-[10px] font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors">
-              Full Report
+            <Link href="/purchase-planning" className="text-sm font-medium text-accent hover:text-accent/80">
+              Open planning
             </Link>
           </div>
-          <div className="space-y-4" aria-live="polite" aria-busy={isLoadingRecs}>
+
+          <div className="pt-6" aria-live="polite" aria-busy={isLoadingRecs}>
             {isLoadingRecs ? (
-              <><RecSkeleton /><RecSkeleton /></>
-            ) : (reorderRecs ?? []).length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="w-16 h-16 bg-surface-raised rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border">
-                  <iconify-icon icon="solar:cart-large-bold-duotone" width="32" height="32" className="text-muted/20" aria-hidden="true" />
-                </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted/60">No pending suggestions</p>
-              </div>
+              Array.from({ length: 3 }).map((_, index) => <RecommendationSkeleton key={index} />)
+            ) : displayedRecommendations.length === 0 ? (
+              <p className="text-sm text-muted">No order recommendations are waiting for review.</p>
             ) : (
-              reorderRecs!.slice(0, 2).map((rec) => <RecommendationCard key={rec._id} rec={rec} />)
+              displayedRecommendations.map((rec) => <RecommendationRow key={rec._id} rec={rec} />)
             )}
           </div>
         </div>
 
-        {/* Anomalies */}
-        <div className="bg-surface border border-border rounded-2xl shadow-sm p-7">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-base font-bold text-foreground tracking-tight">Security &amp; Logic Anomalies</h2>
-            <Link
-              href="/alerts"
-              className="text-[10px] font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors"
-            >
-              Audits
+        <div className="rounded-xl border border-border bg-surface p-6">
+          <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Open anomalies</h2>
+              <p className="mt-1 text-sm text-muted">Issues that still need review.</p>
+            </div>
+            <Link href="/alerts" className="text-sm font-medium text-accent hover:text-accent/80">
+              Review alerts
             </Link>
           </div>
 
-          <div aria-live="polite" aria-busy={isLoadingAnomalies} className="space-y-4">
+          <div className="pt-6" aria-live="polite" aria-busy={isLoadingAnomalies}>
             {isLoadingAnomalies ? (
-              Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="p-5 rounded-2xl border border-border animate-pulse space-y-3">
-                  <div className="h-5 bg-surface-raised rounded-lg w-1/2" />
-                  <div className="h-3.5 bg-surface-raised rounded-md w-3/4" />
-                  <div className="h-3.5 bg-surface-raised rounded-md w-2/3" />
-                </div>
-              ))
-            ) : (anomalies ?? []).length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="w-20 h-20 bg-accent/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-accent/10 relative">
-                   <div className="absolute inset-0 bg-accent/10 rounded-full animate-ping opacity-20" />
-                  <iconify-icon icon="solar:shield-check-bold-duotone" width="40" height="40" className="text-accent opacity-40 shadow-sm" aria-hidden="true" />
-                </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted/60">System Integrity Zero Defect</p>
-              </div>
+              Array.from({ length: 3 }).map((_, index) => <RecommendationSkeleton key={index} />)
+            ) : displayedAnomalies.length === 0 ? (
+              <p className="text-sm text-muted">No anomalies are open.</p>
             ) : (
-              anomalies!.slice(0, 3).map((anomaly) => (
-                <div key={anomaly._id} className="p-5 rounded-2xl bg-danger-subtle/30 border border-danger/10 flex gap-4 group transition-all hover:bg-danger-subtle/50" role="alert">
-                  <div className="mt-0.5 shrink-0 p-2.5 bg-danger/10 rounded-xl group-hover:scale-110 transition-transform">
-                    <iconify-icon icon="solar:danger-triangle-bold-duotone" width="22" height="22" className="text-danger" aria-hidden="true" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-danger mb-1.5 truncate leading-none" title={anomaly.title}>
-                      {anomaly.title}
-                    </h3>
-                    <p className="text-xs text-danger/70 mb-3 line-clamp-2 font-medium leading-relaxed italic">&ldquo;{anomaly.description}&rdquo;</p>
-                    <Link
-                      href="/alerts"
-                      className="text-[10px] font-bold uppercase tracking-widest text-danger hover:text-danger/80 flex items-center gap-1.5 group/link"
-                    >
-                      Investigate Protocol
-                      <iconify-icon icon="solar:arrow-right-linear" width="12" height="12" className="group-hover/link:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-                </div>
-              ))
+              displayedAnomalies.map((anomaly) => <AnomalyRow key={anomaly._id} anomaly={anomaly} />)
             )}
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
