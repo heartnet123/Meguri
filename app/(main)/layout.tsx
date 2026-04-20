@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { ReactNode, useMemo, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useMutation, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useWorkspaceId, useWorkspaceLoading, useHasNoWorkspaces } from '@/app/providers/WorkspaceProvider';
+import { useWorkspaceId, useWorkspaceLoading, useHasNoWorkspaces, useSwitchWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useTheme } from '@/app/providers/ThemeProvider';
 
 type NavItemConfig = {
@@ -73,10 +73,16 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
 
-  const currentWorkspace = useQuery(api.workspaces.myWorkspace);
   const workspaces = useQuery(api.workspaces.myWorkspaces);
   const currentUser = useQuery(api.users.me) as CurrentUser | null | undefined;
   const { theme, toggleTheme } = useTheme();
+  const switchWorkspace = useSwitchWorkspace();
+
+  const currentWorkspace = useMemo(() => {
+    if (!workspaces || workspaces.length === 0) return null;
+    if (!workspaceId) return workspaces[0];
+    return workspaces.find((workspace) => workspace._id === workspaceId) ?? workspaces[0];
+  }, [workspaces, workspaceId]);
 
   // Derive the current user's role for this workspace
   const myRole = workspaces?.find((w) => w._id === workspaceId)?.role;
@@ -233,9 +239,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                         return (
                           <button key={workspace._id} type="button" onClick={() => {
                             if (active) return;
-                            localStorage.setItem('smartstock-current-workspace', workspace._id);
                             setWorkspaceMenuOpen(false);
-                            window.location.reload();
+                            switchWorkspace(workspace._id);
                           }} className={`flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors ${active ? 'bg-accent-subtle' : 'hover:bg-subtle'}`}>
                             <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ${active ? 'bg-accent text-accent-fg' : 'bg-surface-raised text-muted'}`}>
                               {workspace.name.slice(0, 2).toUpperCase()}
