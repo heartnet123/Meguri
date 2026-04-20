@@ -16,10 +16,10 @@ export default function ReportsPage() {
   const reports: Report[] = [
     {
       id: 'REP-001',
-      title: 'Consolidated Revenue Matrix',
-      description: 'Comprehensive overview of sales performance, top velocity products, and unit margins.',
-      type: 'Financial',
-      frequency: 'Monthly',
+      title: 'รายงานสรุปรายได้รวม',
+      description: 'ภาพรวมผลการขาย สินค้าหมุนเร็ว และกำไรต่อหน่วยในมุมมองเดียว',
+      type: 'การเงิน',
+      frequency: 'รายเดือน',
       lastGenerated: '2026-03-01',
       icon: 'solar:chart-square-bold-duotone',
       iconColor: 'text-accent',
@@ -27,10 +27,10 @@ export default function ReportsPage() {
     },
     {
       id: 'REP-002',
-      title: 'Global Asset Valuation',
-      description: 'Real-time valuation of all on-hand stock assets categorized by operational risk.',
-      type: 'Inventory',
-      frequency: 'Weekly',
+      title: 'ประเมินมูลค่าสินทรัพย์คงคลัง',
+      description: 'ประเมินมูลค่าสินค้าคงคลังทั้งหมดแบบเรียลไทม์ พร้อมจัดกลุ่มตามความเสี่ยงเชิงปฏิบัติการ',
+      type: 'สินค้าคงคลัง',
+      frequency: 'รายสัปดาห์',
       lastGenerated: '2026-03-15',
       icon: 'solar:pie-chart-2-bold-duotone',
       iconColor: 'text-success',
@@ -38,10 +38,10 @@ export default function ReportsPage() {
     },
     {
       id: 'REP-003',
-      title: 'Predictive Variance Audit',
-      description: 'High-fidelity comparison of AI-forecasted demand vs verified actual sales velocity.',
-      type: 'Intelligence',
-      frequency: 'Monthly',
+      title: 'ตรวจสอบความคลาดเคลื่อนเชิงคาดการณ์',
+      description: 'เปรียบเทียบความต้องการที่ AI คาดการณ์กับยอดขายจริงอย่างละเอียด',
+      type: 'การวิเคราะห์',
+      frequency: 'รายเดือน',
       lastGenerated: '2026-03-01',
       icon: 'solar:graph-up-bold-duotone',
       iconColor: 'text-accent',
@@ -49,10 +49,10 @@ export default function ReportsPage() {
     },
     {
       id: 'REP-004',
-      title: 'Vendor Reliability Index',
-      description: 'Algorithmic scoring of vendor lead times, fulfillment integrity, and defect rates.',
-      type: 'Procurement',
-      frequency: 'Quarterly',
+      title: 'ดัชนีความน่าเชื่อถือของซัพพลายเออร์',
+      description: 'ให้คะแนนซัพพลายเออร์ตามระยะเวลาจัดส่ง ความครบถ้วนของการส่งมอบ และอัตราของเสีย',
+      type: 'จัดซื้อ',
+      frequency: 'รายไตรมาส',
       lastGenerated: '2026-01-01',
       icon: 'solar:document-text-bold-duotone',
       iconColor: 'text-warning',
@@ -60,10 +60,10 @@ export default function ReportsPage() {
     },
     {
       id: 'REP-005',
-      title: 'Critical Stockout Forensics',
-      description: 'Historical audit of stockout events, recovery duration, and lost opportunity cost.',
-      type: 'Operational',
-      frequency: 'Weekly',
+      title: 'วิเคราะห์เหตุการณ์สินค้าขาดสต็อก',
+      description: 'ตรวจสอบประวัติสินค้าขาดสต็อก ระยะเวลาฟื้นตัว และต้นทุนของโอกาสที่สูญเสีย',
+      type: 'ปฏิบัติการ',
+      frequency: 'รายสัปดาห์',
       lastGenerated: '2026-03-15',
       icon: 'solar:document-bold-duotone',
       iconColor: 'text-danger',
@@ -75,13 +75,13 @@ export default function ReportsPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Analytical Suite</h1>
-          <p className="text-sm text-muted mt-2 leading-relaxed max-w-xl">Generate high-fidelity reports, schedule automated data exports, and perform deep-dive forensics.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">ชุดรายงานวิเคราะห์</h1>
+          <p className="text-sm text-muted mt-2 leading-relaxed max-w-xl">สร้างรายงานเชิงลึก ตั้งเวลาส่งออกข้อมูลอัตโนมัติ และตรวจสอบข้อมูลย้อนหลังได้จากที่เดียว</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <button className="inline-flex items-center justify-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-[0.15em] text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 hover:scale-105 active:scale-95">
             <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true"></iconify-icon>
-            Configure Custom Suite
+            ตั้งค่าชุดรายงานแบบกำหนดเอง
           </button>
         </div>
       </div>
@@ -114,11 +114,11 @@ export default function ReportsPage() {
               <div className="pt-6 border-t border-border/50 flex items-center justify-between mt-auto">
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted/40">
                   <iconify-icon icon="solar:history-bold-duotone" width="14" height="14" aria-hidden="true" className="text-muted/20"></iconify-icon>
-                  Sync: <span className="text-muted/60">{report.lastGenerated}</span>
+                  อัปเดตล่าสุด: <span className="text-muted/60">{report.lastGenerated}</span>
                 </div>
                 <button
                   className="w-10 h-10 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/40 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-90 border border-transparent hover:border-accent/10"
-                  aria-label={`Execute Export for ${report.title}`}
+                  aria-label={`ส่งออกรายงาน ${report.title}`}
                 >
                   <iconify-icon icon="solar:file-download-bold-duotone" width="22" height="22" aria-hidden="true"></iconify-icon>
                 </button>

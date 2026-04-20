@@ -62,7 +62,7 @@ function nextLocalId() {
 }
 
 function formatCurrency(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+  return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(n);
 }
 
 function generateDisplayId() {
@@ -201,23 +201,23 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
     if (isWorkspaceLoading || isRecipeLoading) return;
 
     if (!workspaceId) {
-      setError('No active workspace found.');
+      setError('ไม่พบเวิร์กสเปซที่กำลังใช้งาน');
       return;
     }
     if (ingredients.length === 0) {
-      setError('Please add at least one ingredient.');
+      setError('กรุณาเพิ่มวัตถุดิบอย่างน้อย 1 รายการ');
       return;
     }
     if (yieldQty <= 0) {
-      setError('Yield quantity must be greater than zero.');
+      setError('ปริมาณผลผลิตต้องมากกว่าศูนย์');
       return;
     }
     if (!recipeName.trim()) {
-      setError('Recipe name is required.');
+      setError('กรุณาระบุชื่อสินค้า');
       return;
     }
     if (!sku.trim()) {
-      setError('SKU is required.');
+      setError('กรุณาระบุ SKU');
       return;
     }
 
@@ -257,7 +257,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
       }
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'An error occurred';
+      const msg = err instanceof Error ? err.message : 'เกิดข้อผิดพลาดระหว่างบันทึกข้อมูล';
       setError(msg);
     } finally {
       setLoading(false);
@@ -276,15 +276,15 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
         <div className="px-6 py-5 border-b border-border flex items-center justify-between shrink-0 bg-surface-raised">
           <div>
             <h2 id="recipe-editor-title" className="text-lg font-semibold text-foreground">
-              {recipe ? 'Edit Sellable Item' : 'New Sellable Item'}
+              {recipe ? 'แก้ไขสินค้าพร้อมขาย' : 'สร้างสินค้าพร้อมขาย'}
             </h2>
             <p className="text-xs text-muted mt-0.5">
-              Configure name, pricing, and BOM ingredients to produce this item.
+              กำหนดชื่อ ราคา และส่วนผสมตาม BOM สำหรับสินค้านี้
             </p>
           </div>
           <button
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label="ปิดหน้าต่าง"
             className="text-muted hover:text-foreground transition-colors"
           >
             <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
@@ -306,7 +306,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label htmlFor="recipe-name" className="text-xs font-black uppercase tracking-widest text-muted/60">
-                    Product Name <span className="text-danger">*</span>
+                    ชื่อสินค้า <span className="text-danger">*</span>
                   </label>
                   <input
                     id="recipe-name"
@@ -315,7 +315,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                     value={recipeName}
                     onChange={(e) => setRecipeName(e.target.value)}
                     className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 bg-surface text-foreground"
-                    placeholder="e.g. Signature Latte"
+                    placeholder="เช่น ลาเต้ซิกเนเจอร์"
                   />
                 </div>
 
@@ -336,7 +336,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                   </div>
                   <div className="space-y-1.5">
                     <label htmlFor="recipe-category" className="text-xs font-black uppercase tracking-widest text-muted/60">
-                      Category
+                      หมวดหมู่
                     </label>
                     <select
                       id="recipe-category"
@@ -344,16 +344,16 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                       onChange={(e) => setCategory(e.target.value as any)}
                       className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
                     >
-                      <option value="finished_goods">Finished Goods</option>
-                      <option value="bundles">Bundled Items</option>
-                      <option value="raw_materials">Raw Materials (For Sale)</option>
+                      <option value="finished_goods">สินค้าสำเร็จรูป</option>
+                      <option value="bundles">สินค้าชุด</option>
+                      <option value="raw_materials">วัตถุดิบที่จำหน่ายได้</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <label htmlFor="recipe-price" className="text-xs font-black uppercase tracking-widest text-muted/60">
-                    Selling Price <span className="text-danger">*</span>
+                    ราคาขาย <span className="text-danger">*</span>
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">$</span>
@@ -373,7 +373,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label htmlFor="yield-qty" className="text-xs font-black uppercase tracking-widest text-muted/60">
-                      Recipe Yield <span className="text-danger">*</span>
+                      ปริมาณผลผลิตต่อสูตร <span className="text-danger">*</span>
                     </label>
                     <input
                       id="yield-qty"
@@ -388,7 +388,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                   </div>
                   <div className="space-y-1.5">
                     <label htmlFor="yield-unit" className="text-xs font-black uppercase tracking-widest text-muted/60">
-                      Yield Unit
+                      หน่วยผลผลิต
                     </label>
                     <input
                       id="yield-unit"
@@ -397,7 +397,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                       value={yieldUnit}
                       onChange={(e) => setYieldUnit(e.target.value)}
                       className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 bg-surface text-foreground"
-                      placeholder="pcs, cups, servings…"
+                      placeholder="ชิ้น, แก้ว, เสิร์ฟ…"
                     />
                   </div>
                 </div>
@@ -407,11 +407,11 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
               <div className="rounded-xl border border-border bg-surface-raised/50 p-4 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest text-muted/60">Unit Cost</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-muted/60">ต้นทุนต่อหน่วย</div>
                     <div className="mt-1 text-xl font-bold text-foreground tabular-nums">{formatCurrency(unitCost)}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest text-muted/60 text-right">Gross Margin</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-muted/60 text-right">กำไรขั้นต้น</div>
                     <div className={`mt-1 text-xl font-bold text-right tabular-nums ${marginPct >= 30 ? 'text-success' : marginPct >= 15 ? 'text-warning' : 'text-danger'}`}>
                       {marginPct}%
                     </div>
@@ -424,8 +424,8 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                   />
                 </div>
                 <p className="text-[11px] text-muted italic leading-relaxed">
-                  Calculated based on <strong className="text-foreground">{ingredients.length} ingredients</strong>.
-                  Profit per unit: <strong className="text-foreground">{formatCurrency(margin)}</strong>.
+                  คำนวณจาก <strong className="text-foreground">{ingredients.length} วัตถุดิบ</strong>
+                  {' '}กำไรต่อหน่วย: <strong className="text-foreground">{formatCurrency(margin)}</strong>
                 </p>
               </div>
             </form>
@@ -436,8 +436,8 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
             <div className="space-y-3 shrink-0">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-foreground">
-                  Bill of Materials (BOM)
-                  <span className="ml-1.5 text-xs font-normal text-muted">({ingredients.length} items)</span>
+                  รายการวัตถุดิบ (BOM)
+                  <span className="ml-1.5 text-xs font-normal text-muted">({ingredients.length} รายการ)</span>
                 </h3>
               </div>
 
@@ -452,7 +452,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                   type="search"
                   value={ingredientSearch}
                   onChange={(e) => setIngredientSearch(e.target.value)}
-                  placeholder="Add inventory item as ingredient…"
+                  placeholder="เพิ่มวัตถุดิบจากสินค้าคงคลัง…"
                   className="w-full pl-9 pr-4 py-2 text-sm border border-border bg-surface text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20"
                 />
               </div>
@@ -483,8 +483,8 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
               {ingredients.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-border rounded-2xl bg-surface/50">
                   <iconify-icon icon="solar:layers-minimalistic-linear" width="48" height="48" className="text-muted/30 mb-4" />
-                  <p className="text-sm text-muted">No ingredients added yet.</p>
-                  <p className="text-xs text-muted/60 mt-1">Search above to build your recipe.</p>
+                  <p className="text-sm text-muted">ยังไม่มีการเพิ่มวัตถุดิบ</p>
+                  <p className="text-xs text-muted/60 mt-1">ค้นหาด้านบนเพื่อเริ่มสร้างสูตรสินค้า</p>
                 </div>
               ) : (
                 <div className="space-y-2 pb-4">
@@ -536,8 +536,8 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
         <div className="px-6 py-4 border-t border-border flex items-center justify-between gap-3 bg-surface-raised shrink-0">
           <div className="text-xs text-muted">
              {ingredients.length > 0 
-                ? `${ingredients.length} BOM components · Batch Cost: ${formatCurrency(batchCost)}`
-                : 'Define ingredients to calculate unit cost'
+                ? `${ingredients.length} รายการวัตถุดิบ · ต้นทุนรวมต่อชุด: ${formatCurrency(batchCost)}`
+                : 'ระบุวัตถุดิบเพื่อคำนวณต้นทุนต่อหน่วย'
              }
           </div>
           <div className="flex items-center gap-3">
@@ -546,7 +546,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-raised transition-colors"
             >
-              Cancel
+              ยกเลิก
             </button>
             <button
               type="submit"
@@ -557,7 +557,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
               {(loading || isWorkspaceLoading) && (
                 <iconify-icon icon="solar:refresh-circle-linear" width="16" height="16" className="animate-spin" />
               )}
-              {recipe ? 'Update Item' : 'Create Item'}
+              {recipe ? 'อัปเดตสินค้า' : 'สร้างสินค้า'}
             </button>
           </div>
         </div>

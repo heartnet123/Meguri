@@ -1,10 +1,10 @@
 import { mutation, query, MutationCtx } from './_generated/server';
 import { v, ConvexError } from 'convex/values';
 import { Doc, Id } from './_generated/dataModel';
-import { getCurrentUser } from './utils';
+import { ensureCurrentUser, getCurrentUser, getMembership, verifyWorkspace, checkRole } from './utils';
 
 /**
- * Create a new workspace and the owner user profile in one transaction.
+ * Create a new workspace and add the user as owner.
  * Called from the onboarding flow after a user signs up.
  */
 export const create = mutation({
@@ -15,17 +15,7 @@ export const create = mutation({
     timezone: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Unauthenticated');
-
-    const existingUser = await ctx.db
-      .query('users')
-      .withIndex('by_better_auth_id', (q) => q.eq('betterAuthId', identity.tokenIdentifier))
-      .unique();
-
-    if (existingUser?.workspaceId) {
-      throw new Error('You already belong to a workspace. You cannot create another one from onboarding.');
-    }
+    const user = await ensureCurrentUser(ctx);
 
     const existing = await ctx.db
       .query('workspaces')
@@ -43,22 +33,13 @@ export const create = mutation({
       createdAt: Date.now(),
     });
 
-    if (existingUser) {
-      await ctx.db.patch(existingUser._id, { workspaceId, role: 'owner' });
-      await upsertMembership(ctx, workspaceId, existingUser._id, 'owner');
-    } else {
-      const userId = await ctx.db.insert('users', {
-        workspaceId,
-        betterAuthId: identity.tokenIdentifier,
-        name: identity.name ?? 'Owner',
-        email: identity.email ?? '',
-        role: 'owner',
-        avatarUrl: identity.pictureUrl,
-        notificationsEnabled: true,
-        createdAt: Date.now(),
-      });
-      await upsertMembership(ctx, workspaceId, userId, 'owner');
-    }
+    // Create owner membership
+    await ctx.db.insert('workspaceMemberships', {
+      workspaceId,
+      userId: user._id,
+      role: 'owner',
+      joinedAt: Date.now(),
+    });
 
     return workspaceId;
   },
@@ -68,7 +49,7 @@ async function upsertMembership(
   ctx: MutationCtx,
   workspaceId: Id<'workspaces'>,
   userId: Id<'users'>,
-  role: 'owner' | 'admin' | 'manager' | 'staff'
+  role: 'owner' | 'admin' | 'manager' | 'staff' | 'viewer'
 ) {
   const existing = await ctx.db
     .query('workspaceMemberships')
@@ -89,14 +70,24 @@ async function upsertMembership(
 }
 
 /**
- * Returns the workspace the authenticated user belongs to.
+ * Returns the first workspace the authenticated user belongs to.
+ * Use this for default workspace selection or when user has no specific preference.
  */
 export const myWorkspace = query({
   args: {},
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
-    if (!user?.workspaceId) return null;
-    return ctx.db.get(user.workspaceId);
+    if (!user) return null;
+
+    // Get first membership (most recently joined)
+    const membership = await ctx.db
+      .query('workspaceMemberships')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .order('desc')
+      .first();
+
+    if (!membership) return null;
+    return ctx.db.get(membership.workspaceId);
   },
 });
 
@@ -133,22 +124,91 @@ export const myWorkspaces = query({
   },
 });
 
+/**
+ * Verify user has access to workspace and return role.
+ * The UI tracks "current" workspace in local state; this just validates access.
+ */
 export const switchWorkspace = mutation({
   args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, { workspaceId }) => {
     const user = await getCurrentUser(ctx);
     if (!user) throw new ConvexError('Unauthenticated');
 
-    const membership = await ctx.db
-      .query('workspaceMemberships')
-      .withIndex('by_user_workspace', (q) => q.eq('userId', user._id).eq('workspaceId', workspaceId))
-      .unique();
-
+    const membership = await getMembership(ctx, user._id, workspaceId);
     if (!membership) {
       throw new ConvexError('You do not have access to this workspace.');
     }
 
-    await ctx.db.patch(user._id, { workspaceId });
-    return workspaceId;
+    return { workspaceId, role: membership.role };
+  },
+});
+
+/**
+ * Remove a member from the workspace.
+ * - Owner/admin only; cannot remove the workspace owner.
+ */
+export const removeMember = mutation({
+  args: {
+    workspaceId: v.id('workspaces'),
+    userId: v.id('users'),
+  },
+  handler: async (ctx, { workspaceId, userId }) => {
+    const { user, membership } = await verifyWorkspace(ctx, workspaceId);
+    checkRole(membership, ['owner', 'admin']);
+
+    // Prevent removing yourself as owner
+    if (user._id === userId && membership.role === 'owner') {
+      throw new ConvexError('ไม่สามารถลบเจ้าของเวิร์กสเปซออกจากเวิร์กสเปซได้');
+    }
+
+    const targetMembership = await getMembership(ctx, userId, workspaceId);
+    if (!targetMembership) {
+      throw new ConvexError('ไม่พบสมาชิกในเวิร์กสเปซนี้');
+    }
+
+    // Admins cannot remove the owner or other admins
+    if (membership.role === 'admin' && (targetMembership.role === 'owner' || targetMembership.role === 'admin')) {
+      throw new ConvexError('ผู้ดูแลระบบไม่สามารถลบเจ้าของหรือผู้ดูแลระบบคนอื่นออกได้');
+    }
+
+    await ctx.db.delete(targetMembership._id);
+  },
+});
+
+/**
+ * Change a member's role in the workspace.
+ * - Owner/admin only; cannot reassign the owner role.
+ */
+export const changeMemberRole = mutation({
+  args: {
+    workspaceId: v.id('workspaces'),
+    userId: v.id('users'),
+    newRole: v.union(
+      v.literal('admin'),
+      v.literal('manager'),
+      v.literal('staff'),
+      v.literal('viewer'),
+    ),
+  },
+  handler: async (ctx, { workspaceId, userId, newRole }) => {
+    const { membership } = await verifyWorkspace(ctx, workspaceId);
+    checkRole(membership, ['owner', 'admin']);
+
+    const targetMembership = await getMembership(ctx, userId, workspaceId);
+    if (!targetMembership) {
+      throw new ConvexError('ไม่พบสมาชิกในเวิร์กสเปซนี้');
+    }
+
+    // Cannot change the owner's role
+    if (targetMembership.role === 'owner') {
+      throw new ConvexError('ไม่สามารถเปลี่ยนบทบาทของเจ้าของเวิร์กสเปซได้');
+    }
+
+    // Admins cannot elevate others to owner, or change other admins
+    if (membership.role === 'admin' && targetMembership.role === 'admin') {
+      throw new ConvexError('ผู้ดูแลระบบไม่สามารถเปลี่ยนบทบาทของผู้ดูแลระบบคนอื่นได้');
+    }
+
+    await ctx.db.patch(targetMembership._id, { role: newRole });
   },
 });

@@ -46,27 +46,27 @@ type AlertStats = {
 };
 
 const TYPE_LABELS: Record<AlertType, string> = {
-  low_stock: 'Low Stock',
-  unusual_demand: 'Unusual Demand',
-  supplier: 'Supplier',
-  price_change: 'Price Change',
-  system: 'System',
+  low_stock: 'สต็อกต่ำ',
+  unusual_demand: 'ความต้องการผิดปกติ',
+  supplier: 'ซัพพลายเออร์',
+  price_change: 'ราคาเปลี่ยนแปลง',
+  system: 'ระบบ',
 };
 
 const CATEGORY_LABELS: Record<AlertCategory, string> = {
-  stock: 'Stock',
-  anomaly: 'Anomaly',
-  supplier: 'Supplier',
-  system: 'System',
+  stock: 'สต็อก',
+  anomaly: 'ความผิดปกติ',
+  supplier: 'ซัพพลายเออร์',
+  system: 'ระบบ',
 };
 
 function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return `${mins} นาทีที่แล้ว`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+  if (hrs < 24) return `${hrs} ชม.ที่แล้ว`;
+  return `${Math.floor(hrs / 24)} วันที่แล้ว`;
 }
 
 function StatSkeleton() {
@@ -213,9 +213,9 @@ export default function AlertsPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Alert Inbox</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">กล่องแจ้งเตือน</h1>
           <p className="text-sm text-muted mt-1.5 leading-relaxed">
-            Triage stock warnings, anomaly signals, supplier issues, and system alerts.
+            จัดการคำเตือนสต็อก สัญญาณความผิดปกติ ปัญหาจากซัพพลายเออร์ และการแจ้งเตือนจากระบบ
           </p>
         </div>
         <button
@@ -224,16 +224,16 @@ export default function AlertsPage() {
           className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-40 active:scale-[0.98]"
         >
           <iconify-icon icon="solar:check-circle-bold-duotone" width="18" height="18" aria-hidden="true" className="text-success" />
-          {resolvingAll ? 'Resolving…' : 'Resolve All Open'}
+          {resolvingAll ? 'กำลังปิดรายการ…' : 'ปิดรายการที่เปิดอยู่ทั้งหมด'}
         </button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { label: 'Open Alerts', value: stats?.open, color: 'text-foreground', icon: 'solar:bell-bold-duotone', bg: 'bg-surface-raised/50' },
-          { label: 'Critical Alerts', value: stats?.critical, color: 'text-danger', icon: 'solar:danger-bold-duotone', bg: 'bg-danger-subtle/20' },
-          { label: 'Anomaly Alerts', value: stats?.unusual, color: 'text-accent', icon: 'solar:graph-up-bold-duotone', bg: 'bg-accent-subtle/20' },
-          { label: 'Stock Alerts', value: stats?.lowStock, color: 'text-warning', icon: 'solar:box-bold-duotone', bg: 'bg-warning-subtle/20' },
+          { label: 'การแจ้งเตือนที่เปิดอยู่', value: stats?.open, color: 'text-foreground', icon: 'solar:bell-bold-duotone', bg: 'bg-surface-raised/50' },
+          { label: 'การแจ้งเตือนวิกฤต', value: stats?.critical, color: 'text-danger', icon: 'solar:danger-bold-duotone', bg: 'bg-danger-subtle/20' },
+          { label: 'การแจ้งเตือนความผิดปกติ', value: stats?.unusual, color: 'text-accent', icon: 'solar:graph-up-bold-duotone', bg: 'bg-accent-subtle/20' },
+          { label: 'การแจ้งเตือนสต็อก', value: stats?.lowStock, color: 'text-warning', icon: 'solar:box-bold-duotone', bg: 'bg-warning-subtle/20' },
         ].map(({ label, value, color, icon, bg }) => (
           <div key={label} className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-accent/20 transition-all">
             <div className="flex items-center justify-between mb-3">
@@ -263,41 +263,41 @@ export default function AlertsPage() {
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search alerts by title or description…"
-              aria-label="Search alerts"
+              placeholder="ค้นหาจากหัวข้อหรือรายละเอียดการแจ้งเตือน…"
+              aria-label="ค้นหาการแจ้งเตือน"
               className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
             />
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <select
-              aria-label="Filter by severity"
+              aria-label="กรองตามระดับความรุนแรง"
               value={severityFilter}
               onChange={(e) => setSeverityFilter(e.target.value)}
               className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
             >
-              <option value="">All Severities</option>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="">ทุกระดับความรุนแรง</option>
+              <option value="critical">วิกฤต</option>
+              <option value="high">สูง</option>
+              <option value="medium">กลาง</option>
+              <option value="low">ต่ำ</option>
             </select>
             <select
-              aria-label="Filter by status"
+              aria-label="กรองตามสถานะ"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
             >
-              <option value="">All Statuses</option>
-              <option value="open">Open</option>
-              <option value="resolved">Resolved</option>
+              <option value="">ทุกสถานะ</option>
+              <option value="open">เปิดอยู่</option>
+              <option value="resolved">ปิดแล้ว</option>
             </select>
             <select
-              aria-label="Filter by category"
+              aria-label="กรองตามหมวดหมู่"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
             >
-              <option value="">All Categories</option>
+              <option value="">ทุกหมวดหมู่</option>
               {Object.keys(CATEGORY_LABELS).map((cat) => (
                 <option key={cat} value={cat}>{CATEGORY_LABELS[cat as AlertCategory]}</option>
               ))}
@@ -305,7 +305,7 @@ export default function AlertsPage() {
           </div>
         </div>
 
-        <ul className="divide-y divide-border" aria-label="Alerts list" aria-live="polite" aria-busy={isLoading}>
+        <ul className="divide-y divide-border" aria-label="รายการการแจ้งเตือน" aria-live="polite" aria-busy={isLoading}>
           {isLoading ? (
             Array.from({ length: 5 }).map((_, index) => <AlertSkeleton key={index} />)
           ) : filtered.length === 0 ? (
@@ -314,10 +314,10 @@ export default function AlertsPage() {
                 <iconify-icon icon="solar:bell-bold-duotone" width="32" height="32" className="text-muted/40 mx-auto" aria-hidden="true" />
               </div>
               <p className="text-base font-bold text-foreground">
-                {(alerts ?? []).length === 0 ? "You're all caught up!" : 'No alerts match your filters'}
+                {(alerts ?? []).length === 0 ? 'ตอนนี้ไม่มีรายการค้างแล้ว' : 'ไม่พบการแจ้งเตือนตามตัวกรองที่เลือก'}
               </p>
               <p className="text-sm text-muted mt-1 leading-relaxed">
-                {(alerts ?? []).length === 0 ? "No active alerts in your inbox." : 'Try adjusting your filters or search query.'}
+                {(alerts ?? []).length === 0 ? 'ไม่มีการแจ้งเตือนที่เปิดอยู่ในกล่องรายการของคุณ' : 'ลองปรับตัวกรองหรือคำค้นหาใหม่อีกครั้ง'}
               </p>
             </li>
           ) : (
@@ -341,7 +341,7 @@ export default function AlertsPage() {
                       </h2>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border ${getSeverityClass(alert.severity)}`}>
-                          {alert.severity}
+                          {alert.severity === 'critical' ? 'วิกฤต' : alert.severity === 'high' ? 'สูง' : alert.severity === 'medium' ? 'กลาง' : 'ต่ำ'}
                         </span>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border ${getCategoryClass(alert.category)}`}>
                           {CATEGORY_LABELS[alert.category]}
@@ -351,7 +351,7 @@ export default function AlertsPage() {
                         </span>
                         {alert.status === 'resolved' && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-success-subtle/50 text-success border border-success/20">
-                            Resolved
+                            ปิดแล้ว
                           </span>
                         )}
                       </div>
@@ -368,14 +368,14 @@ export default function AlertsPage() {
 
                     <div className="grid gap-5 md:grid-cols-[240px_1fr_auto] md:items-end p-5 bg-surface-raised/40 rounded-2xl border border-border/60">
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">Assignee</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">ผู้รับผิดชอบ</span>
                         <select
                           value={alert.assignedTo ?? ''}
                           onChange={(e) => handleAssign(alert._id, e.target.value)}
                           disabled={assigningId === alert._id || !workspaceUsers}
                           className="w-full px-3.5 py-2 bg-surface border border-border rounded-xl text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-accent/10 disabled:opacity-50 transition-all"
                         >
-                          <option value="">Unassigned</option>
+                          <option value="">ยังไม่มอบหมาย</option>
                           {(workspaceUsers ?? []).map((user) => (
                             <option key={user._id} value={user._id}>
                               {user.name} ({user.role})
@@ -386,7 +386,7 @@ export default function AlertsPage() {
 
                       {alert.status === 'open' ? (
                         <div className="space-y-1.5">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">Resolution Note</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">บันทึกการแก้ไข</span>
                           <input
                             type="text"
                             value={resolutionDrafts[alert._id] ?? ''}
@@ -396,7 +396,7 @@ export default function AlertsPage() {
                                 [alert._id]: e.target.value,
                               }))
                             }
-                            placeholder="Briefly explain how this was resolved…"
+                            placeholder="อธิบายสั้น ๆ ว่าปิดรายการนี้อย่างไร…"
                             className="w-full px-3.5 py-2 bg-surface border border-border rounded-xl text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-accent/10 transition-all placeholder:text-muted/30"
                           />
                         </div>
@@ -404,10 +404,10 @@ export default function AlertsPage() {
                         <div className="p-4 bg-surface border border-dashed border-border rounded-xl">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-success">Resolved Information</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-success">ข้อมูลการปิดรายการ</span>
                           </div>
                           <div className="text-xs text-foreground/60 font-medium">
-                            {alert.resolvedByName ? `Closed by ${alert.resolvedByName}` : 'System resolved'}
+                            {alert.resolvedByName ? `ปิดโดย ${alert.resolvedByName}` : 'ระบบปิดรายการอัตโนมัติ'}
                             {alert.resolvedAt ? ` • ${timeAgo(alert.resolvedAt)}` : ''}
                           </div>
                           {alert.resolutionNote && (
@@ -424,7 +424,7 @@ export default function AlertsPage() {
                           className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-widest text-accent hover:bg-accent-subtle/50 rounded-xl transition-all"
                         >
                           <iconify-icon icon="solar:arrow-right-up-bold-duotone" width="16" height="16" />
-                          View Record
+                          ดูรายการ
                         </Link>
                         {alert.status === 'open' ? (
                           <button
@@ -433,7 +433,7 @@ export default function AlertsPage() {
                             className="inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised hover:text-success hover:border-success/20 transition-all shadow-sm active:scale-[0.98]"
                           >
                             <iconify-icon icon="solar:check-circle-bold-duotone" width="16" height="16" />
-                            {resolvingId === alert._id ? 'Resolving…' : 'Resolve'}
+                            {resolvingId === alert._id ? 'กำลังปิดรายการ…' : 'ปิดรายการ'}
                           </button>
                         ) : (
                           <button
@@ -442,7 +442,7 @@ export default function AlertsPage() {
                             className="inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised hover:text-accent hover:border-accent/20 transition-all shadow-sm active:scale-[0.98]"
                           >
                             <iconify-icon icon="solar:refresh-bold-duotone" width="16" height="16" />
-                            {reopeningId === alert._id ? 'Reopening…' : 'Reopen'}
+                            {reopeningId === alert._id ? 'กำลังเปิดใหม่…' : 'เปิดใหม่'}
                           </button>
                         )}
                       </div>
@@ -453,7 +453,7 @@ export default function AlertsPage() {
                       {alert.displayId}
                       <span className="mx-1">•</span>
                       <iconify-icon icon="solar:user-bold-duotone" width="12" height="12" />
-                      {alert.assignedToName ? `Owned by ${alert.assignedToName}` : 'No Owner Assigned'}
+                      {alert.assignedToName ? `รับผิดชอบโดย ${alert.assignedToName}` : 'ยังไม่มีผู้รับผิดชอบ'}
                     </div>
                   </div>
                 </div>
@@ -464,8 +464,8 @@ export default function AlertsPage() {
 
         {filtered.length > 0 && (
           <div className="p-5 border-t border-border text-center bg-surface-raised/30">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60">
-              Showing <span className="text-foreground">{filtered.length.toLocaleString()}</span> of <span className="text-foreground">{(alerts ?? []).length.toLocaleString()}</span> total alert inbox messages
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60">
+              แสดง <span className="text-foreground">{filtered.length.toLocaleString()}</span> จากทั้งหมด <span className="text-foreground">{(alerts ?? []).length.toLocaleString()}</span> รายการ
             </span>
           </div>
         )}

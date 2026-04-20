@@ -18,14 +18,14 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: 'SmartStock | Inventory & Demand Forecasting',
-  description: 'Smart Inventory + Demand Forecasting Platform for small businesses.',
+  title: 'SmartStock | ระบบจัดการสต็อกและคาดการณ์ความต้องการ',
+  description: 'แพลตฟอร์มจัดการสินค้าคงคลังและคาดการณ์ความต้องการสำหรับธุรกิจขนาดเล็ก',
 };
 
 export default async function RootLayout({children}: {children: React.ReactNode}) {
   const token = await getToken();
   return (
-    <html lang="en" className={`${geistSans.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
+    <html lang="th" className={`${geistSans.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
       <head>
         <Script src="https://code.iconify.design/iconify-icon/2.0.0/iconify-icon.min.js" strategy="beforeInteractive" />
         <Script id="theme-init" strategy="beforeInteractive">{`(function(){try{var t=localStorage.getItem('ss_theme');var theme=t==='light'||t==='dark'?t:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=theme;}catch(e){document.documentElement.dataset.theme='light';}})();`}</Script>

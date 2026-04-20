@@ -46,7 +46,7 @@ type PasswordStrength = 'weak' | 'fair' | 'strong';
 const MAX_PROFILE_IMAGE_FILE_BYTES = 700 * 1024;
 const MAX_PROFILE_IMAGE_DATA_URL_BYTES = 900 * 1024;
 const PROFILE_TOO_LARGE_MESSAGE =
-  'Your profile photo is too large to save. Please choose an image smaller than 700 KB.';
+  'รูปโปรไฟล์มีขนาดใหญ่เกินกว่าจะบันทึกได้ กรุณาเลือกภาพที่มีขนาดเล็กกว่า 700 KB';
 
 function getPasswordStrength(pw: string): PasswordStrength | null {
   if (!pw) return null;
@@ -63,40 +63,40 @@ function getPasswordStrength(pw: string): PasswordStrength | null {
 }
 
 const DEPARTMENTS: SelectOption[] = [
-  { value: '', label: 'Select department…' },
-  { value: 'operations', label: 'Operations' },
-  { value: 'purchasing', label: 'Purchasing' },
-  { value: 'finance', label: 'Finance' },
-  { value: 'management', label: 'Management' },
-  { value: 'kitchen', label: 'Kitchen / Production' },
-  { value: 'other', label: 'Other' },
+  { value: '', label: 'เลือกแผนก…' },
+  { value: 'operations', label: 'ปฏิบัติการ' },
+  { value: 'purchasing', label: 'จัดซื้อ' },
+  { value: 'finance', label: 'การเงิน' },
+  { value: 'management', label: 'บริหาร' },
+  { value: 'kitchen', label: 'ครัว / การผลิต' },
+  { value: 'other', label: 'อื่น ๆ' },
 ];
 
 const TIMEZONES: SelectOption[] = [
-  { value: 'Asia/Bangkok', label: '(UTC+07:00) Bangkok' },
-  { value: 'Asia/Singapore', label: '(UTC+08:00) Singapore' },
-  { value: 'Asia/Tokyo', label: '(UTC+09:00) Tokyo' },
-  { value: 'Australia/Sydney', label: '(UTC+11:00) Sydney' },
-  { value: 'Europe/London', label: '(UTC+00:00) London' },
-  { value: 'Europe/Paris', label: '(UTC+01:00) Paris' },
-  { value: 'America/New_York', label: '(UTC-05:00) New York' },
-  { value: 'America/Los_Angeles', label: '(UTC-08:00) Los Angeles' },
+  { value: 'Asia/Bangkok', label: '(UTC+07:00) กรุงเทพฯ' },
+  { value: 'Asia/Singapore', label: '(UTC+08:00) สิงคโปร์' },
+  { value: 'Asia/Tokyo', label: '(UTC+09:00) โตเกียว' },
+  { value: 'Australia/Sydney', label: '(UTC+11:00) ซิดนีย์' },
+  { value: 'Europe/London', label: '(UTC+00:00) ลอนดอน' },
+  { value: 'Europe/Paris', label: '(UTC+01:00) ปารีส' },
+  { value: 'America/New_York', label: '(UTC-05:00) นิวยอร์ก' },
+  { value: 'America/Los_Angeles', label: '(UTC-08:00) ลอสแอนเจลิส' },
 ];
 
 const LANGUAGES: SelectOption[] = [
-  { value: 'en', label: 'English' },
-  { value: 'th', label: 'ภาษาไทย (Thai)' },
-  { value: 'zh', label: '中文 (Chinese)' },
-  { value: 'ja', label: '日本語 (Japanese)' },
+  { value: 'en', label: 'อังกฤษ' },
+  { value: 'th', label: 'ไทย' },
+  { value: 'zh', label: 'จีน' },
+  { value: 'ja', label: 'ญี่ปุ่น' },
 ];
 
 const CURRENCIES: SelectOption[] = [
-  { value: 'THB', label: 'THB — Thai Baht (฿)' },
-  { value: 'USD', label: 'USD — US Dollar ($)' },
-  { value: 'SGD', label: 'SGD — Singapore Dollar (S$)' },
-  { value: 'EUR', label: 'EUR — Euro (€)' },
-  { value: 'GBP', label: 'GBP — British Pound (£)' },
-  { value: 'JPY', label: 'JPY — Japanese Yen (¥)' },
+  { value: 'THB', label: 'THB — บาทไทย (฿)' },
+  { value: 'USD', label: 'USD — ดอลลาร์สหรัฐ ($)' },
+  { value: 'SGD', label: 'SGD — ดอลลาร์สิงคโปร์ (S$)' },
+  { value: 'EUR', label: 'EUR — ยูโร (€)' },
+  { value: 'GBP', label: 'GBP — ปอนด์สเตอร์ลิง (£)' },
+  { value: 'JPY', label: 'JPY — เยนญี่ปุ่น (¥)' },
 ];
 
 const DATE_FORMATS: SelectOption[] = [
@@ -124,7 +124,7 @@ type CurrentUser = {
 const DEFAULT_PREFERENCES = {
   department: '',
   timezone: 'Asia/Bangkok',
-  language: 'en',
+  language: 'th',
   currency: 'THB',
   dateFormat: 'DD/MM/YYYY',
 } as const;
@@ -149,7 +149,7 @@ function getProfileSaveErrorMessage(error: unknown) {
     return PROFILE_TOO_LARGE_MESSAGE;
   }
 
-  return rawMessage || 'Failed to save your profile.';
+  return rawMessage || 'ไม่สามารถบันทึกโปรไฟล์ได้';
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -237,7 +237,7 @@ export default function ProfilePage() {
     setAvatarError(null);
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setAvatarError('File must be a PNG, JPEG, or WebP image.');
+      setAvatarError('ไฟล์ต้องเป็นรูปภาพประเภท PNG, JPEG หรือ WebP');
       return;
     }
     if (file.size > MAX_PROFILE_IMAGE_FILE_BYTES) {
@@ -248,7 +248,7 @@ export default function ProfilePage() {
     reader.onload = (ev) => {
       const result = typeof ev.target?.result === 'string' ? ev.target.result : '';
       if (!result) {
-        setAvatarError('Could not read the selected image. Please try again.');
+        setAvatarError('ไม่สามารถอ่านรูปภาพที่เลือกได้ กรุณาลองอีกครั้ง');
         return;
       }
       if (new TextEncoder().encode(result).length > MAX_PROFILE_IMAGE_DATA_URL_BYTES) {
@@ -262,18 +262,18 @@ export default function ProfilePage() {
 
   function validate(): Record<string, string> {
     const errs: Record<string, string> = {};
-    if (!firstName.trim()) errs.firstName = 'Enter your first name.';
-    if (!lastName.trim()) errs.lastName = 'Enter your last name.';
+    if (!firstName.trim()) errs.firstName = 'กรุณากรอกชื่อจริง';
+    if (!lastName.trim()) errs.lastName = 'กรุณากรอกนามสกุล';
     if (!email.trim()) {
-      errs.email = 'Enter your work email address.';
+      errs.email = 'กรุณากรอกอีเมลสำหรับงาน';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errs.email = 'Enter a valid email address (e.g. jane@example.com).';
+      errs.email = 'กรุณากรอกอีเมลให้ถูกต้อง เช่น jane@example.com';
     }
     if (newPassword && newPassword.length < 8) {
-      errs.newPassword = 'New password must be at least 8 characters.';
+      errs.newPassword = 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร';
     }
     if (newPassword && newPassword !== confirmPassword) {
-      errs.confirmPassword = "Passwords don't match. Please try again.";
+      errs.confirmPassword = 'รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
     }
     return errs;
   }
@@ -321,7 +321,9 @@ export default function ProfilePage() {
   const memberSinceLabel = currentUser
     ? new Date(currentUser.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
     : '—';
-  const roleLabel = currentUser?.role ? currentUser.role.replace('_', ' ') : 'account';
+  const roleLabel = currentUser?.role
+    ? ({ owner: 'เจ้าของ', admin: 'ผู้ดูแลระบบ', manager: 'ผู้จัดการ', staff: 'พนักงาน' }[currentUser.role] ?? currentUser.role)
+    : 'บัญชีผู้ใช้';
   const profileInitials = useMemo(() => {
     const parts = [firstName, lastName].filter(Boolean);
     return parts.map((part) => part[0]?.toUpperCase() ?? '').join('').slice(0, 2) || 'SS';
@@ -332,8 +334,8 @@ export default function ProfilePage() {
 
       {/* ── Page header ───────────────────────────────────────────────── */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-black tracking-tight text-foreground">Personnel Identity</h1>
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted leading-relaxed">Management of authentication tiers & professional metadata</p>
+        <h1 className="text-3xl font-black tracking-tight text-foreground">ข้อมูลโปรไฟล์ผู้ใช้</h1>
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted leading-relaxed">จัดการสิทธิ์การเข้าถึง ข้อมูลมืออาชีพ และการตั้งค่าบัญชี</p>
       </div>
 
       {/* ── Identity card ─────────────────────────────────────────────── */}
@@ -357,7 +359,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-surface border border-border flex items-center justify-center hover:bg-surface-raised transition-all shadow-lg active:scale-90 focus:outline-none focus:ring-2 focus:ring-accent ring-offset-2"
-            aria-label="Change profile photo"
+            aria-label="เปลี่ยนรูปโปรไฟล์"
           >
             <iconify-icon icon="solar:camera-bold-duotone" width="16" height="16" className="text-accent" aria-hidden="true"></iconify-icon>
           </button>
@@ -372,7 +374,7 @@ export default function ProfilePage() {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-lg font-black text-foreground truncate tracking-tight">{displayName || `${firstName} ${lastName}`.trim() || 'Unidentified Entity'}</p>
+          <p className="text-lg font-black text-foreground truncate tracking-tight">{displayName || `${firstName} ${lastName}`.trim() || 'ยังไม่ได้ระบุชื่อ'}</p>
           <p className="text-sm font-medium text-muted truncate mt-0.5 opacity-70">{email}</p>
           {avatarError && (
             <p className="text-xs text-danger mt-2 flex items-center gap-1.5 font-black uppercase tracking-widest" role="alert">
@@ -384,9 +386,9 @@ export default function ProfilePage() {
         <div className="shrink-0 hidden sm:flex flex-col items-end gap-2 text-right">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-black uppercase tracking-widest text-accent">
             <iconify-icon icon="solar:shield-check-bold-duotone" width="14" height="14" aria-hidden="true"></iconify-icon>
-            {roleLabel} LEVEL
+            ระดับสิทธิ์: {roleLabel}
           </div>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/50 leading-none">Active since {memberSinceLabel}</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/50 leading-none">ใช้งานตั้งแต่ {memberSinceLabel}</span>
         </div>
         {/* Decorative corner accent */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-[4rem] -mr-8 -mt-8 blur-2xl" />
@@ -397,12 +399,12 @@ export default function ProfilePage() {
 
           {/* ── Personal information ──────────────────────────────────── */}
           <FormSection
-            title="Biometric & Nominal"
-            description="Operational identity markers visible across the workspace."
+            title="ข้อมูลส่วนตัว"
+            description="ข้อมูลตัวตนที่แสดงให้ทีมเห็นภายในเวิร์กสเปซ"
             icon="solar:user-rounded-bold-duotone"
           >
             <FormRow>
-              <FormField label="First Nominal" htmlFor="firstName" required error={errors.firstName}>
+              <FormField label="ชื่อ" htmlFor="firstName" required error={errors.firstName}>
                 <TextInput
                   id="firstName"
                   type="text"
@@ -416,7 +418,7 @@ export default function ProfilePage() {
                   aria-describedby={errors.firstName ? 'firstName-error' : undefined}
                 />
               </FormField>
-              <FormField label="Last Nominal" htmlFor="lastName" required error={errors.lastName}>
+              <FormField label="นามสกุล" htmlFor="lastName" required error={errors.lastName}>
                 <TextInput
                   id="lastName"
                   type="text"
@@ -433,9 +435,9 @@ export default function ProfilePage() {
             </FormRow>
 
             <FormField
-              label="Interface Handle"
+               label="ชื่อที่ใช้แสดง"
               htmlFor="displayName"
-              hint="Preferred alias for collaborative interaction hubs."
+               hint="ชื่อเรียกที่ต้องการให้แสดงในระบบและระหว่างการทำงานร่วมกัน"
             >
               <TextInput
                 id="displayName"
@@ -452,11 +454,11 @@ export default function ProfilePage() {
 
           {/* ── Contact & role ────────────────────────────────────────── */}
           <FormSection
-            title="Communication Tiers"
-            description="Secure channels for operational synchronization."
+            title="ข้อมูลติดต่อ"
+            description="ช่องทางสำหรับการติดต่อและประสานงานในการทำงาน"
             icon="solar:buildings-2-bold-duotone"
           >
-            <FormField label="Operational Mail" htmlFor="email" required error={errors.email}>
+            <FormField label="อีเมลสำหรับงาน" htmlFor="email" required error={errors.email}>
               <TextInput
                 id="email"
                 type="email"
@@ -472,7 +474,7 @@ export default function ProfilePage() {
             </FormField>
 
             <FormRow>
-              <FormField label="Telephony Link" htmlFor="phone" hint="Emergency protocol activation channel.">
+              <FormField label="เบอร์โทรศัพท์" htmlFor="phone" hint="ช่องทางติดต่อเพิ่มเติมเมื่อจำเป็น">
                 <TextInput
                   id="phone"
                   type="tel"
@@ -482,7 +484,7 @@ export default function ProfilePage() {
                   maxLength={30}
                 />
               </FormField>
-              <FormField label="Executive Designation" htmlFor="jobTitle">
+              <FormField label="ตำแหน่งงาน" htmlFor="jobTitle">
                 <TextInput
                   id="jobTitle"
                   type="text"
@@ -494,7 +496,7 @@ export default function ProfilePage() {
               </FormField>
             </FormRow>
 
-            <FormField label="Functional Department" htmlFor="department">
+            <FormField label="แผนก" htmlFor="department">
               <SelectInput
                 id="department"
                 value={department}
@@ -506,12 +508,12 @@ export default function ProfilePage() {
 
           {/* ── Preferences ───────────────────────────────────────────── */}
           <FormSection
-            title="Regional Overrides"
-            description="Linguistic and temporal constraints for local node synchronization."
+            title="การตั้งค่าภูมิภาค"
+            description="กำหนดภาษา เขตเวลา และรูปแบบข้อมูลให้ตรงกับการใช้งานของคุณ"
             icon="solar:settings-bold-duotone"
           >
             <FormRow>
-              <FormField label="Temporal Zone" htmlFor="timezone">
+              <FormField label="เขตเวลา" htmlFor="timezone">
                 <SelectInput
                   id="timezone"
                   value={timezone}
@@ -519,7 +521,7 @@ export default function ProfilePage() {
                   options={TIMEZONES}
                 />
               </FormField>
-              <FormField label="Linguistic Core" htmlFor="language">
+              <FormField label="ภาษา" htmlFor="language">
                 <SelectInput
                   id="language"
                   value={language}
@@ -530,7 +532,7 @@ export default function ProfilePage() {
             </FormRow>
 
             <FormRow>
-              <FormField label="Fiscal Unit" htmlFor="currency">
+              <FormField label="สกุลเงิน" htmlFor="currency">
                 <SelectInput
                   id="currency"
                   value={currency}
@@ -538,7 +540,7 @@ export default function ProfilePage() {
                   options={CURRENCIES}
                 />
               </FormField>
-              <FormField label="Chronological Schema" htmlFor="dateFormat">
+              <FormField label="รูปแบบวันที่" htmlFor="dateFormat">
                 <SelectInput
                   id="dateFormat"
                   value={dateFormat}
@@ -551,15 +553,15 @@ export default function ProfilePage() {
 
           {/* ── Password & security ───────────────────────────────────── */}
           <FormSection
-            title="Cryptographic Access"
-            description="Security credentials for identity verification."
+            title="ความปลอดภัยบัญชี"
+            description="จัดการข้อมูลยืนยันตัวตนและรหัสผ่านของบัญชี"
             icon="solar:lock-password-bold-duotone"
           >
-            <FormField label="Current Credentials" htmlFor="currentPassword">
+            <FormField label="รหัสผ่านปัจจุบัน" htmlFor="currentPassword">
               <TextInput
                 id="currentPassword"
                 type="password"
-                placeholder="Verify active identity"
+                placeholder="ยืนยันตัวตนด้วยรหัสผ่านปัจจุบัน"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 autoComplete="current-password"
@@ -569,11 +571,11 @@ export default function ProfilePage() {
             <FormRow>
               {/* New password + strength meter */}
               <div className="space-y-3">
-                <FormField label="New Cryptokey" htmlFor="newPassword" error={errors.newPassword}>
+                <FormField label="รหัสผ่านใหม่" htmlFor="newPassword" error={errors.newPassword}>
                   <TextInput
                     id="newPassword"
                     type="password"
-                    placeholder="8+ Entropy characters"
+                      placeholder="อย่างน้อย 8 ตัวอักษร"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     autoComplete="new-password"
@@ -609,20 +611,20 @@ export default function ProfilePage() {
                       }`}
                     >
                       {pwStrength === 'weak'
-                        ? 'Insufficient Entropy'
+                        ? 'ความปลอดภัยต่ำ'
                         : pwStrength === 'fair'
-                        ? 'Standard Resilience'
-                        : 'Maximized Security'}
+                        ? 'ความปลอดภัยปานกลาง'
+                        : 'ความปลอดภัยสูง'}
                     </p>
                   </div>
                 )}
               </div>
 
-              <FormField label="Repeat Pattern" htmlFor="confirmPassword" error={errors.confirmPassword}>
+              <FormField label="ยืนยันรหัสผ่านใหม่" htmlFor="confirmPassword" error={errors.confirmPassword}>
                 <TextInput
                   id="confirmPassword"
                   type="password"
-                  placeholder="Redundant verification"
+                    placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   autoComplete="new-password"
@@ -649,7 +651,7 @@ export default function ProfilePage() {
                 aria-live="polite"
               >
                 <iconify-icon icon="solar:check-circle-bold-duotone" width="18" height="18" aria-hidden="true"></iconify-icon>
-                Synchronization Successful
+                บันทึกข้อมูลสำเร็จ
               </span>
             )}
             <button
@@ -666,11 +668,11 @@ export default function ProfilePage() {
                     aria-hidden="true"
                     className="animate-spin"
                   ></iconify-icon>
-                  Synchronizing…
+                  กำลังบันทึก…
                 </>
               ) : (
                 <>
-                  Upload Changes
+                  บันทึกการเปลี่ยนแปลง
                   <iconify-icon icon="solar:arrow-right-up-linear" width="18" height="18" className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </>
               )}

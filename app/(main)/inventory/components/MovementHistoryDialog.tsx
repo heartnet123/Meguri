@@ -35,7 +35,7 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
       <div className="bg-surface rounded-xl shadow-xl border border-border w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface">
           <h2 className="text-lg font-semibold text-foreground">
-            Stock Movement History
+            ประวัติการเคลื่อนไหวของสต็อก
           </h2>
           <button
             onClick={onClose}
@@ -49,23 +49,23 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
           {movements === undefined ? (
             <div className="p-12 text-center">
                <iconify-icon icon="solar:refresh-circle-linear" width="32" height="32" className="animate-spin text-accent mx-auto mb-3 block" />
-               <p className="text-sm font-medium text-muted">Loading history...</p>
+               <p className="text-sm font-medium text-muted">กำลังโหลดประวัติ...</p>
             </div>
           ) : movements.length === 0 ? (
             <div className="p-12 text-center">
                <iconify-icon icon="solar:history-linear" width="32" height="32" className="text-muted/30 mx-auto mb-3 block" />
-               <p className="text-sm font-medium text-muted">No stock movements found.</p>
+               <p className="text-sm font-medium text-muted">ไม่พบประวัติการเคลื่อนไหวของสต็อก</p>
             </div>
           ) : (
             <table className="w-full text-left text-sm">
               <thead className="text-xs text-muted uppercase bg-surface-raised border-b border-border sticky top-0">
                 <tr>
-                  <th scope="col" className="px-6 py-3 font-medium">Date</th>
-                  {!inventoryItemId && <th scope="col" className="px-6 py-3 font-medium">Item</th>}
-                  <th scope="col" className="px-6 py-3 font-medium">Type</th>
-                  <th scope="col" className="px-6 py-3 font-medium text-right">Qty</th>
-                  <th scope="col" className="px-6 py-3 font-medium">User</th>
-                  <th scope="col" className="px-6 py-3 font-medium">Note</th>
+                  <th scope="col" className="px-6 py-3 font-medium">วันที่</th>
+                  {!inventoryItemId && <th scope="col" className="px-6 py-3 font-medium">สินค้า</th>}
+                  <th scope="col" className="px-6 py-3 font-medium">ประเภท</th>
+                  <th scope="col" className="px-6 py-3 font-medium text-right">จำนวน</th>
+                  <th scope="col" className="px-6 py-3 font-medium">ผู้ใช้</th>
+                  <th scope="col" className="px-6 py-3 font-medium">หมายเหตุ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
@@ -115,7 +115,7 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-raised transition-colors focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-1"
           >
-            Close
+            ปิด
           </button>
         </div>
       </div>

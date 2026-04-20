@@ -12,11 +12,9 @@ export default defineSchema({
   }).index('by_slug', ['slug']),
 
   users: defineTable({
-    workspaceId: v.optional(v.id('workspaces')),
     betterAuthId: v.optional(v.string()),
     name: v.string(),
     email: v.string(),
-    role: v.union(v.literal('owner'), v.literal('admin'), v.literal('manager'), v.literal('staff')),
     avatarUrl: v.optional(v.string()),
     phone: v.optional(v.string()),
     jobTitle: v.optional(v.string()),
@@ -28,14 +26,13 @@ export default defineSchema({
     notificationsEnabled: v.boolean(),
     createdAt: v.number(),
   })
-    .index('by_workspace', ['workspaceId'])
     .index('by_email', ['email'])
     .index('by_better_auth_id', ['betterAuthId']),
 
   workspaceMemberships: defineTable({
     workspaceId: v.id('workspaces'),
     userId: v.id('users'),
-    role: v.union(v.literal('owner'), v.literal('admin'), v.literal('manager'), v.literal('staff')),
+    role: v.union(v.literal('owner'), v.literal('admin'), v.literal('manager'), v.literal('staff'), v.literal('viewer')),
     joinedAt: v.number(),
   })
     .index('by_workspace', ['workspaceId'])
@@ -45,7 +42,8 @@ export default defineSchema({
   invitations: defineTable({
     workspaceId: v.id('workspaces'),
     email: v.string(),
-    role: v.union(v.literal('admin'), v.literal('manager'), v.literal('staff')),
+    invitedUserId: v.optional(v.id('users')),
+    role: v.union(v.literal('admin'), v.literal('manager'), v.literal('staff'), v.literal('viewer')),
     token: v.string(),
     status: v.union(v.literal('pending'), v.literal('accepted'), v.literal('cancelled')),
     invitedBy: v.id('users'),
@@ -54,7 +52,8 @@ export default defineSchema({
   })
     .index('by_workspace', ['workspaceId'])
     .index('by_token', ['token'])
-    .index('by_email', ['email']),
+    .index('by_email', ['email'])
+    .index('by_invited_user', ['invitedUserId']),
 
   suppliers: defineTable({
     workspaceId: v.id('workspaces'),

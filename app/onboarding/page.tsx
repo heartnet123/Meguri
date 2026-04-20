@@ -4,23 +4,24 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import Link from 'next/link';
 
 const TIMEZONES = [
-  { label: 'Bangkok (UTC+7)', value: 'Asia/Bangkok' },
-  { label: 'Singapore (UTC+8)', value: 'Asia/Singapore' },
-  { label: 'Tokyo (UTC+9)', value: 'Asia/Tokyo' },
-  { label: 'London (UTC+0)', value: 'Europe/London' },
-  { label: 'New York (UTC-5)', value: 'America/New_York' },
-  { label: 'Los Angeles (UTC-8)', value: 'America/Los_Angeles' },
+  { label: 'กรุงเทพฯ (UTC+7)', value: 'Asia/Bangkok' },
+  { label: 'สิงคโปร์ (UTC+8)', value: 'Asia/Singapore' },
+  { label: 'โตเกียว (UTC+9)', value: 'Asia/Tokyo' },
+  { label: 'ลอนดอน (UTC+0)', value: 'Europe/London' },
+  { label: 'นิวยอร์ก (UTC-5)', value: 'America/New_York' },
+  { label: 'ลอสแอนเจลิส (UTC-8)', value: 'America/Los_Angeles' },
 ];
 
 const CURRENCIES = [
-  { label: 'THB – Thai Baht', value: 'THB' },
-  { label: 'USD – US Dollar', value: 'USD' },
-  { label: 'SGD – Singapore Dollar', value: 'SGD' },
-  { label: 'GBP – British Pound', value: 'GBP' },
-  { label: 'EUR – Euro', value: 'EUR' },
-  { label: 'JPY – Japanese Yen', value: 'JPY' },
+  { label: 'THB – บาทไทย', value: 'THB' },
+  { label: 'USD – ดอลลาร์สหรัฐ', value: 'USD' },
+  { label: 'SGD – ดอลลาร์สิงคโปร์', value: 'SGD' },
+  { label: 'GBP – ปอนด์สเตอร์ลิง', value: 'GBP' },
+  { label: 'EUR – ยูโร', value: 'EUR' },
+  { label: 'JPY – เยนญี่ปุ่น', value: 'JPY' },
 ];
 
 function slugify(text: string) {
@@ -35,7 +36,7 @@ function slugify(text: string) {
 export default function OnboardingPage() {
   const router = useRouter();
   const createWorkspace = useMutation(api.workspaces.create);
-  const myWorkspace = useQuery(api.workspaces.myWorkspace);
+  const myWorkspaces = useQuery(api.workspaces.myWorkspaces);
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -44,11 +45,7 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (myWorkspace) {
-      router.replace('/dashboard');
-    }
-  }, [myWorkspace, router]);
+  const hasExistingWorkspaces = myWorkspaces && myWorkspaces.length > 0;
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -67,7 +64,7 @@ export default function OnboardingPage() {
       await createWorkspace({ name: name.trim(), slug, currency, timezone });
       router.replace('/dashboard');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to create workspace.';
+      const message = err instanceof Error ? err.message : 'ไม่สามารถสร้างเวิร์กสเปซได้';
       setError(message);
       setIsLoading(false);
     }
@@ -83,10 +80,23 @@ export default function OnboardingPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Set up your workspace</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+            {hasExistingWorkspaces ? 'สร้างเวิร์กสเปซใหม่' : 'ตั้งค่าเวิร์กสเปซของคุณ'}
+          </h1>
           <p className="mt-2 text-sm text-neutral-500">
-            This takes about 30 seconds. You can change these settings later.
+            ใช้เวลาประมาณ 30 วินาที และคุณสามารถกลับมาเปลี่ยนการตั้งค่าเหล่านี้ภายหลังได้
           </p>
+          {hasExistingWorkspaces && (
+            <Link
+              href="/select-workspace"
+              className="inline-flex items-center gap-1 mt-3 text-sm text-teal-600 hover:text-teal-700"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              กลับไปเลือกเวิร์กสเปซ
+            </Link>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
@@ -99,7 +109,7 @@ export default function OnboardingPage() {
           {/* Business name */}
           <div>
             <label htmlFor="workspace-name" className="block text-sm font-medium text-neutral-700">
-              Business name
+              ชื่อธุรกิจ
             </label>
             <input
               id="workspace-name"
@@ -109,14 +119,14 @@ export default function OnboardingPage() {
               value={name}
               onChange={handleNameChange}
               className="mt-1 block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 sm:text-sm"
-              placeholder="Sunflower Bakery"
+              placeholder="เบเกอรีดอกทานตะวัน"
             />
           </div>
 
           {/* Slug */}
           <div>
             <label htmlFor="workspace-slug" className="block text-sm font-medium text-neutral-700">
-              Workspace ID <span className="text-neutral-400 font-normal">(used in invite links)</span>
+              รหัสเวิร์กสเปซ <span className="text-neutral-400 font-normal">(ใช้ในลิงก์คำเชิญ)</span>
             </label>
             <div className="mt-1 flex rounded-lg shadow-sm">
               <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-neutral-300 bg-neutral-50 text-neutral-500 sm:text-sm">
@@ -139,7 +149,7 @@ export default function OnboardingPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="currency" className="block text-sm font-medium text-neutral-700">
-                Currency
+                สกุลเงิน
               </label>
               <select
                 id="currency"
@@ -155,7 +165,7 @@ export default function OnboardingPage() {
             </div>
             <div>
               <label htmlFor="timezone" className="block text-sm font-medium text-neutral-700">
-                Timezone
+                เขตเวลา
               </label>
               <select
                 id="timezone"
@@ -178,7 +188,7 @@ export default function OnboardingPage() {
             className="w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-600 shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             aria-busy={isLoading}
           >
-            {isLoading ? 'Creating workspace…' : 'Create workspace →'}
+            {isLoading ? 'กำลังสร้างเวิร์กสเปซ…' : 'สร้างเวิร์กสเปซ →'}
           </button>
         </form>
       </div>

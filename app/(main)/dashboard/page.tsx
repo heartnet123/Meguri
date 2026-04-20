@@ -13,7 +13,7 @@ type LowStockItem = {
   currentStock: number;
   minStockLevel: number;
   unit: string;
-  status: 'Critical' | 'Warning';
+  status: 'Critical' | 'Warning' | 'วิกฤต' | 'เฝ้าระวัง';
 };
 type Recommendation = {
   _id: string;
@@ -29,13 +29,13 @@ type Anomaly = {
 };
 
 const DEFAULT_TREND_DAYS: TrendDay[] = [
-  { label: 'Mon', revenue: 0, orderCount: 0 },
-  { label: 'Tue', revenue: 0, orderCount: 0 },
-  { label: 'Wed', revenue: 0, orderCount: 0 },
-  { label: 'Thu', revenue: 0, orderCount: 0 },
-  { label: 'Fri', revenue: 0, orderCount: 0 },
-  { label: 'Sat', revenue: 0, orderCount: 0 },
-  { label: 'Sun', revenue: 0, orderCount: 0 },
+  { label: 'จ.', revenue: 0, orderCount: 0 },
+  { label: 'อ.', revenue: 0, orderCount: 0 },
+  { label: 'พ.', revenue: 0, orderCount: 0 },
+  { label: 'พฤ.', revenue: 0, orderCount: 0 },
+  { label: 'ศ.', revenue: 0, orderCount: 0 },
+  { label: 'ส.', revenue: 0, orderCount: 0 },
+  { label: 'อา.', revenue: 0, orderCount: 0 },
 ];
 
 function StatSkeleton({ wide }: { wide?: boolean }) {
@@ -47,9 +47,9 @@ function TextSkeleton({ className = 'w-24' }: { className?: string }) {
 }
 
 function fmtCurrency(value: number) {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('th-TH', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'THB',
     maximumFractionDigits: 0,
   }).format(value);
 }
@@ -118,8 +118,8 @@ function SalesTrendChart({ data, loading }: { data: TrendDay[] | undefined; load
         role="img"
         aria-label={
           isEmpty
-            ? 'No sales have been recorded this week yet.'
-            : `Weekly sales chart. Highest day reached ${fmtCurrency(maxRevenue)} in revenue.`
+            ? 'ยังไม่มีการบันทึกยอดขายในสัปดาห์นี้'
+            : `กราฟยอดขายรายสัปดาห์ วันที่สูงสุดมียอดขาย ${fmtCurrency(maxRevenue)}`
         }
       >
         {chartData.map((day) => {
@@ -141,13 +141,14 @@ function SalesTrendChart({ data, loading }: { data: TrendDay[] | undefined; load
         })}
       </div>
 
-      {isEmpty && <p className="text-sm text-muted">Sales appear here as soon as transactions are recorded.</p>}
+      {isEmpty && <p className="text-sm text-muted">ข้อมูลยอดขายจะแสดงที่นี่เมื่อมีการบันทึกรายการขาย</p>}
     </div>
   );
 }
 
 function LowStockRow({ item }: { item: LowStockItem }) {
-  const isCritical = item.status === 'Critical';
+  const isCritical = item.status === 'Critical' || item.status === 'วิกฤต';
+  const statusLabel = isCritical ? 'วิกฤต' : 'เฝ้าระวัง';
 
   return (
     <div className="flex items-start justify-between gap-4 border-t border-border py-4 first:border-0 first:pt-0 last:pb-0">
@@ -156,7 +157,7 @@ function LowStockRow({ item }: { item: LowStockItem }) {
           {item.name}
         </p>
         <p className="mt-1 text-xs text-muted">
-          Minimum {item.minStockLevel.toLocaleString()} {item.unit}
+          ขั้นต่ำ {item.minStockLevel.toLocaleString()} {item.unit}
         </p>
       </div>
 
@@ -164,7 +165,7 @@ function LowStockRow({ item }: { item: LowStockItem }) {
         <p className={`text-sm font-semibold tabular-nums ${isCritical ? 'text-danger' : 'text-warning'}`}>
           {item.currentStock.toLocaleString()} {item.unit}
         </p>
-        <p className={`mt-1 text-xs ${isCritical ? 'text-danger' : 'text-warning'}`}>{item.status}</p>
+        <p className={`mt-1 text-xs ${isCritical ? 'text-danger' : 'text-warning'}`}>{statusLabel}</p>
       </div>
     </div>
   );
@@ -199,7 +200,7 @@ function RecommendationRow({ rec }: { rec: Recommendation }) {
       </div>
       <div className="shrink-0 text-right">
         <p className="text-xl font-semibold tabular-nums text-foreground">{rec.recommendedQty.toLocaleString()}</p>
-        <p className="text-xs text-muted">units</p>
+        <p className="text-xs text-muted">หน่วย</p>
       </div>
     </div>
   );
@@ -258,10 +259,10 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-6xl space-y-10">
       <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
-          <p className="text-sm font-medium text-muted">Today at a glance</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground">Dashboard</h1>
+          <p className="text-sm font-medium text-muted">ภาพรวมวันนี้</p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground">แดชบอร์ด</h1>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Monitor sales, stock risks, and purchase signals without leaving this page.
+            ติดตามยอดขาย ความเสี่ยงด้านสต็อก และสัญญาณการจัดซื้อได้จากหน้านี้โดยตรง
           </p>
         </div>
 
@@ -269,35 +270,35 @@ export default function DashboardPage() {
           href="/sales"
           className="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-accent-fg transition-colors hover:bg-accent/90"
         >
-          Record entry
+          บันทึกรายการขาย
         </Link>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          title="Revenue today"
+          title="รายได้วันนี้"
           value={summary ? fmtCurrency(summary.todayRevenue) : undefined}
-          meta={summary ? `${summary.todayOrderCount} orders recorded` : undefined}
+          meta={summary ? `บันทึกแล้ว ${summary.todayOrderCount} ออเดอร์` : undefined}
           tone="success"
           loading={isLoadingSummary}
         />
         <KpiCard
-          title="Low-stock items"
+          title="สินค้าที่สต็อกต่ำ"
           value={summary?.lowStockCount}
-          meta={summary ? `${summary.criticalCount} need attention` : undefined}
+          meta={summary ? `${summary.criticalCount} รายการต้องรีบดูแล` : undefined}
           tone={summary && summary.criticalCount > 0 ? 'danger' : 'muted'}
           loading={isLoadingSummary}
         />
         <KpiCard
-          title="Recommended orders"
+          title="คำแนะนำการสั่งซื้อ"
           value={summary?.pendingRecommendations}
-          meta="Ready for review"
+          meta="พร้อมให้ตรวจสอบ"
           loading={isLoadingSummary}
         />
         <KpiCard
-          title="Open alerts"
+          title="การแจ้งเตือนที่เปิดอยู่"
           value={summary?.openAlertCount}
-          meta={summary?.openAlertCount === 0 ? 'All clear' : 'Review pending issues'}
+          meta={summary?.openAlertCount === 0 ? 'ไม่มีประเด็นค้าง' : 'ยังมีรายการรอตรวจสอบ'}
           tone={summary?.openAlertCount === 0 ? 'success' : 'danger'}
           loading={isLoadingSummary}
         />
@@ -307,12 +308,12 @@ export default function DashboardPage() {
         <div className="rounded-xl border border-border bg-surface p-6">
           <div className="flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Sales this week</h2>
-              <p className="mt-1 text-sm text-muted">Daily revenue from recorded orders.</p>
+              <h2 className="text-lg font-semibold text-foreground">ยอดขายสัปดาห์นี้</h2>
+              <p className="mt-1 text-sm text-muted">รายได้รายวันจากออเดอร์ที่บันทึกไว้</p>
             </div>
             {!isLoadingTrend && weeklyRevenue > 0 && (
               <p className="text-sm text-muted">
-                {fmtCurrency(weeklyRevenue)} across {weeklyOrders.toLocaleString()} orders
+                {fmtCurrency(weeklyRevenue)} จากทั้งหมด {weeklyOrders.toLocaleString()} ออเดอร์
               </p>
             )}
           </div>
@@ -325,11 +326,11 @@ export default function DashboardPage() {
         <div className="rounded-xl border border-border bg-surface p-6">
           <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Stock risks</h2>
-              <p className="mt-1 text-sm text-muted">Items close to or below their minimum level.</p>
+              <h2 className="text-lg font-semibold text-foreground">ความเสี่ยงด้านสต็อก</h2>
+              <p className="mt-1 text-sm text-muted">สินค้าที่ใกล้ถึงหรือต่ำกว่าระดับขั้นต่ำ</p>
             </div>
             <Link href="/alerts" className="text-sm font-medium text-accent hover:text-accent/80">
-              View all
+              ดูทั้งหมด
             </Link>
           </div>
 
@@ -337,7 +338,7 @@ export default function DashboardPage() {
             {isLoadingLowStock ? (
               Array.from({ length: 4 }).map((_, index) => <LowStockSkeleton key={index} />)
             ) : stockRiskCount === 0 ? (
-              <p className="text-sm text-muted">Nothing needs restocking right now.</p>
+              <p className="text-sm text-muted">ตอนนี้ยังไม่มีสินค้าที่ต้องเติมสต็อก</p>
             ) : (
               lowStockItems?.map((item) => <LowStockRow key={item._id} item={item} />)
             )}
@@ -348,7 +349,7 @@ export default function DashboardPage() {
               href="/purchase-planning"
               className="mt-6 inline-flex text-sm font-medium text-accent hover:text-accent/80"
             >
-              Open purchase plan
+              เปิดแผนจัดซื้อ
             </Link>
           )}
         </div>
@@ -358,11 +359,11 @@ export default function DashboardPage() {
         <div className="rounded-xl border border-border bg-surface p-6">
           <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Purchase recommendations</h2>
-              <p className="mt-1 text-sm text-muted">The next items worth ordering based on current demand.</p>
+              <h2 className="text-lg font-semibold text-foreground">คำแนะนำการจัดซื้อ</h2>
+              <p className="mt-1 text-sm text-muted">รายการถัดไปที่ควรสั่งซื้อจากความต้องการปัจจุบัน</p>
             </div>
             <Link href="/purchase-planning" className="text-sm font-medium text-accent hover:text-accent/80">
-              Open planning
+              เปิดแผนจัดซื้อ
             </Link>
           </div>
 
@@ -370,7 +371,7 @@ export default function DashboardPage() {
             {isLoadingRecs ? (
               Array.from({ length: 3 }).map((_, index) => <RecommendationSkeleton key={index} />)
             ) : displayedRecommendations.length === 0 ? (
-              <p className="text-sm text-muted">No order recommendations are waiting for review.</p>
+              <p className="text-sm text-muted">ยังไม่มีคำแนะนำการสั่งซื้อที่รอตรวจสอบ</p>
             ) : (
               displayedRecommendations.map((rec) => <RecommendationRow key={rec._id} rec={rec} />)
             )}
@@ -380,11 +381,11 @@ export default function DashboardPage() {
         <div className="rounded-xl border border-border bg-surface p-6">
           <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Open anomalies</h2>
-              <p className="mt-1 text-sm text-muted">Issues that still need review.</p>
+              <h2 className="text-lg font-semibold text-foreground">ความผิดปกติที่เปิดอยู่</h2>
+              <p className="mt-1 text-sm text-muted">ประเด็นที่ยังต้องได้รับการตรวจสอบ</p>
             </div>
             <Link href="/alerts" className="text-sm font-medium text-accent hover:text-accent/80">
-              Review alerts
+              ตรวจสอบการแจ้งเตือน
             </Link>
           </div>
 
@@ -392,7 +393,7 @@ export default function DashboardPage() {
             {isLoadingAnomalies ? (
               Array.from({ length: 3 }).map((_, index) => <RecommendationSkeleton key={index} />)
             ) : displayedAnomalies.length === 0 ? (
-              <p className="text-sm text-muted">No anomalies are open.</p>
+              <p className="text-sm text-muted">ไม่มีความผิดปกติที่เปิดค้างอยู่</p>
             ) : (
               displayedAnomalies.map((anomaly) => <AnomalyRow key={anomaly._id} anomaly={anomaly} />)
             )}

@@ -38,12 +38,12 @@ function StatSkeleton() {
 }
 
 function leadTimeLabel(min: number, max: number) {
-  if (min === max) return `${min} day${min !== 1 ? 's' : ''}`;
-  return `${min}–${max} days`;
+  if (min === max) return `${min} วัน`;
+  return `${min}–${max} วัน`;
 }
 
 function statusLabel(status: Supplier['status']) {
-  return status === 'active' ? 'Active' : status === 'needs_review' ? 'Needs Review' : 'Inactive';
+  return status === 'active' ? 'ใช้งานอยู่' : status === 'needs_review' ? 'ต้องตรวจสอบ' : 'ไม่ใช้งาน';
 }
 
 export default function SuppliersPage() {
@@ -83,17 +83,17 @@ export default function SuppliersPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Supply Chain Network</h1>
-          <p className="text-sm text-muted mt-1.5 leading-relaxed">Manage vendor relationships, procurement leads, and performance metrics.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">เครือข่ายซัพพลายเชน</h1>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">จัดการความสัมพันธ์กับผู้ขาย รายการจัดซื้อ และตัวชี้วัดประสิทธิภาพ</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.98]">
             <iconify-icon icon="solar:export-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
-            Export Registry
+            ส่งออกข้อมูล
           </button>
           <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 active:scale-[0.98]">
             <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
-            Enroll Vendor
+            เพิ่มซัพพลายเออร์
           </button>
         </div>
       </div>
@@ -105,7 +105,7 @@ export default function SuppliersPage() {
             <div className="w-10 h-10 rounded-xl bg-accent-subtle/50 flex items-center justify-center text-accent border border-accent/10 group-hover:scale-110 transition-transform" aria-hidden="true">
               <iconify-icon icon="solar:delivery-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Total Vendors</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">ซัพพลายเออร์ทั้งหมด</h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground">
             {stats === undefined ? <StatSkeleton /> : stats.total.toLocaleString()}
@@ -116,12 +116,12 @@ export default function SuppliersPage() {
             <div className="w-10 h-10 rounded-xl bg-success-subtle/50 flex items-center justify-center text-success border border-success/10 group-hover:scale-110 transition-transform" aria-hidden="true">
               <iconify-icon icon="solar:star-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Avg Reliability</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">ความน่าเชื่อถือเฉลี่ย</h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground flex items-baseline gap-1.5">
             {stats === undefined
               ? <StatSkeleton />
-              : <>{stats.avgRating}<span className="text-[10px] text-muted/40 font-black tracking-[0.2em] uppercase align-baseline">Score</span></>
+              : <>{stats.avgRating}<span className="text-[10px] text-muted/40 font-black tracking-[0.2em] uppercase align-baseline">คะแนน</span></>
             }
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function SuppliersPage() {
             <div className="w-10 h-10 rounded-xl bg-warning-subtle/50 flex items-center justify-center text-warning border border-warning/10 group-hover:scale-110 transition-transform" aria-hidden="true">
               <iconify-icon icon="solar:clock-circle-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Open Fulfilments</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">รายการรอดำเนินการ</h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground">
             {stats === undefined ? <StatSkeleton /> : stats.pendingOrderCount.toLocaleString()}
@@ -151,47 +151,47 @@ export default function SuppliersPage() {
               type="search"
               value={search}
               onChange={(e) => { setSearch(e.target.value); }}
-              placeholder="Search by vendor or contact…"
-              aria-label="Search suppliers"
+              placeholder="ค้นหาจากชื่อซัพพลายเออร์หรือผู้ติดต่อ…"
+              aria-label="ค้นหาซัพพลายเออร์"
               className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
             />
           </div>
           <div className="flex items-center gap-3">
             <select
-              aria-label="Filter by category"
+              aria-label="กรองตามหมวดหมู่"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="px-4 py-2.5 bg-surface border border-border rounded-xl text-xs font-bold uppercase tracking-widest text-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
             >
-              <option value="">All Regions</option>
+              <option value="">ทุกหมวดหมู่</option>
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <select
-              aria-label="Filter by status"
+              aria-label="กรองตามสถานะ"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2.5 bg-surface border border-border rounded-xl text-xs font-bold uppercase tracking-widest text-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
             >
-              <option value="">All Tiers</option>
-              <option value="active">Active</option>
-              <option value="needs_review">Needs Review</option>
-              <option value="inactive">Inactive</option>
+              <option value="">ทุกสถานะ</option>
+              <option value="active">ใช้งานอยู่</option>
+              <option value="needs_review">ต้องตรวจสอบ</option>
+              <option value="inactive">ไม่ใช้งาน</option>
             </select>
           </div>
         </div>
 
         <div className="overflow-x-auto" aria-busy={isLoading} aria-live="polite">
           <table className="w-full text-sm text-left">
-            <caption className="sr-only">Suppliers list with contact information, ratings, and status</caption>
+            <caption className="sr-only">รายการซัพพลายเออร์พร้อมข้อมูลติดต่อ คะแนน และสถานะ</caption>
             <thead className="text-[10px] text-muted/60 font-bold uppercase tracking-widest bg-surface-raised/50 border-b border-border">
               <tr>
-                <th scope="col" className="px-6 py-4">Vendor Identity</th>
-                <th scope="col" className="px-6 py-4">Commercial Tier</th>
-                <th scope="col" className="px-6 py-4">Communication Details</th>
-                <th scope="col" className="px-6 py-4 text-center">Fulfillment Cycle</th>
-                <th scope="col" className="px-6 py-4 text-center">Trust Index</th>
-                <th scope="col" className="px-6 py-4 text-center">Operational Status</th>
-                <th scope="col" className="px-6 py-4 text-right">Management</th>
+                <th scope="col" className="px-6 py-4">ข้อมูลซัพพลายเออร์</th>
+                <th scope="col" className="px-6 py-4">ประเภทเชิงพาณิชย์</th>
+                <th scope="col" className="px-6 py-4">ช่องทางติดต่อ</th>
+                <th scope="col" className="px-6 py-4 text-center">รอบการจัดส่ง</th>
+                <th scope="col" className="px-6 py-4 text-center">ดัชนีความน่าเชื่อถือ</th>
+                <th scope="col" className="px-6 py-4 text-center">สถานะการดำเนินงาน</th>
+                <th scope="col" className="px-6 py-4 text-right">การจัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -203,15 +203,15 @@ export default function SuppliersPage() {
                     <div className="w-20 h-20 rounded-3xl bg-surface-raised flex items-center justify-center mx-auto mb-6 border border-border shadow-inner">
                       <iconify-icon icon="solar:delivery-bold-duotone" width="40" height="40" className="text-muted/20" aria-hidden="true" />
                     </div>
-                    <p className="text-lg font-bold text-foreground">No Vendors Enrolled</p>
-                    <p className="text-sm text-muted mt-2 leading-relaxed max-w-xs mx-auto">Initialize your supply chain network by adding your primary vendors.</p>
+                    <p className="text-lg font-bold text-foreground">ยังไม่มีซัพพลายเออร์</p>
+                    <p className="text-sm text-muted mt-2 leading-relaxed max-w-xs mx-auto">เริ่มต้นเครือข่ายซัพพลายเชนของคุณด้วยการเพิ่มผู้ขายหลักก่อน</p>
                   </td>
                 </tr>
               ) : noResults ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-16 text-center">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40">
-                      No matching vendors found for the current query
+                      ไม่พบซัพพลายเออร์ตามคำค้นหาปัจจุบัน
                     </div>
                   </td>
                 </tr>
@@ -239,7 +239,7 @@ export default function SuppliersPage() {
                         <a
                           href={`mailto:${supplier.email}`}
                           className="text-[10px] font-medium text-muted/60 hover:text-accent flex items-center gap-2 transition-colors focus:outline-none truncate max-w-[180px]"
-                          aria-label={`Email ${supplier.contactName}`}
+                          aria-label={`ส่งอีเมลถึง ${supplier.contactName}`}
                         >
                           <iconify-icon icon="solar:letter-bold-duotone" width="14" height="14" className="shrink-0 text-muted/20" aria-hidden="true" />
                           {supplier.email}
@@ -247,7 +247,7 @@ export default function SuppliersPage() {
                         <a
                           href={`tel:${supplier.phone}`}
                           className="text-[10px] font-medium text-muted/60 hover:text-accent flex items-center gap-2 transition-colors focus:outline-none"
-                          aria-label={`Call ${supplier.contactName}`}
+                          aria-label={`โทรหา ${supplier.contactName}`}
                         >
                           <iconify-icon icon="solar:phone-bold-duotone" width="14" height="14" className="shrink-0 text-muted/20" aria-hidden="true" />
                           {supplier.phone}
@@ -284,7 +284,7 @@ export default function SuppliersPage() {
                     <td className="px-6 py-5 text-right">
                       <button
                         className="w-9 h-9 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.9] border border-transparent hover:border-accent/10"
-                        aria-label={`Actions for ${supplier.name}`}
+                        aria-label={`การจัดการสำหรับ ${supplier.name}`}
                       >
                         <iconify-icon icon="solar:menu-dots-bold-duotone" width="22" height="22" aria-hidden="true" />
                       </button>
@@ -300,7 +300,7 @@ export default function SuppliersPage() {
           <div className="text-[10px] font-black uppercase tracking-widest text-muted/40">
             {isLoading
               ? <div className="h-4 w-40 bg-surface-raised rounded-lg animate-pulse" />
-              : <>Network Index <span className="text-foreground/60">{filtered.length.toLocaleString()}</span> of <span className="text-foreground/60">{(suppliers ?? []).length.toLocaleString()}</span> Vendors Connected</>
+              : <>แสดงซัพพลายเออร์ <span className="text-foreground/60">{filtered.length.toLocaleString()}</span> จากทั้งหมด <span className="text-foreground/60">{(suppliers ?? []).length.toLocaleString()}</span> ราย</>
             }
           </div>
           <div className="flex gap-2">

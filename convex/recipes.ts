@@ -149,8 +149,8 @@ export const add = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const user = await verifyWorkspace(ctx, args.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager']);
+    const { membership } = await verifyWorkspace(ctx, args.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager']);
 
     const recipeId = await ctx.db.insert('recipes', {
       workspaceId: args.workspaceId,
@@ -209,8 +209,8 @@ export const update = mutation({
     const recipe = await ctx.db.get(args.recipeId);
     if (!recipe) throw new Error('Recipe not found');
 
-    const user = await verifyWorkspace(ctx, recipe.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager']);
+    const { membership } = await verifyWorkspace(ctx, recipe.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager']);
 
     const { recipeId, ingredients, name, sku, category, price, yieldQty, yieldUnit, isActive } = args;
 
@@ -261,8 +261,8 @@ export const remove = mutation({
     const recipe = await ctx.db.get(recipeId);
     if (!recipe) throw new Error('Recipe not found');
 
-    const user = await verifyWorkspace(ctx, recipe.workspaceId);
-    checkRole(user, ['owner', 'admin']);
+    const { membership } = await verifyWorkspace(ctx, recipe.workspaceId);
+    checkRole(membership, ['owner', 'admin']);
 
     const ingredients = await ctx.db
       .query('recipeIngredients')

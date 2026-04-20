@@ -45,7 +45,7 @@ function EmptyTableState({ cols, message }: { cols: number; message: string }) {
           <iconify-icon icon="solar:box-minimalistic-bold-duotone" width="32" height="32" className="text-muted/40 mx-auto" aria-hidden="true" />
         </div>
         <p className="text-base font-bold text-foreground">{message}</p>
-        <p className="text-sm text-muted mt-1 leading-relaxed">Add items using the <strong>Add Item</strong> button above.</p>
+        <p className="text-sm text-muted mt-1 leading-relaxed">เพิ่มรายการได้จากปุ่ม <strong>เพิ่มสินค้า</strong> ด้านบน</p>
       </td>
     </tr>
   );
@@ -109,8 +109,8 @@ export default function InventoryPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Inventory</h1>
-          <p className="text-sm text-muted mt-1.5 leading-relaxed">Manage your raw materials and stock items.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">สินค้าคงคลัง</h1>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">จัดการวัตถุดิบและรายการสินค้าในสต็อก</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="flex bg-surface border border-border rounded-xl p-1 shadow-sm">
@@ -120,15 +120,15 @@ export default function InventoryPage() {
                 setIsHistoryDialogOpen(true);
               }}
               className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-widest text-foreground hover:bg-surface-raised rounded-lg transition-all"
-              title="Global Movement History"
+              title="ประวัติการเคลื่อนไหวทั้งหมด"
             >
               <iconify-icon icon="solar:history-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
-              History
+              ประวัติ
             </button>
             <div className="w-px bg-border my-1 mx-1" />
             <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-widest text-foreground hover:bg-surface-raised rounded-lg transition-all">
               <iconify-icon icon="solar:export-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
-              Export
+              ส่งออก
             </button>
           </div>
           <button
@@ -139,7 +139,7 @@ export default function InventoryPage() {
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 active:scale-[0.98]"
           >
             <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
-            Add Item
+            เพิ่มสินค้า
           </button>
         </div>
       </div>
@@ -159,39 +159,39 @@ export default function InventoryPage() {
                 type="search"
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Search items, SKU…"
-                aria-label="Search inventory items"
+                placeholder="ค้นหาสินค้า, SKU…"
+                aria-label="ค้นหาสินค้าในคลัง"
                 className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
               />
             </div>
             <select
-              aria-label="Filter by category"
+              aria-label="กรองตามหมวดหมู่"
               value={categoryFilter}
               onChange={(e) => handleCategory(e.target.value)}
               className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors min-w-[160px]"
             >
-              <option value="">All Categories</option>
+              <option value="">ทุกหมวดหมู่</option>
               {categories.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
             <select
-              aria-label="Filter by status"
+              aria-label="กรองตามสถานะ"
               value={statusFilter}
               onChange={(e) => handleStatus(e.target.value)}
               className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors min-w-[140px]"
             >
-              <option value="">All Statuses</option>
-              <option value="In Stock">In Stock</option>
-              <option value="Warning">Low Stock</option>
-              <option value="Critical">Critical</option>
+              <option value="">ทุกสถานะ</option>
+              <option value="In Stock">มีสต็อก</option>
+              <option value="Warning">สต็อกต่ำ</option>
+              <option value="Critical">วิกฤต</option>
             </select>
           </div>
           {!isLoading && rawItems && (
             <div className="px-3 py-1 bg-surface-raised border border-border rounded-full flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
-                {filtered.length.toLocaleString()} item{filtered.length !== 1 ? 's' : ''} found
+                พบ {filtered.length.toLocaleString()} รายการ
               </span>
             </div>
           )}
@@ -199,25 +199,25 @@ export default function InventoryPage() {
 
         <div className="overflow-x-auto" aria-busy={isLoading} aria-live="polite">
           <table className="w-full text-left text-sm">
-            <caption className="sr-only">Inventory items list showing stock levels and status</caption>
+            <caption className="sr-only">รายการสินค้าคงคลังแสดงระดับสต็อกและสถานะ</caption>
             <thead className="text-[10px] text-muted font-bold uppercase tracking-widest bg-surface-raised/50 border-b border-border">
               <tr>
-                <th scope="col" className="px-6 py-4">Item Name</th>
+                <th scope="col" className="px-6 py-4">ชื่อสินค้า</th>
                 <th scope="col" className="px-6 py-4">SKU</th>
-                <th scope="col" className="px-6 py-4">Category</th>
-                <th scope="col" className="px-6 py-4 text-right">Current Stock</th>
-                <th scope="col" className="px-6 py-4 text-right">Min. Stock</th>
-                <th scope="col" className="px-6 py-4 text-center">Status</th>
-                <th scope="col" className="px-6 py-4 text-right">Actions</th>
+                <th scope="col" className="px-6 py-4">หมวดหมู่</th>
+                <th scope="col" className="px-6 py-4 text-right">สต็อกปัจจุบัน</th>
+                <th scope="col" className="px-6 py-4 text-right">สต็อกขั้นต่ำ</th>
+                <th scope="col" className="px-6 py-4 text-center">สถานะ</th>
+                <th scope="col" className="px-6 py-4 text-right">การจัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
               ) : isEmpty ? (
-                <EmptyTableState cols={7} message="No inventory items yet" />
+                <EmptyTableState cols={7} message="ยังไม่มีรายการสินค้าคงคลัง" />
               ) : noResults ? (
-                <EmptyTableState cols={7} message="No items match your filters" />
+                <EmptyTableState cols={7} message="ไม่พบรายการที่ตรงกับตัวกรอง" />
               ) : (
                 pageItems.map((item) => (
                   <InventoryRow
@@ -251,7 +251,7 @@ export default function InventoryPage() {
           <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60">
             {isLoading
               ? <div className="h-4 w-40 bg-surface-raised rounded animate-pulse" />
-              : <>Showing <span className="text-foreground">{Math.min((page - 1) * PER_PAGE + 1, filtered.length)}</span>–<span className="text-foreground">{Math.min(page * PER_PAGE, filtered.length)}</span> of <span className="text-foreground">{filtered.length.toLocaleString()}</span> items</>
+              : <>แสดง <span className="text-foreground">{Math.min((page - 1) * PER_PAGE + 1, filtered.length)}</span>–<span className="text-foreground">{Math.min(page * PER_PAGE, filtered.length)}</span> จาก <span className="text-foreground">{filtered.length.toLocaleString()}</span> รายการ</>
             }
           </div>
           {totalPages > 1 && (
@@ -260,17 +260,17 @@ export default function InventoryPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  aria-label="Previous page"
+                  aria-label="หน้าก่อนหน้า"
                   className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted border border-border rounded-lg hover:bg-surface-raised transition-all disabled:opacity-30"
                 >
-                  Previous
+                  ก่อนหน้า
                 </button>
                 <div className="flex items-center gap-1">
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
                     <button
                       key={p}
                       onClick={() => setPage(p)}
-                      aria-label={`Page ${p}`}
+                      aria-label={`หน้า ${p}`}
                       aria-current={page === p ? 'page' : undefined}
                       className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all ${
                         page === p 
@@ -285,10 +285,10 @@ export default function InventoryPage() {
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  aria-label="Next page"
+                  aria-label="หน้าถัดไป"
                   className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted border border-border rounded-lg hover:bg-surface-raised transition-all disabled:opacity-30"
                 >
-                  Next
+                  ถัดไป
                 </button>
               </div>
             </nav>
@@ -317,7 +317,7 @@ export default function InventoryPage() {
       <MovementHistoryDialog
         isOpen={isHistoryDialogOpen}
         onClose={() => setIsHistoryDialogOpen(false)}
-        workspaceId={workspaceId}
+        workspaceId={workspaceId ?? undefined}
         inventoryItemId={historyItemId}
       />
     </div>
@@ -345,7 +345,7 @@ function InventoryRow({
   return (
     <tr className={`transition-all group ${isHighlighted ? 'bg-accent-subtle/20 border-l-2 border-l-accent' : 'hover:bg-accent-subtle/5'}`}>
       <td className="px-6 py-5 min-w-0 max-w-[220px]">
-        <span className="block font-bold text-foreground truncate group-hover:text-accent transition-colors" title={item.name}>{item.name || '(unnamed)'}</span>
+        <span className="block font-bold text-foreground truncate group-hover:text-accent transition-colors" title={item.name}>{item.name || '(ไม่มีชื่อ)'}</span>
         <span className="block text-[10px] font-bold uppercase tracking-widest text-muted/50 mt-1">{item.sku}</span>
       </td>
       <td className="px-6 py-5 text-muted font-mono text-[10px] tracking-tight whitespace-nowrap">
@@ -373,7 +373,7 @@ function InventoryRow({
           <span className={`w-1 h-1 rounded-full mr-1.5 ${
             isCritical ? 'bg-danger' : isWarning ? 'bg-warning' : 'bg-success'
           }`} />
-          {item.status === 'Warning' ? 'Low Stock' : item.status}
+          {item.status === 'Warning' ? 'สต็อกต่ำ' : item.status === 'Critical' ? 'วิกฤต' : 'มีสต็อก'}
         </span>
       </td>
       <td className="px-6 py-5 text-right">
@@ -381,32 +381,32 @@ function InventoryRow({
           <button
             onClick={onHistory}
             className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none"
-            aria-label={`History for ${item.name}`}
-            title="Movement History"
+            aria-label={`ประวัติของ ${item.name}`}
+            title="ประวัติการเคลื่อนไหว"
           >
             <iconify-icon icon="solar:history-bold-duotone" width="18" height="18" aria-hidden="true" />
           </button>
           <button
             onClick={onAdjust}
             className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none"
-            aria-label={`Adjust stock for ${item.name}`}
-            title="Adjust Stock"
+            aria-label={`ปรับสต็อกของ ${item.name}`}
+            title="ปรับสต็อก"
           >
             <iconify-icon icon="solar:calculator-minimalistic-bold-duotone" width="18" height="18" aria-hidden="true" />
           </button>
           <button
             onClick={onEdit}
             className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none"
-            aria-label={`Edit ${item.name}`}
-            title="Edit Item"
+            aria-label={`แก้ไข ${item.name}`}
+            title="แก้ไขสินค้า"
           >
             <iconify-icon icon="solar:pen-bold-duotone" width="18" height="18" aria-hidden="true" />
           </button>
           <button
             onClick={onArchive}
             className="w-8 h-8 flex items-center justify-center text-muted hover:text-danger hover:bg-danger-subtle/30 rounded-lg transition-all focus:outline-none"
-            aria-label={`Archive ${item.name}`}
-            title="Archive Item"
+            aria-label={`เก็บ ${item.name} เป็นคลังเก่า`}
+            title="เก็บเข้าคลังเก่า"
           >
             <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="18" height="18" aria-hidden="true" />
           </button>

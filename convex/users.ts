@@ -1,54 +1,20 @@
 import { mutation, query } from './_generated/server';
 import { ConvexError, v } from 'convex/values';
-import { getCurrentUser, verifyWorkspace } from './utils';
+import { ensureCurrentUser, getCurrentUser, verifyWorkspace } from './utils';
 
 const PROFILE_TOO_LARGE_MESSAGE =
-  'Your profile could not be saved because it is too large. If you added a profile photo, please choose a smaller image and try again.';
+  'ไม่สามารถบันทึกโปรไฟล์ได้เนื่องจากข้อมูลมีขนาดใหญ่เกินไป หากคุณอัปโหลดรูปโปรไฟล์ กรุณาเลือกรูปที่มีขนาดเล็กลงแล้วลองอีกครั้ง';
 
 /**
  * Upsert the authenticated user's profile in the app users table.
- * Called by the frontend after a successful Better Auth sign-in/sign-up
- * when a workspaceId has been established (i.e., after onboarding).
+ * Called by the frontend after a successful Better Auth sign-in/sign-up.
+ * Users can exist without a workspace until they create or join one.
  */
 export const store = mutation({
-  args: {
-    workspaceId: v.id('workspaces'),
-  },
-  handler: async (ctx, { workspaceId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error('Unauthenticated');
-    }
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('by_better_auth_id', (q) => q.eq('betterAuthId', identity.tokenIdentifier))
-      .unique();
-
-    if (user !== null) {
-      // Update profile fields that may have changed
-      await ctx.db.patch(user._id, {
-        name: identity.name ?? user.name,
-        avatarUrl: identity.pictureUrl ?? user.avatarUrl,
-      });
-      return user._id;
-    }
-
-    // First sign-in: create the user profile
-    return await ctx.db.insert('users', {
-      workspaceId,
-      betterAuthId: identity.tokenIdentifier,
-      name: identity.name ?? 'Unknown User',
-      email: identity.email ?? '',
-      role: 'owner',
-      notificationsEnabled: true,
-      createdAt: Date.now(),
-      avatarUrl: identity.pictureUrl,
-      timezone: 'Asia/Bangkok',
-      language: 'en',
-      currency: 'THB',
-      dateFormat: 'DD/MM/YYYY',
-    });
+  args: {},
+  handler: async (ctx) => {
+    const user = await ensureCurrentUser(ctx);
+    return user._id;
   },
 });
 
@@ -115,18 +81,68 @@ export const listByWorkspace = query({
   handler: async (ctx, { workspaceId }) => {
     await verifyWorkspace(ctx, workspaceId);
 
-    const users = await ctx.db
-      .query('users')
+    // Get memberships for this workspace
+    const memberships = await ctx.db
+      .query('workspaceMemberships')
       .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
       .collect();
 
-    return users
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((user) => ({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      }));
+    // Fetch user details for each membership
+    const members = await Promise.all(
+      memberships.map(async (membership) => {
+        const user = await ctx.db.get(membership.userId);
+        return {
+          _id: membership.userId,
+          name: user?.name ?? 'Unknown',
+          email: user?.email ?? '',
+          role: membership.role,
+        };
+      })
+    );
+
+    return members.sort((a, b) => a.name.localeCompare(b.name));
+  },
+});
+
+/**
+ * Get user's onboarding state: 'no_workspace', 'invited', or 'active'
+ * - no_workspace: User has no workspace memberships and no pending invites
+ * - invited: User has pending invitations waiting
+ * - active: User has at least one workspace membership
+ */
+export const getOnboardingState = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) return { state: 'no_workspace' as const };
+
+    // Check for workspace memberships
+    const memberships = await ctx.db
+      .query('workspaceMemberships')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .collect();
+
+    if (memberships.length > 0) {
+      // User is already active in at least one workspace
+      return { state: 'active' as const };
+    }
+
+    // Check for pending invitations
+    const pendingInvites = await ctx.db
+      .query('invitations')
+      .withIndex('by_email', (q) => q.eq('email', user.email.toLowerCase()))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('status'), 'pending'),
+          q.gt(q.field('expiresAt'), Date.now())
+        )
+      )
+      .collect();
+
+    if (pendingInvites.length > 0) {
+      return { state: 'invited' as const, invitationCount: pendingInvites.length };
+    }
+
+    return { state: 'no_workspace' as const };
   },
 });

@@ -24,15 +24,15 @@ export default function RegisterPage() {
       name,
       email,
       password,
-      callbackURL: '/onboarding',
+      callbackURL: '/select-workspace',
     });
 
     setIsLoading(false);
 
     if (authError) {
-      setError(authError.message ?? 'Sign up failed. Please try again.');
+      setError(authError.message ?? 'สมัครสมาชิกไม่สำเร็จ กรุณาลองอีกครั้ง');
     } else {
-      router.push('/onboarding');
+      router.push('/select-workspace');
     }
   };
 
@@ -40,9 +40,9 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-neutral-200">
         <div className="text-center">
-          <h1 className="text-3xl font-medium tracking-tight text-neutral-900">Create your account</h1>
+          <h1 className="text-3xl font-medium tracking-tight text-neutral-900">สร้างบัญชีของคุณ</h1>
           <p className="mt-2 text-sm text-neutral-500">
-            Start managing your inventory in minutes
+            เริ่มจัดการสต็อกของคุณได้ภายในไม่กี่นาที
           </p>
         </div>
 
@@ -56,7 +56,7 @@ export default function RegisterPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-neutral-700">
-                Full name
+                ชื่อ-นามสกุล
               </label>
               <input
                 id="name"
@@ -65,12 +65,12 @@ export default function RegisterPage() {
                 autoComplete="name"
                 required
                 className="mt-1 appearance-none block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 sm:text-sm"
-                placeholder="Jane Smith"
+                placeholder="สมชาย ใจดี"
               />
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-neutral-700">
-                Email address
+                อีเมล
               </label>
               <input
                 id="email"
@@ -79,12 +79,12 @@ export default function RegisterPage() {
                 autoComplete="email"
                 required
                 className="mt-1 appearance-none block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 sm:text-sm"
-                placeholder="you@example.com"
+                placeholder="name@example.com"
               />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
-                Password
+                รหัสผ่าน
               </label>
               <input
                 id="password"
@@ -94,7 +94,7 @@ export default function RegisterPage() {
                 required
                 minLength={8}
                 className="mt-1 appearance-none block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-400 text-neutral-900 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 sm:text-sm"
-                placeholder="At least 8 characters"
+                placeholder="อย่างน้อย 8 ตัวอักษร"
               />
             </div>
           </div>
@@ -106,14 +106,14 @@ export default function RegisterPage() {
             className="w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-600 shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             aria-busy={isLoading}
           >
-            {isLoading ? 'Creating account…' : 'Create account'}
+            {isLoading ? 'กำลังสร้างบัญชี…' : 'สร้างบัญชี'}
           </button>
         </form>
 
         <p className="mt-2 text-center text-sm text-neutral-600">
-          Already have an account?{' '}
+          มีบัญชีอยู่แล้วใช่ไหม?{' '}
           <Link href="/login" className="font-medium text-teal-600 hover:text-teal-700 hover:underline">
-            Sign in
+            เข้าสู่ระบบ
           </Link>
         </p>
       </div>

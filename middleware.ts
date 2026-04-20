@@ -2,10 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Routes that don't require authentication
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/join-workspace'];
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/join-workspace', '/select-workspace'];
 
 // Routes that should redirect authenticated users away (auth pages)
 const AUTH_ONLY_ROUTES = ['/login', '/register'];
+
+// Routes that require authentication but are safe for users without a workspace
+const NO_WORKSPACE_SAFE_ROUTES = ['/onboarding', '/select-workspace', '/join-workspace'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,7 +30,7 @@ export function middleware(request: NextRequest) {
 
   // Redirect authenticated users away from login/register
   if (AUTH_ONLY_ROUTES.some((route) => pathname.startsWith(route)) && isAuthenticated) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/select-workspace', request.url));
   }
 
   // Protect all non-public routes

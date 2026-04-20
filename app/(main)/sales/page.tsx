@@ -22,10 +22,10 @@ const PER_PAGE = 25;
 const SKEL_WIDTHS = ['w-1/4', 'w-1/3', 'w-2/5', 'w-12', 'w-1/5', 'w-16', 'w-1/4', 'w-1/5', 'w-8'];
 
 const PAYMENT_LABELS: Record<Transaction['paymentMethod'], string> = {
-  cash: 'Cash',
-  credit_card: 'Credit Card',
-  mobile_pay: 'Mobile Pay',
-  invoice: 'Invoice',
+  cash: 'เงินสด',
+  credit_card: 'บัตรเครดิต',
+  mobile_pay: 'ชำระผ่านมือถือ',
+  invoice: 'ใบแจ้งหนี้',
 };
 
 function SkeletonRow() {
@@ -45,14 +45,14 @@ function StatSkeleton() {
 }
 
 function formatDateTime(ts: number) {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short', day: 'numeric',
+  return new Intl.DateTimeFormat('th-TH', {
+    day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   }).format(new Date(ts));
 }
 
 function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', currencyDisplay: 'symbol' }).format(amount);
 }
 
 export default function SalesPage() {
@@ -92,17 +92,17 @@ export default function SalesPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Sales Registry</h1>
-          <p className="text-sm text-muted mt-1.5 leading-relaxed">Comprehensive audit log of all commercial transactions and revenue flow.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">ทะเบียนการขาย</h1>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">บันทึกรายการขายและการไหลของรายได้ทั้งหมดอย่างครบถ้วน</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.98]">
             <iconify-icon icon="solar:export-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
-            Export Audit
+            ส่งออกข้อมูลตรวจสอบ
           </button>
           <Link href="/sales/new" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 active:scale-[0.98]">
             <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
-            New Transaction
+            รายการขายใหม่
           </Link>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function SalesPage() {
             <div className="w-10 h-10 rounded-xl bg-success-subtle/50 flex items-center justify-center text-success border border-success/10 group-hover:scale-110 transition-transform" aria-hidden="true">
               <iconify-icon icon="solar:wallet-money-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Gross Revenue</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">รายได้รวม</h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {todayStats === undefined ? <StatSkeleton /> : formatCurrency(todayStats.revenue)}
@@ -125,7 +125,7 @@ export default function SalesPage() {
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10 group-hover:scale-110 transition-transform" aria-hidden="true">
               <iconify-icon icon="solar:chart-2-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Gross Margin</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">กำไรขั้นต้น</h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {todayStats === undefined ? <StatSkeleton /> : (
@@ -140,7 +140,7 @@ export default function SalesPage() {
             <div className="w-10 h-10 rounded-xl bg-accent-subtle/50 flex items-center justify-center text-accent border border-accent/10 group-hover:scale-110 transition-transform" aria-hidden="true">
               <iconify-icon icon="solar:cart-large-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Total Orders</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">ออเดอร์ทั้งหมด</h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums text-foreground">
             {todayStats === undefined ? <StatSkeleton /> : todayStats.orderCount.toLocaleString()}
@@ -151,7 +151,7 @@ export default function SalesPage() {
             <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/10 group-hover:scale-110 transition-transform" aria-hidden="true">
               <iconify-icon icon="solar:graph-up-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">Avg Ticket Size</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">มูลค่าเฉลี่ยต่อบิล</h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums text-foreground">
             {todayStats === undefined ? <StatSkeleton /> : formatCurrency(todayStats.avgOrder)}
@@ -171,39 +171,39 @@ export default function SalesPage() {
               type="search"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Filter by ID, Customer, or Reference…"
-              aria-label="Search transactions"
+              placeholder="กรองด้วยรหัส ลูกค้า หรือข้อมูลอ้างอิง…"
+              aria-label="ค้นหารายการขาย"
               className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
             />
           </div>
           <select
-            aria-label="Filter by status"
+            aria-label="กรองตามสถานะ"
             value={statusFilter}
             onChange={(e) => handleStatus(e.target.value)}
             className="px-4 py-2.5 bg-surface border border-border rounded-xl text-xs font-bold uppercase tracking-widest text-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
           >
-            <option value="">All Statuses</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="refunded">Refunded</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="">ทุกสถานะ</option>
+            <option value="completed">เสร็จสิ้น</option>
+            <option value="pending">รอดำเนินการ</option>
+            <option value="refunded">คืนเงินแล้ว</option>
+            <option value="cancelled">ยกเลิก</option>
           </select>
         </div>
 
         <div className="overflow-x-auto" aria-busy={isLoading} aria-live="polite">
           <table className="w-full text-sm text-left">
-            <caption className="sr-only">Sales transactions list representing commercial audit log</caption>
+            <caption className="sr-only">ตารางรายการขายสำหรับตรวจสอบธุรกรรมเชิงพาณิชย์</caption>
             <thead className="text-[10px] text-muted/60 font-bold uppercase tracking-widest bg-surface-raised/50 border-b border-border">
               <tr>
-                <th scope="col" className="px-6 py-4">Ref ID</th>
-                <th scope="col" className="px-6 py-4">Timestamp</th>
-                <th scope="col" className="px-6 py-4">Client Representative</th>
-                <th scope="col" className="px-6 py-4 text-right">Items</th>
-                <th scope="col" className="px-6 py-4 text-right">Settlement</th>
-                <th scope="col" className="px-6 py-4 text-right">Margin</th>
-                <th scope="col" className="px-6 py-4 text-center">Method</th>
-                <th scope="col" className="px-6 py-4 text-center">Lifecycle</th>
-                <th scope="col" className="px-6 py-4 text-right">Access</th>
+                <th scope="col" className="px-6 py-4">รหัสอ้างอิง</th>
+                <th scope="col" className="px-6 py-4">เวลา</th>
+                <th scope="col" className="px-6 py-4">ลูกค้า</th>
+                <th scope="col" className="px-6 py-4 text-right">จำนวนสินค้า</th>
+                <th scope="col" className="px-6 py-4 text-right">ยอดชำระ</th>
+                <th scope="col" className="px-6 py-4 text-right">กำไร</th>
+                <th scope="col" className="px-6 py-4 text-center">ช่องทาง</th>
+                <th scope="col" className="px-6 py-4 text-center">สถานะ</th>
+                <th scope="col" className="px-6 py-4 text-right">การจัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -215,11 +215,11 @@ export default function SalesPage() {
                     <div className="w-20 h-20 rounded-3xl bg-surface-raised flex items-center justify-center mx-auto mb-6 border border-border shadow-inner">
                       <iconify-icon icon="solar:cart-large-bold-duotone" width="40" height="40" className="text-muted/20" aria-hidden="true" />
                     </div>
-                    <p className="text-lg font-bold text-foreground">Transaction Log Empty</p>
-                    <p className="text-sm text-muted mt-2 leading-relaxed max-w-xs mx-auto">Your sales ledger is currently empty. Initialize a transaction to begin tracking revenue.</p>
+                    <p className="text-lg font-bold text-foreground">ยังไม่มีรายการขาย</p>
+                    <p className="text-sm text-muted mt-2 leading-relaxed max-w-xs mx-auto">ตอนนี้ยังไม่มีข้อมูลการขายในระบบ เริ่มบันทึกรายการแรกได้เลย</p>
                     <Link href="/sales/new" className="mt-8 inline-flex items-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-[0.15em] text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 hover:scale-105 active:scale-95">
                       <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" />
-                      Initiate Transaction
+                      เพิ่มรายการขาย
                     </Link>
                   </td>
                 </tr>
@@ -227,7 +227,7 @@ export default function SalesPage() {
                 <tr>
                   <td colSpan={9} className="px-6 py-16 text-center">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40 text-muted/60">
-                      No matching records found in the audit ledger
+                      ไม่พบรายการที่ตรงกับเงื่อนไขค้นหา
                     </div>
                   </td>
                 </tr>
@@ -244,7 +244,7 @@ export default function SalesPage() {
                     </td>
                     <td className="px-6 py-5 max-w-[180px]">
                       <span className="block font-bold text-foreground truncate group-hover:text-accent transition-colors" title={trx.customer}>
-                        {trx.customer || 'Standard Walk-in'}
+                        {trx.customer || 'ลูกค้าทั่วไป'}
                       </span>
                     </td>
                     <td className="px-6 py-5 text-right text-muted tabular-nums font-black text-xs">{trx.itemCount}</td>
@@ -282,7 +282,7 @@ export default function SalesPage() {
                     <td className="px-6 py-5 text-right">
                       <button
                         className="w-9 h-9 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.9] border border-transparent hover:border-accent/10"
-                        aria-label={`Actions for transaction ${trx.displayId}`}
+                        aria-label={`จัดการรายการ ${trx.displayId}`}
                       >
                         <iconify-icon icon="solar:menu-dots-bold-duotone" width="22" height="22" aria-hidden="true" />
                       </button>
@@ -298,7 +298,7 @@ export default function SalesPage() {
           <div className="text-[10px] font-black uppercase tracking-widest text-muted/40">
             {isLoading
               ? <div className="h-4 w-48 bg-surface-raised rounded-lg animate-pulse" />
-              : <>View Index <span className="text-foreground/60">{Math.min((page - 1) * PER_PAGE + 1, filtered.length)}</span>–<span className="text-foreground/60">{Math.min(page * PER_PAGE, filtered.length)}</span> of <span className="text-foreground/60">{filtered.length.toLocaleString()}</span> Records</>
+              : <>แสดงรายการ <span className="text-foreground/60">{Math.min((page - 1) * PER_PAGE + 1, filtered.length)}</span>–<span className="text-foreground/60">{Math.min(page * PER_PAGE, filtered.length)}</span> จาก <span className="text-foreground/60">{filtered.length.toLocaleString('th-TH')}</span> รายการ</>
             }
           </div>
           {totalPages > 1 && (
@@ -308,18 +308,18 @@ export default function SalesPage() {
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
                   className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]"
-                  aria-label="Previous Page"
+                  aria-label="หน้าก่อนหน้า"
                 >
                   <iconify-icon icon="solar:alt-arrow-left-linear" width="18" height="18" />
                 </button>
                 <div className="flex items-center px-4 text-[10px] font-black uppercase tracking-widest text-muted/60">
-                  Batch {page} of {totalPages}
+                  หน้า {page} จาก {totalPages}
                 </div>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
                   className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]"
-                  aria-label="Next Page"
+                  aria-label="หน้าถัดไป"
                 >
                   <iconify-icon icon="solar:alt-arrow-right-linear" width="18" height="18" />
                 </button>

@@ -93,19 +93,19 @@ export default function ForecastingPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Demand Forecasting</h1>
-          <p className="text-sm text-muted mt-1.5 leading-relaxed">AI-powered predictions based on historical sales and seasonality.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">การคาดการณ์ความต้องการ</h1>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">ใช้ AI ทำนายจากยอดขายย้อนหลังและฤดูกาล</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <select
-            aria-label="Select forecast period"
+            aria-label="เลือกระยะเวลาคาดการณ์"
             value={periodDays}
             onChange={(e) => setPeriodDays(Number(e.target.value))}
             className="px-4 py-2 bg-surface border border-border rounded-xl text-sm text-foreground font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-accent/10 transition-all hover:bg-surface-raised"
           >
-            <option value={7}>Next 7 Days</option>
-            <option value={14}>Next 14 Days</option>
-            <option value={30}>Next 30 Days</option>
+            <option value={7}>7 วันถัดไป</option>
+            <option value={14}>14 วันถัดไป</option>
+            <option value={30}>30 วันถัดไป</option>
           </select>
           <button 
             onClick={handleRefresh}
@@ -113,7 +113,7 @@ export default function ForecastingPage() {
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 active:scale-[0.98]"
           >
             <iconify-icon icon="solar:refresh-bold-duotone" width="18" height="18" aria-hidden="true" className={isGenerating ? "animate-spin" : ""} />
-            {isGenerating ? 'Refreshing...' : 'Refresh Forecast'}
+            {isGenerating ? 'กำลังรีเฟรช...' : 'รีเฟรชการคาดการณ์'}
           </button>
         </div>
       </div>
@@ -121,36 +121,36 @@ export default function ForecastingPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-surface border border-border rounded-2xl shadow-sm p-6 group transition-all hover:border-accent/20">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60 mb-2">High Confidence Rate</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60 mb-2">อัตราความมั่นใจสูง</div>
           <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {stats === undefined ? <StatSkeleton /> : accuracyPct !== null ? `${accuracyPct}%` : '—'}
           </div>
           {stats && accuracyPct !== null && (
             <div className="text-[10px] font-bold uppercase tracking-widest text-success mt-3 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-              Analyzed {stats.itemsWithForecasts} items
+วิเคราะห์แล้ว {stats.itemsWithForecasts} รายการ
             </div>
           )}
         </div>
         <div className="bg-surface border border-border rounded-2xl shadow-sm p-6 group transition-all hover:border-accent/20">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60 mb-2">Items with Forecasts</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60 mb-2">รายการที่มีการคาดการณ์</div>
           <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {stats === undefined
               ? <StatSkeleton />
               : <>{stats.itemsHighConfidence.toLocaleString()} <span className="text-muted/40 font-medium text-lg">/ {stats.totalItems.toLocaleString()}</span></>
             }
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted mt-3">Sufficient sales history</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted mt-3">มีประวัติยอดขายเพียงพอ</div>
         </div>
         <div className="bg-surface border border-border rounded-2xl shadow-sm p-6 group transition-all hover:border-accent/20">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60 mb-2">Data Quality Issues</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60 mb-2">ปัญหาคุณภาพข้อมูล</div>
           <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {stats === undefined ? <StatSkeleton /> : stats.dataQualityIssues.toLocaleString()}
           </div>
           {stats && stats.dataQualityIssues > 0 && (
             <div className="text-[10px] font-bold uppercase tracking-widest text-warning mt-3 flex items-center gap-2">
               <iconify-icon icon="solar:danger-triangle-bold-duotone" width="14" height="14" aria-hidden="true" />
-              Action required for accuracy
+ต้องดำเนินการเพื่อความแม่นยำ
             </div>
           )}
         </div>
@@ -160,24 +160,24 @@ export default function ForecastingPage() {
       <div className="bg-surface border border-border rounded-2xl shadow-sm p-7">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
-            <h2 className="text-base font-bold text-foreground">Aggregate Demand Forecast</h2>
-            <p className="text-xs text-muted mt-0.5 font-medium">Actual sales vs. predictive forecast across all inventory items</p>
+            <h2 className="text-base font-bold text-foreground">ภาพรวมการคาดการณ์ความต้องการ</h2>
+            <p className="text-xs text-muted mt-0.5 font-medium">ยอดขายจริงเทียบกับการคาดการณ์ในทุกสินค้าคงคลัง</p>
           </div>
           <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest" role="list" aria-label="Chart legend">
             <div className="flex items-center gap-2" role="listitem">
               <div className="w-2.5 h-2.5 rounded-full bg-muted/40 shadow-sm" aria-hidden="true" />
-              <span className="text-muted">Historical Sales</span>
+              <span className="text-muted">ยอดขายย้อนหลัง</span>
             </div>
             <div className="flex items-center gap-2" role="listitem">
               <div className="w-2.5 h-2.5 rounded-full bg-accent shadow-md shadow-accent/20" aria-hidden="true" />
-              <span className="text-muted">Smart Forecast</span>
+              <span className="text-muted">การคาดการณ์อัจฉริยะ</span>
             </div>
           </div>
         </div>
         <div
           className="h-80 w-full relative border-b border-l border-border ml-10 mb-8"
           role="img"
-          aria-label="Demand forecast chart showing historical and predicted trends."
+          aria-label="กราฟการคาดการณ์ความต้องการแสดงแนวโน้มย้อนหลังและแนวโน้มที่คาดการณ์"
         >
           {/* Y-Axis Labels */}
           <div className="absolute -left-12 top-0 bottom-0 flex flex-col justify-between text-[10px] font-bold uppercase tracking-widest text-muted/30 py-2 pointer-events-none" aria-hidden="true">
@@ -205,7 +205,7 @@ export default function ForecastingPage() {
 
           {/* X-Axis Labels */}
           <div className="absolute -bottom-6 left-0 right-0 flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted/40" aria-hidden="true">
-            <span>Last Month</span><span>–21d</span><span>–14d</span><span className="text-danger font-bold bg-danger-subtle/50 px-2 py-0.5 rounded-full">Present Day</span><span>+7d</span><span>Next Week</span>
+            <span>เดือนก่อน</span><span>–21 วัน</span><span>–14 วัน</span><span className="text-danger font-bold bg-danger-subtle/50 px-2 py-0.5 rounded-full">วันนี้</span><span>+7 วัน</span><span>สัปดาห์หน้า</span>
           </div>
         </div>
       </div>
@@ -213,23 +213,23 @@ export default function ForecastingPage() {
       {/* Item-level Forecasts */}
       <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
         <div className="p-5 border-b border-border bg-surface-raised/30 flex items-center justify-between">
-          <h2 className="text-base font-bold text-foreground">Forecast Intelligence</h2>
+          <h2 className="text-base font-bold text-foreground">ข้อมูลเชิงลึกการคาดการณ์</h2>
           <div className="px-3 py-1 bg-surface-raised border border-border rounded-full flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted">Real-time Analysis</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted">วิเคราะห์แบบเรียลไทม์</span>
           </div>
         </div>
         <div className="overflow-x-auto" aria-busy={isLoading} aria-live="polite">
           <table className="w-full text-left text-sm">
-            <caption className="sr-only">Detailed item-level demand forecasts with confidence and trend ratings</caption>
+            <caption className="sr-only">ตารางคาดการณ์ความต้องการรายสินค้า พร้อมระดับความมั่นใจและแนวโน้ม</caption>
             <thead className="text-[10px] text-muted font-bold uppercase tracking-widest bg-surface-raised/50 border-b border-border">
               <tr>
-                <th scope="col" className="px-6 py-4">Item</th>
-                <th scope="col" className="px-6 py-4">Forecasting Model</th>
-                <th scope="col" className="px-6 py-4 text-right">Pred. Next {periodDays}d</th>
-                <th scope="col" className="px-6 py-4 text-right">Trend</th>
-                <th scope="col" className="px-6 py-4">Confidence</th>
-                <th scope="col" className="px-6 py-4 text-right">Action</th>
+                <th scope="col" className="px-6 py-4">รายการ</th>
+                <th scope="col" className="px-6 py-4">โมเดลคาดการณ์</th>
+                <th scope="col" className="px-6 py-4 text-right">คาดการณ์ {periodDays} วันถัดไป</th>
+                <th scope="col" className="px-6 py-4 text-right">แนวโน้ม</th>
+                <th scope="col" className="px-6 py-4">ความมั่นใจ</th>
+                <th scope="col" className="px-6 py-4 text-right">การจัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -241,8 +241,8 @@ export default function ForecastingPage() {
                     <div className="w-16 h-16 rounded-full bg-surface-raised flex items-center justify-center mx-auto mb-4 border border-border shadow-inner">
                       <iconify-icon icon="solar:graph-up-bold-duotone" width="32" height="32" className="text-muted/40 mx-auto" aria-hidden="true" />
                     </div>
-                    <p className="text-base font-bold text-foreground">No predictive data available</p>
-                    <p className="text-sm text-muted mt-1 leading-relaxed">Add inventory items and sales history to enable AI forecasting.</p>
+                    <p className="text-base font-bold text-foreground">ยังไม่มีข้อมูลการคาดการณ์</p>
+                    <p className="text-sm text-muted mt-1 leading-relaxed">เพิ่มสินค้าคงคลังและประวัติยอดขายเพื่อเปิดใช้งานการคาดการณ์ด้วย AI</p>
                   </td>
                 </tr>
               ) : (
@@ -282,7 +282,7 @@ export default function ForecastingPage() {
                       </td>
                       <td className="px-6 py-5 text-right">
                         <button className="text-[10px] font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors focus:outline-none">
-                          Details
+รายละเอียด
                         </button>
                       </td>
                     </tr>

@@ -60,8 +60,8 @@ export const create = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await verifyWorkspace(ctx, args.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager']);
+    const { membership } = await verifyWorkspace(ctx, args.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager']);
 
     if (args.salePrice < args.purchaseCost) {
       throw new ConvexError('Sale price must be greater than or equal to purchase cost.');
@@ -104,8 +104,8 @@ export const update = mutation({
     const item = await ctx.db.get(args.sellableItemId);
     if (!item) throw new ConvexError('Sellable item not found');
 
-    const user = await verifyWorkspace(ctx, item.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager']);
+    const { membership } = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager']);
 
     const salePrice = args.salePrice ?? item.salePrice;
     const purchaseCost = args.purchaseCost ?? item.purchaseCost;
@@ -133,8 +133,8 @@ export const remove = mutation({
     const item = await ctx.db.get(sellableItemId);
     if (!item) throw new ConvexError('Sellable item not found');
 
-    const user = await verifyWorkspace(ctx, item.workspaceId);
-    checkRole(user, ['owner', 'admin']);
+    const { membership } = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(membership, ['owner', 'admin']);
 
     await ctx.db.delete(sellableItemId);
   },

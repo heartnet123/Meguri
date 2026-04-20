@@ -32,22 +32,22 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background overflow-hidden text-foreground">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-surface border-b border-border z-50" aria-label="Main navigation">
+      <nav className="fixed top-0 w-full bg-surface border-b border-border z-50" aria-label="เมนูนำทางหลัก">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="font-display font-medium tracking-tight text-xl flex items-center gap-2" aria-label="SmartStock home">
+          <div className="font-display font-medium tracking-tight text-xl flex items-center gap-2" aria-label="หน้าแรก SmartStock">
             <span className="inline-block w-3 h-3 bg-accent shrink-0" aria-hidden="true"></span>
             SMARTSTOCK
           </div>
           <div className="hidden md:flex space-x-2">
-            <a href="#features" className="text-sm font-medium hover:text-accent transition-colors py-3 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg">Features</a>
-            <a href="#ai" className="text-sm font-medium hover:text-accent transition-colors py-3 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg">AI Forecasting</a>
-            <a href="#audience" className="text-sm font-medium hover:text-accent transition-colors py-3 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg">For Who</a>
+            <a href="#features" className="text-sm font-medium hover:text-accent transition-colors py-3 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg">ความสามารถ</a>
+            <a href="#ai" className="text-sm font-medium hover:text-accent transition-colors py-3 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg">การคาดการณ์ด้วย AI</a>
+            <a href="#audience" className="text-sm font-medium hover:text-accent transition-colors py-3 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg">เหมาะกับใคร</a>
           </div>
           <Link
             href={dashboardHref}
             className="bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium hover:bg-accent/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent"
           >
-            Open Dashboard
+            เปิดแดชบอร์ด
           </Link>
         </div>
       </nav>
@@ -63,16 +63,16 @@ export default function LandingPage() {
           >
             <motion.div variants={slideUpVariants} className="inline-flex items-center gap-2 px-3 py-1 bg-subtle border border-border text-xs font-semibold text-accent tracking-wide uppercase">
               <iconify-icon icon="solar:stars-linear" width="16" height="16" aria-hidden="true"></iconify-icon>
-              Powered by Actionable Intelligence
+              ขับเคลื่อนด้วยข้อมูลเชิงปฏิบัติการอัจฉริยะ
             </motion.div>
             
             <motion.h1 variants={slideUpVariants} className="font-display text-5xl md:text-8xl font-medium tracking-tighter leading-none">
-              Smarter Inventory. <br className="hidden md:block" />
-              <span className="text-muted">Accurate Forecasts.</span>
+              จัดการสต็อกอย่างชาญฉลาด <br className="hidden md:block" />
+              <span className="text-muted">คาดการณ์ได้แม่นยำขึ้น</span>
             </motion.h1>
             
             <motion.p variants={slideUpVariants} className="text-xl text-muted max-w-2xl mx-auto leading-relaxed">
-              The all-in-one platform for bakeries, cafés, and small retailers. Track stock in real-time, connect recipes to sales, and let AI predict your demand so you never run out of what matters.
+              แพลตฟอร์มครบวงจรสำหรับเบเกอรี คาเฟ่ และร้านค้าปลีกขนาดเล็ก ติดตามสต็อกแบบเรียลไทม์ เชื่อมสูตรกับยอดขาย และใช้ AI คาดการณ์ความต้องการเพื่อไม่ให้ของสำคัญขาดสต็อก
             </motion.p>
             
             <motion.div variants={slideUpVariants} className="flex flex-col items-center justify-center gap-4 pt-6">
@@ -81,18 +81,18 @@ export default function LandingPage() {
                   href={dashboardHref}
                   className="w-full sm:w-auto bg-accent text-accent-fg px-8 py-4 text-sm font-semibold tracking-wide uppercase hover:bg-accent/90 transition-colors flex items-center justify-center gap-2"
                 >
-                  Go to Dashboard
+                  ไปที่แดชบอร์ด
                   <iconify-icon icon="solar:arrow-right-linear" width="20" height="20" aria-hidden="true"></iconify-icon>
                 </Link>
                 <a href="#features" className="w-full sm:w-auto bg-surface text-foreground border border-border px-8 py-4 text-sm font-semibold tracking-wide uppercase hover:bg-subtle transition-colors flex items-center justify-center gap-2">
                   <iconify-icon icon="solar:play-circle-linear" width="20" height="20" aria-hidden="true"></iconify-icon>
-                  Explore Features
+                  ดูความสามารถหลัก
                 </a>
               </div>
               <p className="text-sm text-muted">
-                Already have an account?{' '}
+                มีบัญชีอยู่แล้ว?{' '}
                 <Link href={dashboardHref} className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-accent">
-                  Jump straight into the dashboard
+                  เข้าแดชบอร์ดได้ทันที
                 </Link>
                 .
               </p>
@@ -163,8 +163,8 @@ export default function LandingPage() {
         <section id="features" className="py-24 border-y border-border bg-surface">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mb-16 lg:mb-24">
-              <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight mb-6">Uncompromising Control.</h2>
-              <p className="text-xl text-muted leading-relaxed">Stop guessing and start knowing. Our platform connects your sales directly to your raw material inventory through a stark, efficient interface.</p>
+              <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight mb-6">ควบคุมได้อย่างมั่นใจ</h2>
+              <p className="text-xl text-muted leading-relaxed">เลิกคาดเดาแล้วใช้ข้อมูลจริง แพลตฟอร์มของเราจะเชื่อมยอดขายเข้ากับวัตถุดิบคงคลังโดยตรงผ่านหน้าจอที่ชัดเจนและใช้งานง่าย</p>
             </div>
 
             <div className="grid md:grid-cols-12 gap-x-12 gap-y-16">
@@ -202,9 +202,9 @@ export default function LandingPage() {
                 className="space-y-12"
               >
                 <motion.div variants={slideUpVariants}>
-                  <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight mb-6">Demand Forecasting powered by AI</h2>
+                  <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight mb-6">คาดการณ์ความต้องการด้วย AI</h2>
                   <p className="text-background/70 text-xl leading-relaxed">
-                    We use advanced machine learning models to analyze your historical sales, detect seasonality, and predict future demand with high accuracy.
+                    เราใช้โมเดลแมชชีนเลิร์นนิงขั้นสูงในการวิเคราะห์ยอดขายย้อนหลัง จับฤดูกาล และคาดการณ์ความต้องการล่วงหน้าได้อย่างแม่นยำ
                   </p>
                 </motion.div>
 
@@ -237,9 +237,9 @@ export default function LandingPage() {
                   {/* Abstract AI Visualization */}
                   <div className="relative h-full flex flex-col">
                     <div className="flex items-center justify-between mb-8">
-                      <div className="text-sm font-medium text-neutral-300">Forecast: Croissants</div>
+                      <div className="text-sm font-medium text-neutral-300">คาดการณ์: ครัวซองต์</div>
                       <div className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-medium border border-emerald-500/30">
-                        High Confidence
+                        ความมั่นใจสูง
                       </div>
                     </div>
                     
@@ -269,8 +269,8 @@ export default function LandingPage() {
                       <div className="flex items-start gap-3">
                         <iconify-icon icon="solar:info-circle-linear" width="20" height="20" className="text-neutral-400 mt-0.5" aria-hidden="true"></iconify-icon>
                         <div>
-                          <div className="text-sm font-medium text-white mb-1">Recommendation</div>
-                          <div className="text-xs text-neutral-400">Order 15kg of Butter today to meet expected weekend demand. Lead time is 2 days.</div>
+                          <div className="text-sm font-medium text-white mb-1">คำแนะนำ</div>
+                          <div className="text-xs text-neutral-400">สั่งเนยเพิ่ม 15 กก. วันนี้เพื่อรองรับความต้องการช่วงสุดสัปดาห์ ระยะเวลาจัดส่ง 2 วัน</div>
                         </div>
                       </div>
                     </div>
@@ -286,8 +286,8 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 lg:mb-24 gap-8">
               <div className="max-w-2xl">
-                <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight mb-6">Built for your business.</h2>
-                <p className="text-xl text-muted leading-relaxed">Designed specifically for the needs of small to medium food and retail operations.</p>
+                <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight mb-6">สร้างมาเพื่อธุรกิจของคุณ</h2>
+                <p className="text-xl text-muted leading-relaxed">ออกแบบมาเฉพาะสำหรับธุรกิจอาหารและค้าปลีกขนาดเล็กถึงขนาดกลาง</p>
               </div>
             </div>
 
@@ -326,13 +326,13 @@ export default function LandingPage() {
             SMARTSTOCK
           </div>
           <div className="text-sm text-muted font-mono tracking-widest uppercase">
-            &copy; {new Date().getFullYear()} SmartStock Platform. All rights reserved.
+            &copy; {new Date().getFullYear()} SmartStock Platform. สงวนลิขสิทธิ์
           </div>
           <div className="flex gap-2">
-            <a href="#" className="p-3 text-muted hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground rounded-lg" aria-label="Follow SmartStock on Twitter">
+            <a href="#" className="p-3 text-muted hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground rounded-lg" aria-label="ติดตาม SmartStock บน Twitter">
               <iconify-icon icon="solar:twitter-linear" width="24" height="24" aria-hidden="true"></iconify-icon>
             </a>
-            <a href="#" className="p-3 text-muted hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground rounded-lg" aria-label="View SmartStock on GitHub">
+            <a href="#" className="p-3 text-muted hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground rounded-lg" aria-label="ดู SmartStock บน GitHub">
               <iconify-icon icon="solar:github-linear" width="24" height="24" aria-hidden="true"></iconify-icon>
             </a>
           </div>
@@ -345,80 +345,80 @@ export default function LandingPage() {
 const features = [
   {
     icon: "solar:box-linear",
-    title: "Real-time Inventory",
-    description: "Track stock in and out instantly. Support for multiple units (kg, g, pieces) and manual adjustments."
+    title: "สต็อกแบบเรียลไทม์",
+    description: "ติดตามสินค้าเข้าออกได้ทันที รองรับหลายหน่วย เช่น กก. กรัม และชิ้น พร้อมการปรับสต็อกด้วยตนเอง"
   },
   {
     icon: "solar:document-text-linear",
-    title: "Recipe & BOM Support",
-    description: "Link products to raw materials. Selling one item automatically deducts the exact ingredients used."
+    title: "รองรับสูตรและ BOM",
+    description: "เชื่อมสินค้าขายกับวัตถุดิบ เมื่อขายสินค้า ระบบจะตัดวัตถุดิบตามปริมาณที่ใช้จริงโดยอัตโนมัติ"
   },
   {
     icon: "solar:bell-bing-linear",
-    title: "Low Stock Alerts",
-    description: "Set custom reorder points and get notified before you run out of critical supplies."
+    title: "แจ้งเตือนสต็อกต่ำ",
+    description: "กำหนดจุดสั่งซื้อใหม่ได้เอง และรับการแจ้งเตือนก่อนวัตถุดิบสำคัญจะหมด"
   },
   {
     icon: "solar:chart-square-linear",
-    title: "Sales Dashboard",
-    description: "Visualize daily sales, top-selling items, and inventory turnover in one clean interface."
+    title: "แดชบอร์ดยอดขาย",
+    description: "ดูยอดขายรายวัน สินค้าขายดี และรอบหมุนเวียนสต็อกได้ในหน้าจอเดียว"
   },
   {
     icon: "solar:cart-large-linear",
-    title: "Smart Recommendations",
-    description: "Get purchase recommendations based on current stock, lead times, and forecasted demand."
+    title: "คำแนะนำอัจฉริยะ",
+    description: "รับคำแนะนำการจัดซื้อตามสต็อกปัจจุบัน ระยะเวลาจัดส่ง และความต้องการที่คาดการณ์ไว้"
   },
   {
     icon: "solar:danger-triangle-linear",
-    title: "Anomaly Detection",
-    description: "Automatically detect unusual stock usage or sudden sales drops to prevent waste and fraud."
+    title: "ตรวจจับความผิดปกติ",
+    description: "ตรวจจับการใช้สต็อกผิดปกติหรือยอดขายตกแบบฉับพลันอัตโนมัติเพื่อลดของเสียและการทุจริต"
   }
 ];
 
 const aiFeatures = [
   {
     icon: "solar:bolt-linear",
-    title: "Fast AI Responses",
-    description: "Powered by Gemini Flash Lite for instant, low-latency insights and daily operational recommendations."
+    title: "AI ตอบสนองรวดเร็ว",
+    description: "ขับเคลื่อนด้วย Gemini Flash Lite เพื่อให้ข้อมูลเชิงลึกและคำแนะนำรายวันได้อย่างรวดเร็ว"
   },
   {
     icon: "solar:network-intelligence-linear",
-    title: "Deep Thinking Mode",
-    description: "Utilizes Gemini Pro with high thinking levels for complex demand forecasting and seasonality analysis."
+    title: "โหมดคิดลึก",
+    description: "ใช้ Gemini Pro สำหรับงานวิเคราะห์การคาดการณ์ที่ซับซ้อนและการดูฤดูกาลของยอดขาย"
   },
   {
     icon: "solar:graph-up-linear",
-    title: "Adaptive Models",
-    description: "Starts with statistical baselines and automatically upgrades to advanced ML models as your data grows."
+    title: "โมเดลที่ปรับตัวได้",
+    description: "เริ่มจากโมเดลเชิงสถิติพื้นฐานและอัปเกรดเป็นโมเดล ML ขั้นสูงโดยอัตโนมัติเมื่อข้อมูลมากขึ้น"
   }
 ];
 
 const audiences = [
   {
-    title: "Cafés",
-    description: "Keep your espresso flowing and pastries fresh without over-ordering.",
+    title: "คาเฟ่",
+    description: "คุมวัตถุดิบกาแฟและเบเกอรีให้พร้อมขายโดยไม่สั่งเกินจำเป็น",
     benefits: [
-      "Track milk and bean usage accurately",
-      "Forecast weekend vs weekday demand",
-      "Manage perishable inventory"
+      "ติดตามการใช้เมล็ดกาแฟและนมได้แม่นยำ",
+      "คาดการณ์ความต้องการวันธรรมดาและวันหยุด",
+      "จัดการสต็อกที่เน่าเสียง่าย"
     ]
   },
   {
-    title: "Bakeries",
-    description: "Connect your daily production recipes directly to your raw material stock.",
+    title: "เบเกอรี",
+    description: "เชื่อมสูตรการผลิตประจำวันเข้ากับสต็อกวัตถุดิบโดยตรง",
     benefits: [
-      "BOM-based flour and butter deduction",
-      "Plan tomorrow's production",
-      "Reduce ingredient waste"
+      "ตัดแป้งและเนยตาม BOM อัตโนมัติ",
+      "วางแผนการผลิตของวันถัดไป",
+      "ลดการสูญเสียวัตถุดิบ"
     ]
   },
   {
-    title: "Small Retail",
-    description: "Know exactly what's selling and what's sitting on the shelf.",
+    title: "ร้านค้าปลีกขนาดเล็ก",
+    description: "รู้ชัดว่าสินค้าไหนขายดีและสินค้าไหนค้างสต็อก",
     benefits: [
-      "Identify dead stock quickly",
-      "Automated reorder recommendations",
-      "Track supplier lead times"
+      "ระบุสินค้าค้างสต็อกได้เร็ว",
+      "รับคำแนะนำการสั่งซื้ออัตโนมัติ",
+      "ติดตามระยะเวลาจัดส่งของซัพพลายเออร์"
     ]
   }
 ];

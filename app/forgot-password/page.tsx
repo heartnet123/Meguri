@@ -6,16 +6,16 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-neutral-200">
         <div className="text-center">
-          <h2 className="text-3xl font-medium tracking-tight text-neutral-900">Reset your password</h2>
+          <h2 className="text-3xl font-medium tracking-tight text-neutral-900">รีเซ็ตรหัสผ่าน</h2>
           <p className="mt-2 text-sm text-neutral-500">
-            Enter your email and we&apos;ll send you a link to reset your password.
+            กรอกอีเมลของคุณ แล้วเราจะส่งลิงก์สำหรับรีเซ็ตรหัสผ่านให้
           </p>
         </div>
         <form className="mt-8 space-y-6" action="#" method="POST">
           <div className="space-y-4">
             <div>
               <label htmlFor="email-address" className="block text-sm font-medium text-neutral-700">
-                Email address
+                อีเมล
               </label>
               <input
                 id="email-address"
@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
                 autoComplete="email"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-neutral-300 placeholder-neutral-500 text-neutral-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 focus:z-10 sm:text-sm"
-                placeholder="you@example.com"
+                placeholder="name@example.com"
               />
             </div>
           </div>
@@ -34,15 +34,15 @@ export default function ForgotPasswordPage() {
               type="submit"
               className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-600 shadow-sm transition-colors"
             >
-              Send reset link
+              ส่งลิงก์รีเซ็ตรหัสผ่าน
             </button>
           </div>
         </form>
         
         <p className="mt-6 text-center text-sm text-neutral-600">
-          Remember your password?{' '}
+          จำรหัสผ่านได้แล้วใช่ไหม?{' '}
           <Link href="/login" className="font-medium text-neutral-900 hover:underline">
-            Back to login
+            กลับไปหน้าเข้าสู่ระบบ
           </Link>
         </p>
       </div>

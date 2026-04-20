@@ -125,12 +125,16 @@ export const assign = mutation({
     const alert = await ctx.db.get(id);
     if (!alert) throw new Error('Alert not found');
 
-    const user = await verifyWorkspace(ctx, alert.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager', 'staff']);
+    const { user, membership } = await verifyWorkspace(ctx, alert.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
 
     if (assignedTo !== null) {
-      const assignee = await ctx.db.get(assignedTo);
-      if (!assignee || assignee.workspaceId !== alert.workspaceId) {
+      // Verify assignee exists and has membership in this workspace
+      const assigneeMembership = await ctx.db
+        .query('workspaceMemberships')
+        .withIndex('by_user_workspace', (q) => q.eq('userId', assignedTo).eq('workspaceId', alert.workspaceId))
+        .unique();
+      if (!assigneeMembership) {
         throw new Error('Assignee must belong to the same workspace');
       }
     }
@@ -150,8 +154,8 @@ export const resolve = mutation({
     const alert = await ctx.db.get(id);
     if (!alert) throw new Error('Alert not found');
 
-    const user = await verifyWorkspace(ctx, alert.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager', 'staff']);
+    const { user, membership } = await verifyWorkspace(ctx, alert.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
 
     await ctx.db.patch(id, {
       status: 'resolved',
@@ -168,8 +172,8 @@ export const reopen = mutation({
     const alert = await ctx.db.get(id);
     if (!alert) throw new Error('Alert not found');
 
-    const user = await verifyWorkspace(ctx, alert.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager', 'staff']);
+    const { membership } = await verifyWorkspace(ctx, alert.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
 
     await ctx.db.patch(id, {
       status: 'open',
@@ -183,8 +187,8 @@ export const reopen = mutation({
 export const resolveAll = mutation({
   args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, { workspaceId }) => {
-    const user = await verifyWorkspace(ctx, workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager', 'staff']);
+    const { user, membership } = await verifyWorkspace(ctx, workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
 
     const now = Date.now();
     for await (const alert of ctx.db

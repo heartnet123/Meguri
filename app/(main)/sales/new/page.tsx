@@ -33,7 +33,7 @@ type CartItem = {
 /* ─── Helpers ──────────────────────────────────────────────────────────────── */
 
 function formatCurrency(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+  return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(n);
 }
 
 function generateDisplayId() {
@@ -41,16 +41,16 @@ function generateDisplayId() {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  finished_goods: 'Finished Goods',
-  bundles: 'Bundles',
-  raw_materials: 'Raw Materials',
+  finished_goods: 'สินค้าสำเร็จรูป',
+  bundles: 'ชุดสินค้า',
+  raw_materials: 'วัตถุดิบ',
 };
 
 const PAYMENT_OPTIONS = [
-  { value: 'cash' as const, label: 'Cash', icon: 'solar:wallet-money-linear' },
-  { value: 'credit_card' as const, label: 'Credit', icon: 'solar:card-linear' },
-  { value: 'mobile_pay' as const, label: 'Mobile', icon: 'solar:smartphone-2-linear' },
-  { value: 'invoice' as const, label: 'Invoice', icon: 'solar:document-text-linear' },
+  { value: 'cash' as const, label: 'เงินสด', icon: 'solar:wallet-money-linear' },
+  { value: 'credit_card' as const, label: 'บัตรเครดิต', icon: 'solar:card-linear' },
+  { value: 'mobile_pay' as const, label: 'มือถือ', icon: 'solar:smartphone-2-linear' },
+  { value: 'invoice' as const, label: 'ใบแจ้งหนี้', icon: 'solar:document-text-linear' },
 ];
 
 /* ─── CustomDropdown ───────────────────────────────────────────────────────── */
@@ -137,7 +137,7 @@ export default function NewOrderPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [customer, setCustomer] = useState('Walk-in Customer');
+  const [customer, setCustomer] = useState('ลูกค้าทั่วไป');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit_card' | 'mobile_pay' | 'invoice'>('cash');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -226,7 +226,7 @@ export default function NewOrderPage() {
   const handleCheckout = async () => {
     if (!workspaceId || cart.length === 0) return;
     if (hasInsufficientStock) {
-      setError('Cannot complete order — some ingredients have insufficient stock.');
+      setError('ไม่สามารถทำรายการได้ — วัตถุดิบบางรายการมีสต็อกไม่เพียงพอ');
       return;
     }
 
@@ -251,7 +251,7 @@ export default function NewOrderPage() {
       });
       router.push('/sales');
     } catch (err: any) {
-      setError(err.message || 'Failed to complete sale.');
+      setError(err.message || 'ทำรายการขายไม่สำเร็จ');
     } finally {
       setIsSubmitting(false);
     }
@@ -269,13 +269,13 @@ export default function NewOrderPage() {
           <Link
             href="/sales"
             className="p-2 text-neutral-500 hover:text-neutral-900 rounded-md hover:bg-neutral-100 transition-colors focus:outline-none"
-            aria-label="Back to sales"
+            aria-label="กลับไปหน้าขาย"
           >
             <iconify-icon icon="solar:arrow-left-linear" width="20" height="20" aria-hidden="true" />
           </Link>
           <div>
-            <h1 className="text-2xl font-medium tracking-tight text-neutral-900">New Order</h1>
-            <p className="text-sm text-neutral-500 mt-0.5">Select items from catalog. Stock deductions are based on recipe BOM.</p>
+            <h1 className="text-2xl font-medium tracking-tight text-neutral-900">รายการขายใหม่</h1>
+            <p className="text-sm text-neutral-500 mt-0.5">เลือกสินค้าจากแคตตาล็อก ระบบจะตัดสต็อกตามสูตรสินค้าอัตโนมัติ</p>
           </div>
         </div>
         {cart.length > 0 && (
@@ -283,7 +283,7 @@ export default function NewOrderPage() {
             onClick={clearCart}
             className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
           >
-            Clear cart
+ล้างตะกร้า
           </button>
         )}
       </div>
@@ -305,7 +305,7 @@ export default function NewOrderPage() {
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search catalog by name or SKU…"
+                placeholder="ค้นหาตามชื่อหรือ SKU…"
                 className="w-full pl-9 pr-4 py-2 text-sm bg-transparent border border-neutral-200 rounded-md focus:outline-none focus-visible:border-neutral-900 transition-colors placeholder:text-neutral-400"
               />
             </div>
@@ -313,7 +313,7 @@ export default function NewOrderPage() {
               value={categoryFilter}
               onChange={setCategoryFilter}
               options={categoryOptions}
-              placeholder="All Categories"
+              placeholder="ทุกหมวดหมู่"
             />
           </div>
 
@@ -333,8 +333,8 @@ export default function NewOrderPage() {
               ))
             ) : filteredRecipes.length === 0 ? (
               <div className="col-span-full py-16 text-center border border-dashed border-neutral-200 rounded-md">
-                <p className="text-sm font-medium text-neutral-500">No items match your criteria.</p>
-                <p className="text-xs text-neutral-400 mt-1">Try adjusting your search or filter.</p>
+                <p className="text-sm font-medium text-neutral-500">ไม่พบรายการที่ตรงกับเงื่อนไข</p>
+                <p className="text-xs text-neutral-400 mt-1">ลองปรับคำค้นหาหรือตัวกรอง</p>
               </div>
             ) : (
               filteredRecipes.map((recipe) => {
@@ -371,7 +371,7 @@ export default function NewOrderPage() {
                       </span>
                       <span className="text-xs text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                         <iconify-icon icon="solar:add-circle-linear" width="14" height="14" aria-hidden="true" />
-                        Add
+เพิ่ม
                       </span>
                     </div>
                   </button>
@@ -388,7 +388,7 @@ export default function NewOrderPage() {
           <div className="bg-white border border-neutral-200 rounded-md p-4 space-y-5">
             <div>
               <label htmlFor="customer-name" className="text-xs text-neutral-500 mb-1.5 block">
-                Customer
+                ลูกค้า
               </label>
               <input
                 id="customer-name"
@@ -400,7 +400,7 @@ export default function NewOrderPage() {
             </div>
 
             <div>
-              <label className="text-xs text-neutral-500 mb-1.5 block">Payment</label>
+              <label className="text-xs text-neutral-500 mb-1.5 block">วิธีชำระเงิน</label>
               <div className="flex bg-neutral-50 border border-neutral-200 rounded-md p-1">
                 {PAYMENT_OPTIONS.map((opt) => (
                   <button
@@ -423,13 +423,13 @@ export default function NewOrderPage() {
           {/* Cart — Line Items */}
           <div className="bg-white border border-neutral-200 rounded-md flex flex-col">
             <div className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-neutral-900">Line Items</h2>
-              <span className="text-xs text-neutral-500">{cartTotals.itemCount} units</span>
+              <h2 className="text-sm font-medium text-neutral-900">รายการในตะกร้า</h2>
+              <span className="text-xs text-neutral-500">{cartTotals.itemCount} ชิ้น</span>
             </div>
 
             {cart.length === 0 ? (
               <div className="px-4 py-12 text-center">
-                <p className="text-sm text-neutral-400">Cart is empty</p>
+                <p className="text-sm text-neutral-400">ตะกร้ายังว่างอยู่</p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-100 max-h-64 overflow-y-auto">
@@ -448,7 +448,7 @@ export default function NewOrderPage() {
                         <button
                           onClick={() => updateQuantity(item.recipeId, item.quantity - 1)}
                           className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
-                          aria-label="Decrease quantity"
+                          aria-label="ลดจำนวน"
                         >
                           <iconify-icon icon="solar:minus-linear" width="12" height="12" aria-hidden="true" />
                         </button>
@@ -458,7 +458,7 @@ export default function NewOrderPage() {
                         <button
                           onClick={() => updateQuantity(item.recipeId, item.quantity + 1)}
                           className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
-                          aria-label="Increase quantity"
+                          aria-label="เพิ่มจำนวน"
                         >
                           <iconify-icon icon="solar:add-linear" width="12" height="12" aria-hidden="true" />
                         </button>
@@ -476,15 +476,15 @@ export default function NewOrderPage() {
             {cart.length > 0 && (
               <div className="p-4 border-t border-neutral-200 bg-neutral-50 space-y-2">
                 <div className="flex justify-between text-xs text-neutral-500">
-                  <span>Subtotal</span>
+                  <span>ยอดย่อย</span>
                   <span className="tabular-nums">{formatCurrency(cartTotals.revenue)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-neutral-500">
-                  <span>Est. Cost</span>
+                  <span>ต้นทุนโดยประมาณ</span>
                   <span className="tabular-nums">{formatCurrency(cartTotals.cost)}</span>
                 </div>
                 <div className="flex justify-between text-sm font-medium pt-2 mt-1 border-t border-neutral-200 text-neutral-900">
-                  <span>Total</span>
+                  <span>ยอดรวม</span>
                   <span className="tabular-nums">{formatCurrency(cartTotals.revenue)}</span>
                 </div>
               </div>
@@ -497,7 +497,7 @@ export default function NewOrderPage() {
               <div className="px-4 py-3 border-b border-neutral-100">
                 <h2 className="text-sm font-medium text-neutral-900 flex items-center gap-2">
                   <iconify-icon icon="solar:danger-triangle-linear" width="14" height="14" aria-hidden="true" />
-                  BOM Stock Impact
+ผลกระทบต่อสต็อกจากสูตรสินค้า
                 </h2>
               </div>
 
@@ -509,7 +509,7 @@ export default function NewOrderPage() {
                 <div className="divide-y divide-neutral-100 max-h-48 overflow-y-auto">
                   {impact.ingredientImpacts.length === 0 ? (
                     <div className="px-4 py-4 text-xs text-neutral-500 text-center">
-                      No ingredients found for these items.
+ไม่พบวัตถุดิบของรายการเหล่านี้
                     </div>
                   ) : (
                     impact.ingredientImpacts.map((item: any) => (
@@ -542,7 +542,7 @@ export default function NewOrderPage() {
                 <div className="px-4 py-3 bg-red-50 border-t border-red-200">
                   <p className="text-xs font-medium text-red-700 flex items-center gap-1.5">
                     <iconify-icon icon="solar:danger-circle-linear" width="14" height="14" aria-hidden="true" />
-                    BOM deficiency — check inventory levels.
+วัตถุดิบไม่เพียงพอ — โปรดตรวจสอบระดับสต็อก
                   </p>
                 </div>
               )}
@@ -569,10 +569,10 @@ export default function NewOrderPage() {
             {isSubmitting ? (
               <>
                 <iconify-icon icon="solar:refresh-linear" width="16" height="16" className="animate-spin" aria-hidden="true" />
-                Processing…
+กำลังดำเนินการ…
               </>
             ) : (
-              <span>Charge {formatCurrency(cartTotals.revenue)}</span>
+              <span>เรียกเก็บ {formatCurrency(cartTotals.revenue)}</span>
             )}
           </button>
 

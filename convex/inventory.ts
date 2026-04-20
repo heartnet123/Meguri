@@ -143,8 +143,8 @@ export const add = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await verifyWorkspace(ctx, args.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager']);
+    const { user, membership } = await verifyWorkspace(ctx, args.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager']);
 
     // ── Invariant: non-negative initial stock ──
     if (args.currentStock < 0) {
@@ -203,8 +203,8 @@ export const update = mutation({
     if (!item) throw new ConvexError('Item not found.');
     if (item.isArchived) throw new ConvexError('Cannot edit an archived item.');
 
-    const user = await verifyWorkspace(ctx, item.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager']);
+    const { user, membership } = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager']);
 
     // ── Invariant: non-negative min level ──
     if (updates.minStockLevel !== undefined && updates.minStockLevel < 0) {
@@ -242,8 +242,8 @@ export const updateStock = mutation({
     if (!item) throw new ConvexError('Item not found.');
     if (item.isArchived) throw new ConvexError('Cannot update stock for an archived item.');
 
-    const user = await verifyWorkspace(ctx, item.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager']);
+    const { user, membership } = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager']);
 
     // ── Invariant: no negative stock ──
     if (currentStock < 0) {
@@ -266,8 +266,8 @@ export const adjustStock = mutation({
     if (!item) throw new ConvexError('Item not found.');
     if (item.isArchived) throw new ConvexError('Cannot adjust stock for an archived item.');
 
-    const user = await verifyWorkspace(ctx, item.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager', 'staff']);
+    const { user, membership } = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
 
     // ── Invariant: quantity must be non-zero ──
     if (quantity === 0) {
@@ -320,8 +320,8 @@ export const archive = mutation({
     if (!item) throw new ConvexError('Item not found.');
     if (item.isArchived) throw new ConvexError('Item is already archived.');
 
-    const user = await verifyWorkspace(ctx, item.workspaceId);
-    checkRole(user, ['owner', 'admin']);
+    const { user, membership } = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(membership, ['owner', 'admin']);
 
     const now = Date.now();
     await ctx.db.patch(id, { isArchived: true, updatedAt: now });
@@ -352,8 +352,8 @@ export const remove = mutation({
     const item = await ctx.db.get(id);
     if (!item) throw new ConvexError('Item not found.');
 
-    const user = await verifyWorkspace(ctx, item.workspaceId);
-    checkRole(user, ['owner', 'admin']);
+    const { user, membership } = await verifyWorkspace(ctx, item.workspaceId);
+    checkRole(membership, ['owner', 'admin']);
 
     // Block hard-delete if any movement records exist — use archive() instead
     const movementCount = await ctx.db

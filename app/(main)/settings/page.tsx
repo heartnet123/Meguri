@@ -10,21 +10,21 @@ interface SettingsSection {
 
 export default function SettingsPage() {
   const sections: SettingsSection[] = [
-    { id: 'profile', title: 'Profile', description: 'Update your name, email, and password.', icon: 'solar:user-bold-duotone' },
-    { id: 'workspace', title: 'Workspace', description: 'Edit workspace name, locations, and regional settings.', icon: 'solar:buildings-bold-duotone' },
-    { id: 'notifications', title: 'Notifications', description: 'Choose which stock alerts you want to receive.', icon: 'solar:bell-bold-duotone' },
-    { id: 'team', title: 'Team', description: 'Invite teammates and manage access levels.', icon: 'solar:shield-user-bold-duotone', href: '/settings/team' },
-    { id: 'integrations', title: 'Integrations', description: 'Connect POS, ERP, and logistics tools.', icon: 'solar:database-bold-duotone' },
-    { id: 'billing', title: 'Billing', description: 'Review your plan, invoices, and payment history.', icon: 'solar:card-bold-duotone' },
+    { id: 'profile', title: 'โปรไฟล์', description: 'อัปเดตชื่อ อีเมล และรหัสผ่านของคุณ', icon: 'solar:user-bold-duotone' },
+    { id: 'workspace', title: 'เวิร์กสเปซ', description: 'แก้ไขชื่อเวิร์กสเปซ สาขา และการตั้งค่าภูมิภาค', icon: 'solar:buildings-bold-duotone' },
+    { id: 'notifications', title: 'การแจ้งเตือน', description: 'เลือกประเภทการแจ้งเตือนสต็อกที่คุณต้องการรับ', icon: 'solar:bell-bold-duotone' },
+    { id: 'team', title: 'ทีมงาน', description: 'เชิญเพื่อนร่วมทีมและจัดการระดับสิทธิ์การเข้าถึง', icon: 'solar:shield-user-bold-duotone', href: '/settings/team' },
+    { id: 'integrations', title: 'การเชื่อมต่อระบบ', description: 'เชื่อมต่อระบบ POS, ERP และเครื่องมือด้านโลจิสติกส์', icon: 'solar:database-bold-duotone' },
+    { id: 'billing', title: 'การเรียกเก็บเงิน', description: 'ตรวจสอบแพ็กเกจ ใบแจ้งหนี้ และประวัติการชำระเงิน', icon: 'solar:card-bold-duotone' },
   ];
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Settings</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">Workspace settings</h1>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">การตั้งค่า</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">การตั้งค่าเวิร์กสเปซ</h1>
         <p className="max-w-2xl text-sm text-muted">
-          Manage account details, workspace configuration, alerts, team access, and billing from one place.
+          จัดการรายละเอียดบัญชี การตั้งค่าเวิร์กสเปซ การแจ้งเตือน สิทธิ์ของทีม และการเรียกเก็บเงินได้จากที่เดียว
         </p>
       </div>
 
@@ -42,7 +42,7 @@ export default function SettingsPage() {
                     <h2 className="text-sm font-semibold text-foreground">{section.title}</h2>
                     {section.href && (
                       <span className="rounded-full bg-accent-subtle px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-accent">
-                        Manage
+                        จัดการ
                       </span>
                     )}
                   </div>
@@ -82,12 +82,12 @@ export default function SettingsPage() {
 
       <div className="rounded-2xl border border-border bg-surface px-5 py-4 text-sm text-muted shadow-sm sm:flex sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <p className="font-medium text-foreground">System status</p>
-          <p>Workspace access controls and audit logging are active.</p>
+          <p className="font-medium text-foreground">สถานะระบบ</p>
+          <p>ระบบควบคุมสิทธิ์เข้าถึงเวิร์กสเปซและบันทึกการตรวจสอบกำลังทำงานอยู่</p>
         </div>
         <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-success-subtle px-3 py-1 text-xs font-medium text-success sm:mt-0">
           <iconify-icon icon="solar:shield-check-bold-duotone" width="14" height="14" aria-hidden="true" />
-          Protected
+          ปลอดภัย
         </div>
       </div>
     </div>

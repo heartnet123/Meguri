@@ -125,40 +125,40 @@ export default function SellableItemsPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Sellable Items</h1>
-          <p className="mt-1 text-sm text-muted">Direct-resale products with pricing, margin, and stock logic.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">สินค้าพร้อมขาย</h1>
+          <p className="mt-1 text-sm text-muted">สินค้าสำหรับขายต่อพร้อมข้อมูลราคา กำไร และตรรกะสต็อก</p>
         </div>
         <button onClick={openCreate} className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent/90">
-          Add Item
+          เพิ่มสินค้า
         </button>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <Metric label="Total Items" value={summary?.totalItems ?? 0} />
-        <Metric label="Active Items" value={summary?.activeItems ?? 0} />
-        <Metric label="Avg Margin" value={`${summary?.avgMargin ?? 0}%`} accent />
-        <Metric label="Stock Value" value={formatCurrency(summary?.totalValue ?? 0)} />
+        <Metric label="สินค้าทั้งหมด" value={summary?.totalItems ?? 0} />
+        <Metric label="สินค้าที่ใช้งานอยู่" value={summary?.activeItems ?? 0} />
+        <Metric label="กำไรเฉลี่ย" value={`${summary?.avgMargin ?? 0}%`} accent />
+        <Metric label="มูลค่าสต็อก" value={formatCurrency(summary?.totalValue ?? 0)} />
       </div>
 
       <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, SKU, or ID" className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-accent" />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า" className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-accent" />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
         <table className="w-full text-left">
           <thead className="bg-surface-raised">
             <tr>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">Item</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">Cost</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">Price</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">Profit</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">Stock</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted text-right">Actions</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">สินค้า</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">ต้นทุน</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">ราคาขาย</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">กำไร</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted">สต็อก</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted text-right">การจัดการ</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
             {filtered.length === 0 ? (
-              <tr><td className="px-6 py-10 text-center text-sm text-muted" colSpan={6}>No sellable items found.</td></tr>
+              <tr><td className="px-6 py-10 text-center text-sm text-muted" colSpan={6}>ไม่พบสินค้าพร้อมขาย</td></tr>
             ) : filtered.map((item) => {
               const profit = item.profit ?? (item.salePrice - item.purchaseCost);
               const marginPct = item.marginPct ?? (item.salePrice > 0 ? Math.round((profit / item.salePrice) * 100) : 0);
@@ -172,13 +172,13 @@ export default function SellableItemsPage() {
                   <td className="px-6 py-4 tabular-nums">{formatCurrency(item.salePrice)}</td>
                   <td className="px-6 py-4">
                     <div className="font-semibold text-success tabular-nums">{formatCurrency(profit)}</div>
-                    <div className="text-xs text-muted">{marginPct}% margin</div>
+                    <div className="text-xs text-muted">มาร์จิ้น {marginPct}%</div>
                   </td>
                   <td className="px-6 py-4 tabular-nums">{item.trackStock ? (item.currentStock ?? 0) : '—'}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
-                      <button onClick={() => openEdit(item)} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised">Edit</button>
-                      <button onClick={() => removeItem({ sellableItemId: item._id })} className="rounded-lg px-3 py-2 text-sm text-danger hover:bg-danger-subtle">Delete</button>
+                      <button onClick={() => openEdit(item)} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised">แก้ไข</button>
+                      <button onClick={() => removeItem({ sellableItemId: item._id })} className="rounded-lg px-3 py-2 text-sm text-danger hover:bg-danger-subtle">ลบ</button>
                     </div>
                   </td>
                 </tr>
@@ -193,38 +193,38 @@ export default function SellableItemsPage() {
           <div className="w-full max-w-2xl rounded-3xl border border-border bg-surface p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-foreground">{editing ? 'Edit Item' : 'Add Item'}</h2>
-                <p className="text-sm text-muted">Cost, price, and profit are calculated from business rules.</p>
+                <h2 className="text-xl font-semibold text-foreground">{editing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า'}</h2>
+                <p className="text-sm text-muted">ต้นทุน ราคาขาย และกำไรจะคำนวณตามกฎธุรกิจอัตโนมัติ</p>
               </div>
-              <button onClick={() => setIsOpen(false)} className="rounded-xl px-3 py-2 text-sm hover:bg-surface-raised">Close</button>
+              <button onClick={() => setIsOpen(false)} className="rounded-xl px-3 py-2 text-sm hover:bg-surface-raised">ปิด</button>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
+              <Field label="ชื่อสินค้า" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
               <Field label="SKU" value={form.sku} onChange={(v) => setForm((f) => ({ ...f, sku: v }))} />
-              <Field label="Purchase cost" type="number" value={form.purchaseCost} onChange={(v) => setForm((f) => ({ ...f, purchaseCost: v }))} />
-              <Field label="Sale price" type="number" value={form.salePrice} onChange={(v) => setForm((f) => ({ ...f, salePrice: v }))} />
-              <Field label="Current stock" type="number" value={form.currentStock} onChange={(v) => setForm((f) => ({ ...f, currentStock: v }))} />
-              <Field label="Min stock level" type="number" value={form.minStockLevel} onChange={(v) => setForm((f) => ({ ...f, minStockLevel: v }))} />
+              <Field label="ต้นทุนซื้อ" type="number" value={form.purchaseCost} onChange={(v) => setForm((f) => ({ ...f, purchaseCost: v }))} />
+              <Field label="ราคาขาย" type="number" value={form.salePrice} onChange={(v) => setForm((f) => ({ ...f, salePrice: v }))} />
+              <Field label="สต็อกปัจจุบัน" type="number" value={form.currentStock} onChange={(v) => setForm((f) => ({ ...f, currentStock: v }))} />
+              <Field label="ระดับสต็อกขั้นต่ำ" type="number" value={form.minStockLevel} onChange={(v) => setForm((f) => ({ ...f, minStockLevel: v }))} />
             </div>
 
             <div className="mt-4 rounded-2xl border border-border bg-background p-4">
-              <div className="text-xs font-semibold uppercase tracking-widest text-muted">Live Profit Preview</div>
+              <div className="text-xs font-semibold uppercase tracking-widest text-muted">ตัวอย่างกำไรแบบเรียลไทม์</div>
               <div className="mt-2 grid grid-cols-3 gap-3 text-sm">
-                <Preview label="Cost" value={formatCurrency(Number(form.purchaseCost || 0))} />
-                <Preview label="Profit" value={formatCurrency(Number(form.salePrice || 0) - Number(form.purchaseCost || 0))} accent />
-                <Preview label="Margin" value={`${Number(form.salePrice || 0) > 0 ? Math.round(((Number(form.salePrice || 0) - Number(form.purchaseCost || 0)) / Number(form.salePrice || 0)) * 100) : 0}%`} />
+                <Preview label="ต้นทุน" value={formatCurrency(Number(form.purchaseCost || 0))} />
+                <Preview label="กำไร" value={formatCurrency(Number(form.salePrice || 0) - Number(form.purchaseCost || 0))} accent />
+                <Preview label="มาร์จิ้น" value={`${Number(form.salePrice || 0) > 0 ? Math.round(((Number(form.salePrice || 0) - Number(form.purchaseCost || 0)) / Number(form.salePrice || 0)) * 100) : 0}%`} />
               </div>
             </div>
 
             <div className="mt-4 flex items-center justify-between gap-4">
               <label className="flex items-center gap-2 text-sm text-foreground">
                 <input type="checkbox" checked={form.trackStock} onChange={(e) => setForm((f) => ({ ...f, trackStock: e.target.checked }))} />
-                Track stock
+                ติดตามสต็อก
               </label>
               <div className="flex gap-2">
-                <button onClick={() => setIsOpen(false)} className="rounded-xl border border-border px-4 py-2.5 text-sm">Cancel</button>
-                <button onClick={submit} className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white">{editing ? 'Save changes' : 'Create item'}</button>
+                <button onClick={() => setIsOpen(false)} className="rounded-xl border border-border px-4 py-2.5 text-sm">ยกเลิก</button>
+                <button onClick={submit} className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white">{editing ? 'บันทึกการเปลี่ยนแปลง' : 'สร้างสินค้า'}</button>
               </div>
             </div>
           </div>

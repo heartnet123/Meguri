@@ -12,9 +12,9 @@ function formatCurrency(n: number) {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  finished_goods: 'Finished Goods',
-  bundles: 'Bundles',
-  raw_materials: 'Raw Materials',
+  finished_goods: 'สินค้าสำเร็จรูป',
+  bundles: 'ชุดสินค้า',
+  raw_materials: 'วัตถุดิบ',
 };
 
 export default function RecipesPage() {
@@ -42,7 +42,7 @@ export default function RecipesPage() {
   });
 
   const handleDelete = async (id: Id<'recipes'>) => {
-    if (confirm('Are you sure you want to delete this sellable item?')) {
+    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้าพร้อมขายนี้?')) {
       await removeRecipe({ recipeId: id });
     }
   };
@@ -70,15 +70,15 @@ export default function RecipesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Catalog & Recipes</h1>
-          <p className="text-sm text-muted mt-1">Manage sellable items, pricing, and Bill of Materials (BOM).</p>
+          <h1 className="text-2xl font-semibold text-foreground">แคตตาล็อกและสูตรสินค้า</h1>
+          <p className="text-sm text-muted mt-1">จัดการสินค้าพร้อมขาย ราคาขาย และรายการวัตถุดิบ (BOM)</p>
         </div>
         <button
           onClick={handleCreate}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors shadow-sm"
         >
           <iconify-icon icon="solar:add-circle-linear" width="20" height="20" />
-          Create Sellable Item
+          สร้างสินค้าพร้อมขาย
         </button>
       </div>
 
@@ -87,21 +87,21 @@ export default function RecipesPage() {
         <div className="p-4 bg-surface border border-border rounded-xl shadow-sm">
           <div className="flex items-center gap-3 text-muted mb-2">
             <iconify-icon icon="solar:layers-minimalistic-linear" width="18" height="18" />
-            <span className="text-xs font-medium uppercase tracking-wider">Total Items</span>
+            <span className="text-xs font-medium uppercase tracking-wider">สินค้าทั้งหมด</span>
           </div>
           <div className="text-2xl font-bold text-foreground">{stats.total}</div>
         </div>
         <div className="p-4 bg-surface border border-border rounded-xl shadow-sm">
           <div className="flex items-center gap-3 text-muted mb-2">
             <iconify-icon icon="solar:chart-square-linear" width="18" height="18" />
-            <span className="text-xs font-medium uppercase tracking-wider">Avg Margin</span>
+            <span className="text-xs font-medium uppercase tracking-wider">กำไรเฉลี่ย</span>
           </div>
           <div className="text-2xl font-bold text-success">{stats.avgMargin}%</div>
         </div>
         <div className="p-4 bg-surface border border-border rounded-xl shadow-sm">
           <div className="flex items-center gap-3 text-muted mb-2">
             <iconify-icon icon="solar:dollar-minimalistic-linear" width="18" height="18" />
-            <span className="text-xs font-medium uppercase tracking-wider">Avg Price</span>
+            <span className="text-xs font-medium uppercase tracking-wider">ราคาเฉลี่ย</span>
           </div>
           <div className="text-2xl font-bold text-foreground">{formatCurrency(stats.totalValue / (stats.total || 1))}</div>
         </div>
@@ -119,7 +119,7 @@ export default function RecipesPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, SKU, or ID…"
+            placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า…"
             className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
@@ -128,7 +128,7 @@ export default function RecipesPage() {
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
         >
-          <option value="">All Categories</option>
+          <option value="">ทุกหมวดหมู่</option>
           {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
@@ -141,12 +141,12 @@ export default function RecipesPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-raised border-b border-border">
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">ID & SKU</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">Name & Category</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">Cost</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">Price</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">Margin</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70 text-right">Actions</th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">รหัสและ SKU</th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">ชื่อและหมวดหมู่</th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">ต้นทุน</th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">ราคา</th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">กำไร</th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70 text-right">การจัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -160,7 +160,7 @@ export default function RecipesPage() {
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-muted">
                     <iconify-icon icon="solar:ghost-linear" width="48" height="48" className="mx-auto mb-3 opacity-20" />
-                    <p className="text-sm">No items found in your catalog.</p>
+                    <p className="text-sm">ไม่พบสินค้าในแคตตาล็อกของคุณ</p>
                   </td>
                 </tr>
               ) : (
@@ -176,7 +176,7 @@ export default function RecipesPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-foreground tabular-nums">{formatCurrency(r.unitCost)}</div>
-                      <div className="text-[10px] text-muted mt-0.5">{r.ingredientCount} ingredients</div>
+                      <div className="text-[10px] text-muted mt-0.5">{r.ingredientCount} วัตถุดิบ</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-bold text-foreground tabular-nums">{formatCurrency(r.price)}</div>
@@ -185,21 +185,21 @@ export default function RecipesPage() {
                       <div className={`text-sm font-bold tabular-nums ${r.marginPct >= 30 ? 'text-success' : r.marginPct >= 15 ? 'text-warning' : 'text-danger'}`}>
                         {r.marginPct}%
                       </div>
-                      <div className="text-[10px] text-muted mt-0.5">Profit: {formatCurrency(r.price - r.unitCost)}</div>
+                      <div className="text-[10px] text-muted mt-0.5">กำไร: {formatCurrency(r.price - r.unitCost)}</div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEdit(r)}
                           className="p-2 text-muted hover:text-accent hover:bg-accent-subtle rounded-lg transition-all"
-                          title="Edit Item"
+                          title="แก้ไขสินค้า"
                         >
                           <iconify-icon icon="solar:pen-linear" width="18" height="18" />
                         </button>
                         <button
                           onClick={() => handleDelete(r._id)}
                           className="p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg transition-all"
-                          title="Delete Item"
+                          title="ลบสินค้า"
                         >
                           <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" />
                         </button>

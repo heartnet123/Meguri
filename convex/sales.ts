@@ -80,8 +80,8 @@ export const add = mutation({
     )),
   },
   handler: async (ctx, args) => {
-    const user = await verifyWorkspace(ctx, args.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager', 'staff']);
+    const { user, membership } = await verifyWorkspace(ctx, args.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
 
     // ── 1. Validate item-level fields ──
     if (args.items && args.items.length > 0) {

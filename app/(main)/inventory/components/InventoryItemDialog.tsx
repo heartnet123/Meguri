@@ -72,7 +72,7 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
     if (isWorkspaceLoading) return;
     
     if (!workspaceId) {
-      setError('No active workspace found. Please complete onboarding or contact support.');
+      setError('ไม่พบเวิร์กสเปซที่กำลังใช้งาน กรุณาตั้งค่าเริ่มต้นให้เสร็จหรือ ติดต่อผู้ดูแลระบบ');
       return;
     }
 
@@ -105,12 +105,12 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
       }
       onClose();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      const message = err instanceof Error ? err.message : 'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง';
       // Surface permission issues with a friendlier message
       if (message.includes('Forbidden')) {
-        setError('You do not have permission to perform this action. Manager role or higher required.');
+        setError('คุณไม่มีสิทธิ์ทำรายการนี้ ต้องใช้บทบาทผู้จัดการขึ้นไป');
       } else if (message.includes('Unauthenticated')) {
-        setError('You are not signed in. Please refresh the page and sign in.');
+        setError('คุณยังไม่ได้เข้าสู่ระบบ กรุณารีเฟรชหน้าและเข้าสู่ระบบอีกครั้ง');
       } else {
         setError(message);
       }
@@ -124,7 +124,7 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
       <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">
-            {item ? 'Edit Inventory Item' : 'Add Inventory Item'}
+            {item ? 'แก้ไขสินค้าคงคลัง' : 'เพิ่มสินค้าคงคลัง'}
           </h2>
           <button
             onClick={onClose}
@@ -145,14 +145,14 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
           <form id="inventory-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Name *</label>
+                <label className="text-sm font-medium text-foreground">ชื่อสินค้า *</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground bg-surface text-foreground"
-                  placeholder="e.g. Arabica Beans"
+                  placeholder="เช่น เมล็ดกาแฟอาราบิกา"
                 />
               </div>
               <div className="space-y-1.5">
@@ -163,39 +163,39 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
                   value={sku}
                   onChange={(e) => setSku(e.target.value)}
                   className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground bg-surface text-foreground"
-                  placeholder="e.g. COF-001"
+                  placeholder="เช่น COF-001"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Category *</label>
+                <label className="text-sm font-medium text-foreground">หมวดหมู่ *</label>
                 <input
                   type="text"
                   required
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground bg-surface text-foreground"
-                  placeholder="e.g. Coffee"
+                  placeholder="เช่น กาแฟ"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Unit *</label>
+                <label className="text-sm font-medium text-foreground">หน่วย *</label>
                 <input
                   type="text"
                   required
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
                   className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground bg-surface text-foreground"
-                  placeholder="e.g. kg, L, pcs"
+                  placeholder="เช่น กก., ลิตร, ชิ้น"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Initial Stock {item ? '(Not editable here)' : '*'}</label>
+                <label className="text-sm font-medium text-foreground">สต็อกเริ่มต้น {item ? '(แก้ไขจากหน้าต่างนี้ไม่ได้)' : '*'}</label>
                 <input
                   type="number"
                   required={!item}
@@ -208,7 +208,7 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Min Stock Level *</label>
+                <label className="text-sm font-medium text-foreground">ระดับสต็อกขั้นต่ำ *</label>
                 <input
                   type="number"
                   required
@@ -222,7 +222,7 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Cost Per Unit</label>
+              <label className="text-sm font-medium text-foreground">ต้นทุนต่อหน่วย</label>
               <input
                 type="number"
                 min="0"
@@ -234,13 +234,13 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Notes</label>
+              <label className="text-sm font-medium text-foreground">หมายเหตุ</label>
               <textarea
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground bg-surface text-foreground"
-                placeholder="Optional notes..."
+                placeholder="บันทึกเพิ่มเติม (ไม่บังคับ)..."
               />
             </div>
           </form>
@@ -252,7 +252,7 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-raised transition-colors"
           >
-            Cancel
+            ยกเลิก
           </button>
             <button
               type="submit"
@@ -263,7 +263,7 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
               {(loading || isWorkspaceLoading) && (
                 <iconify-icon icon="solar:refresh-circle-linear" width="16" height="16" className="animate-spin" />
               )}
-              {isWorkspaceLoading ? 'Syncing...' : loading ? 'Saving...' : item ? 'Save Changes' : 'Add Item'}
+              {isWorkspaceLoading ? 'กำลังซิงก์...' : loading ? 'กำลังบันทึก...' : item ? 'บันทึกการเปลี่ยนแปลง' : 'เพิ่มสินค้า'}
             </button>
         </div>
       </div>

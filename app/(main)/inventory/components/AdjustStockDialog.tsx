@@ -46,13 +46,13 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
     e.preventDefault();
 
     if (parsedQty === 0) {
-      setError('Quantity cannot be zero.');
+      setError('จำนวนต้องไม่เป็นศูนย์');
       return;
     }
     if (wouldGoNegative) {
       setError(
-        `This adjustment would result in ${projectedStock.toFixed(2)} ${item.unit}, which is below zero. ` +
-        'Stock cannot go negative.',
+        `การปรับครั้งนี้จะทำให้คงเหลือ ${projectedStock.toFixed(2)} ${item.unit} ซึ่งต่ำกว่าศูนย์ ` +
+        'ไม่สามารถให้สต็อกติดลบได้',
       );
       return;
     }
@@ -68,7 +68,7 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
       });
       handleClose();
     } catch (err: any) {
-      const msg: string = err?.data ?? err?.message ?? 'An unexpected error occurred.';
+      const msg: string = err?.data ?? err?.message ?? 'เกิดข้อผิดพลาดที่ไม่คาดคิด';
       setError(msg);
     } finally {
       setLoading(false);
@@ -79,7 +79,7 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-surface rounded-xl shadow-xl border border-border w-full max-w-sm overflow-hidden flex flex-col">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface">
-          <h2 className="text-lg font-semibold text-foreground">Adjust Stock</h2>
+          <h2 className="text-lg font-semibold text-foreground">ปรับสต็อก</h2>
           <button
             onClick={handleClose}
             className="text-muted hover:text-foreground transition-colors p-1 rounded-lg hover:bg-surface-raised"
@@ -90,7 +90,7 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
 
         <div className="p-6">
           <p className="text-sm text-muted mb-4">
-            Current stock for <strong className="text-foreground">{item.name}</strong>:{' '}
+            สต็อกปัจจุบันของ <strong className="text-foreground">{item.name}</strong>:{' '}
             <span className="text-foreground font-medium">{item.currentStock} {item.unit}</span>
           </p>
 
@@ -103,20 +103,20 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
 
           <form id="adjust-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Type</label>
+              <label className="text-sm font-medium text-foreground">ประเภทการปรับ</label>
               <select
                 value={type}
                 onChange={(e) => { setType(e.target.value as any); setError(null); }}
                 className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
               >
-                <option value="adjustment">Manual Adjustment (+/−)</option>
-                <option value="wastage">Record Wastage (−)</option>
+                <option value="adjustment">ปรับด้วยตนเอง (+/−)</option>
+                <option value="wastage">บันทึกของเสีย (−)</option>
               </select>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                Quantity {type === 'wastage' ? 'Lost' : 'Change'} ({item.unit})
+                จำนวน{type === 'wastage' ? 'ที่สูญเสีย' : 'ที่ปรับ'} ({item.unit})
               </label>
               <input
                 type="number"
@@ -126,10 +126,10 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
                 value={quantity}
                 onChange={(e) => { setQuantity(e.target.value); setError(null); }}
                 className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
-                placeholder={type === 'wastage' ? 'e.g. 5' : 'e.g. −5 or 10'}
+                placeholder={type === 'wastage' ? 'เช่น 5' : 'เช่น −5 หรือ 10'}
               />
               {type === 'adjustment' && (
-                <p className="text-xs text-muted">Use negative values to reduce stock, positive to increase.</p>
+                <p className="text-xs text-muted">ใช้ค่าติดลบเพื่อลดสต็อก และค่าบวกเพื่อเพิ่มสต็อก</p>
               )}
             </div>
 
@@ -139,22 +139,22 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
                   ? 'bg-danger-subtle border-danger/30 text-danger'
                   : 'bg-surface-raised border-border text-muted'
               }`}>
-                After adjustment:{' '}
+                หลังปรับแล้ว:{' '}
                 <span className={`font-semibold ${wouldGoNegative ? 'text-danger' : 'text-foreground'}`}>
                   {projectedStock.toFixed(2)} {item.unit}
                 </span>
-                {wouldGoNegative && ' — cannot go below zero'}
+                {wouldGoNegative && ' — ไม่สามารถต่ำกว่าศูนย์ได้'}
               </div>
             )}
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Reason / Note</label>
+              <label className="text-sm font-medium text-foreground">เหตุผล / หมายเหตุ</label>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
-                placeholder="e.g. Spilled, Found extra, etc."
+                placeholder="เช่น หก พบของเพิ่ม ฯลฯ"
               />
             </div>
           </form>
@@ -166,7 +166,7 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
             onClick={handleClose}
             className="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-raised transition-colors focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-1"
           >
-            Cancel
+            ยกเลิก
           </button>
           <button
             type="submit"
@@ -174,7 +174,7 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
             disabled={loading || wouldGoNegative}
             className="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
           >
-            {loading ? 'Saving…' : 'Confirm'}
+            {loading ? 'กำลังบันทึก…' : 'ยืนยัน'}
           </button>
         </div>
       </div>

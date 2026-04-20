@@ -1,6 +1,6 @@
 import { query, mutation } from './_generated/server';
 import { v, ConvexError } from 'convex/values';
-import { verifyWorkspace, checkRole, getCurrentUser } from './utils';
+import { verifyWorkspace, checkRole, getCurrentUser, getMembership, ensureCurrentUser } from './utils';
 
 /**
  * Generate a URL-safe random token for invitation links.
@@ -24,8 +24,8 @@ const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 export const listByWorkspace = query({
   args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, { workspaceId }) => {
-    const user = await verifyWorkspace(ctx, workspaceId);
-    checkRole(user, ['owner', 'admin']);
+    const { membership } = await verifyWorkspace(ctx, workspaceId);
+    checkRole(membership, ['owner', 'admin']);
 
     const invitations = await ctx.db
       .query('invitations')
@@ -93,32 +93,37 @@ export const create = mutation({
       v.literal('admin'),
       v.literal('manager'),
       v.literal('staff'),
+      v.literal('viewer'),
     ),
   },
   handler: async (ctx, args) => {
-    const user = await verifyWorkspace(ctx, args.workspaceId);
-    checkRole(user, ['owner', 'admin']);
+    const { user, membership } = await verifyWorkspace(ctx, args.workspaceId);
+    checkRole(membership, ['owner', 'admin']);
 
-    // Check if email is already a member of this workspace
-    const existingMember = await ctx.db
+    // Normalize email for case-insensitive comparison
+    const normalizedEmail = args.email.toLowerCase().trim();
+
+    // Check if user with this email already exists
+    const existingUser = await ctx.db
       .query('users')
-      .withIndex('by_email', (q) => q.eq('email', args.email))
-      .collect();
+      .withIndex('by_email', (q) => q.eq('email', normalizedEmail))
+      .unique();
 
-    const alreadyMember = existingMember.find(
-      (u) => u.workspaceId === args.workspaceId,
-    );
-    if (alreadyMember) {
-      throw new ConvexError('This person is already a member of the workspace.');
+    // If user exists, check if they're already a member
+    if (existingUser) {
+      const existingMembership = await getMembership(ctx, existingUser._id, args.workspaceId);
+      if (existingMembership) {
+        throw new ConvexError('This person is already a member of the workspace.');
+      }
     }
 
     // Check if there's already a pending invitation for this email
-    const existing = await ctx.db
+    const existingInvites = await ctx.db
       .query('invitations')
-      .withIndex('by_email', (q) => q.eq('email', args.email))
+      .withIndex('by_email', (q) => q.eq('email', normalizedEmail))
       .collect();
 
-    const pendingForWorkspace = existing.find(
+    const pendingForWorkspace = existingInvites.find(
       (inv) =>
         inv.workspaceId === args.workspaceId &&
         inv.status === 'pending' &&
@@ -133,7 +138,8 @@ export const create = mutation({
 
     return ctx.db.insert('invitations', {
       workspaceId: args.workspaceId,
-      email: args.email,
+      email: normalizedEmail,
+      invitedUserId: existingUser?._id,
       role: args.role,
       token,
       status: 'pending',
@@ -146,7 +152,7 @@ export const create = mutation({
 
 /**
  * Accept an invitation and join the workspace.
- * The user must already be authenticated (signed up).
+ * The user must already be authenticated (signed up) and have a profile.
  */
 export const accept = mutation({
   args: { token: v.string() },
@@ -163,37 +169,26 @@ export const accept = mutation({
     if (inv.status !== 'pending') throw new ConvexError('This invitation has already been used or cancelled.');
     if (inv.expiresAt < Date.now()) throw new ConvexError('This invitation has expired.');
 
-    // Find or create user profile
-    let user = await ctx.db
-      .query('users')
-      .withIndex('by_better_auth_id', (q) => q.eq('betterAuthId', identity.tokenIdentifier))
-      .unique();
+    const user = await ensureCurrentUser(ctx);
 
-    if (user) {
-      // User exists — link to the new workspace
-      if (user.workspaceId === inv.workspaceId) {
-        throw new ConvexError('You are already a member of this workspace.');
-      }
-      await ctx.db.patch(user._id, {
-        workspaceId: inv.workspaceId,
-        role: inv.role,
-      });
-    } else {
-      // New user — create profile and link to workspace
-      await ctx.db.insert('users', {
-        workspaceId: inv.workspaceId,
-        betterAuthId: identity.tokenIdentifier,
-        name: identity.name ?? 'Team Member',
-        email: identity.email ?? inv.email,
-        role: inv.role,
-        avatarUrl: identity.pictureUrl,
-        notificationsEnabled: true,
-        createdAt: Date.now(),
-      });
+    // Check if already a member
+    const existingMembership = await getMembership(ctx, user._id, inv.workspaceId);
+    if (existingMembership) {
+      // Already a member - mark invite as accepted and return workspace
+      await ctx.db.patch(inv._id, { status: 'accepted', invitedUserId: user._id });
+      return inv.workspaceId;
     }
 
-    // Mark invitation as accepted
-    await ctx.db.patch(inv._id, { status: 'accepted' });
+    // Create membership for the invited user
+    await ctx.db.insert('workspaceMemberships', {
+      workspaceId: inv.workspaceId,
+      userId: user._id,
+      role: inv.role,
+      joinedAt: Date.now(),
+    });
+
+    // Update invitation with user reference and mark as accepted
+    await ctx.db.patch(inv._id, { status: 'accepted', invitedUserId: user._id });
 
     return inv.workspaceId;
   },
@@ -210,13 +205,66 @@ export const cancel = mutation({
     const inv = await ctx.db.get(invitationId);
     if (!inv) throw new ConvexError('Invitation not found.');
 
-    const user = await verifyWorkspace(ctx, inv.workspaceId);
-    checkRole(user, ['owner', 'admin']);
+    const { membership } = await verifyWorkspace(ctx, inv.workspaceId);
+    checkRole(membership, ['owner', 'admin']);
 
     if (inv.status !== 'pending') {
       throw new ConvexError('Only pending invitations can be cancelled.');
     }
 
     await ctx.db.patch(invitationId, { status: 'cancelled' });
+  },
+});
+
+/**
+ * Get pending invitations for the current user.
+ */
+export const getPendingForUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) return [];
+
+    // Find invitations by user ID or email
+    const byUserId = await ctx.db
+      .query('invitations')
+      .withIndex('by_invited_user', (q) => q.eq('invitedUserId', user._id))
+      .filter((q) => q.eq(q.field('status'), 'pending'))
+      .collect();
+
+    const byEmail = await ctx.db
+      .query('invitations')
+      .withIndex('by_email', (q) => q.eq('email', user.email.toLowerCase()))
+      .filter((q) => q.eq(q.field('status'), 'pending'))
+      .collect();
+
+    // Combine and deduplicate
+    const allInvitations = [...byUserId, ...byEmail];
+    const uniqueInvitations = allInvitations.filter(
+      (inv, index, self) => index === self.findIndex((i) => i._id === inv._id)
+    );
+
+    // Filter out expired
+    const now = Date.now();
+    const validInvitations = uniqueInvitations.filter((inv) => inv.expiresAt > now);
+
+    // Enrich with workspace and inviter details
+    return Promise.all(
+      validInvitations.map(async (inv) => {
+        const workspace = await ctx.db.get(inv.workspaceId);
+        const inviter = await ctx.db.get(inv.invitedBy);
+        return {
+          _id: inv._id,
+          workspaceId: inv.workspaceId,
+          workspaceName: workspace?.name ?? 'Unknown',
+          workspaceSlug: workspace?.slug ?? '',
+          role: inv.role,
+          token: inv.token,
+          inviterName: inviter?.name ?? 'Unknown',
+          inviterEmail: inviter?.email ?? '',
+          expiresAt: inv.expiresAt,
+        };
+      })
+    );
   },
 });

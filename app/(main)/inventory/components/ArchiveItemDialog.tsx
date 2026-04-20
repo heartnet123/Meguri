@@ -31,7 +31,7 @@ export function ArchiveItemDialog({ isOpen, onClose, item }: Props) {
       onClose();
     } catch (err: any) {
       // Surface the domain error message (ConvexError.message)
-      const msg: string = err?.data ?? err?.message ?? 'An unexpected error occurred.';
+      const msg: string = err?.data ?? err?.message ?? 'เกิดข้อผิดพลาดที่ไม่คาดคิด';
       setError(msg);
     } finally {
       setLoading(false);
@@ -46,21 +46,20 @@ export function ArchiveItemDialog({ isOpen, onClose, item }: Props) {
             <iconify-icon icon="solar:archive-bold" width="24" height="24" className="text-warning" />
           </div>
           <h2 className="text-lg font-semibold text-foreground text-center mb-2">
-            Archive Item
+            เก็บสินค้านี้เข้าแฟ้ม
           </h2>
           <p className="text-sm text-muted text-center leading-relaxed">
-            Archive <strong className="text-foreground">{item.name}</strong>? The item will be hidden from
-            all operational views, but its stock history is preserved and the item can be found in the
-            archive.
+            ต้องการเก็บ <strong className="text-foreground">{item.name}</strong> เข้าแฟ้มหรือไม่? สินค้านี้จะถูกซ่อนจากหน้าปฏิบัติการทั้งหมด
+            แต่ประวัติการเคลื่อนไหวของสต็อกยังคงอยู่ และสามารถค้นหาได้จากรายการที่เก็บเข้าแฟ้ม
           </p>
 
           <div className="mt-4 space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Reason (optional)</label>
+            <label className="text-sm font-medium text-foreground">เหตุผล (ไม่บังคับ)</label>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g. Discontinued product"
+              placeholder="เช่น เลิกจำหน่ายสินค้า"
               className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
             />
           </div>
@@ -77,14 +76,14 @@ export function ArchiveItemDialog({ isOpen, onClose, item }: Props) {
             onClick={() => { setNote(''); setError(null); onClose(); }}
             className="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-raised transition-colors focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-1"
           >
-            Cancel
+            ยกเลิก
           </button>
           <button
             onClick={handleArchive}
             disabled={loading}
             className="px-4 py-2 text-sm font-medium text-white bg-warning rounded-lg hover:bg-warning/90 transition-colors disabled:opacity-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-2"
           >
-            {loading ? 'Archiving…' : 'Archive Item'}
+            {loading ? 'กำลังเก็บเข้าแฟ้ม…' : 'เก็บสินค้าเข้าแฟ้ม'}
           </button>
         </div>
       </div>

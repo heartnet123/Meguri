@@ -76,12 +76,12 @@ export default function PurchasePlanningPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Purchase Planning</h1>
-          <p className="text-sm text-muted mt-1.5 leading-relaxed">AI-driven reorder recommendations and draft orders.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">วางแผนการจัดซื้อ</h1>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">คำแนะนำการสั่งซื้อซ้ำและคำสั่งซื้อฉบับร่างที่ขับเคลื่อนด้วย AI</p>
         </div>
         <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/20 active:scale-[0.98]">
           <iconify-icon icon="solar:document-text-bold-duotone" width="18" height="18" aria-hidden="true" />
-          View Draft Orders
+          ดูคำสั่งซื้อฉบับร่าง
         </button>
       </div>
 
@@ -92,15 +92,15 @@ export default function PurchasePlanningPage() {
           <iconify-icon icon="solar:stars-bold-duotone" width="36" height="36" aria-hidden="true" />
         </div>
         <div className="min-w-0 relative z-10 text-center md:text-left">
-          <h2 className="text-xl font-bold mb-2 tracking-tight">Intelligent Stock Optimization</h2>
+          <h2 className="text-xl font-bold mb-2 tracking-tight">การเพิ่มประสิทธิภาพสต็อกอัจฉริยะ</h2>
           <p className="text-white/90 text-sm leading-relaxed max-w-2xl font-medium">
-            Our predictive engine processed your recent velocity and supplier history.
-            Approve recommendations below to automatically populate draft purchase orders and maintain 99.9% service levels.
+            เอนจินคาดการณ์ของเราได้ประมวลผลอัตราการหมุนเวียนล่าสุดและประวัติของซัพพลายเออร์แล้ว
+            อนุมัติคำแนะนำด้านล่างเพื่อสร้างคำสั่งซื้อฉบับร่างโดยอัตโนมัติและช่วยรักษาความพร้อมในการให้บริการ
           </p>
         </div>
         <div className="flex-1" />
         <div className="hidden lg:flex flex-col items-end shrink-0 gap-1.5 opacity-80">
-          <span className="text-[10px] font-bold uppercase tracking-widest">Model Version</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest">เวอร์ชันโมเดล</span>
           <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-[10px] font-bold">SMART-STOCK-V4</span>
         </div>
       </div>
@@ -120,8 +120,8 @@ export default function PurchasePlanningPage() {
           <div className="w-20 h-20 bg-surface-raised rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border border-border shadow-inner group transition-transform hover:scale-105 duration-500">
             <iconify-icon icon="solar:cart-large-bold-duotone" width="40" height="40" className="text-muted/30 group-hover:text-accent/40 transition-colors" aria-hidden="true" />
           </div>
-          <p className="text-lg font-bold text-foreground mb-1.5 tracking-tight">Stock Levels Nominal</p>
-          <p className="text-sm text-muted max-w-xs mx-auto leading-relaxed">AI monitoring suggests all inventory is currently within safety margins. No reorders required.</p>
+          <p className="text-lg font-bold text-foreground mb-1.5 tracking-tight">ระดับสต็อกอยู่ในเกณฑ์ปกติ</p>
+          <p className="text-sm text-muted max-w-xs mx-auto leading-relaxed">AI ประเมินว่าสินค้าคงคลังทั้งหมดอยู่ในช่วงปลอดภัย ยังไม่จำเป็นต้องสั่งซื้อเพิ่ม</p>
         </div>
       )}
 
@@ -132,7 +132,7 @@ export default function PurchasePlanningPage() {
              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-danger-subtle border border-danger/10">
                <span className="w-2 h-2 rounded-full bg-danger animate-ping" />
              </div>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">Critical Shortfalls</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">รายการขาดแคลนวิกฤต</h2>
           </div>
           <div className="grid grid-cols-1 gap-5">
             {high.map((rec) => (
@@ -156,7 +156,7 @@ export default function PurchasePlanningPage() {
              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-warning-subtle border border-warning/10">
                <span className="w-2 h-2 rounded-full bg-warning" />
              </div>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">Strategic Replenishment</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">รายการเติมสต็อกเชิงกลยุทธ์</h2>
           </div>
           <div className="grid grid-cols-1 gap-5">
             {medium.map((rec) => (
@@ -190,9 +190,9 @@ function ReorderCard({
   onDismiss: () => void;
 }) {
   const isHigh = rec.urgency === 'high';
-  const itemName = rec.item?.name ?? 'Unknown Item';
+  const itemName = rec.item?.name ?? 'สินค้าไม่ทราบชื่อ';
   const itemSku = rec.item?.sku ?? '—';
-  const supplierName = rec.supplier?.name ?? 'Unknown Supplier';
+  const supplierName = rec.supplier?.name ?? 'ซัพพลายเออร์ไม่ทราบชื่อ';
   const currentStock = rec.item ? `${rec.item.currentStock.toLocaleString()} ${rec.item.unit}` : '—';
   const recommendedQty = `${rec.recommendedQty.toLocaleString()}${rec.item?.unit ? ` ${rec.item.unit}` : ''}`;
 
@@ -211,24 +211,24 @@ function ReorderCard({
                     ? 'bg-danger-subtle/50 text-danger border-danger/20'
                     : 'bg-warning-subtle/50 text-warning border-warning/20'
                 }`}>
-                  {isHigh ? 'High Priority' : 'Routine'}
+                  {isHigh ? 'เร่งด่วนสูง' : 'ตามรอบปกติ'}
                 </span>
               </div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60 truncate flex items-center gap-2">
                 <span className="text-muted/40 font-medium">SKU:</span> {itemSku} 
                 <span className="w-1 h-1 rounded-full bg-border" />
-                <span className="text-muted/40 font-medium">Supplier:</span> <span className="text-foreground/70">{supplierName}</span>
+                <span className="text-muted/40 font-medium">ซัพพลายเออร์:</span> <span className="text-foreground/70">{supplierName}</span>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 mb-6">
             <div className="space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted/50 mb-1">On-Hand Inventory</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted/50 mb-1">สต็อกคงเหลือ</div>
               <div className="text-base font-bold text-foreground tabular-nums tracking-tight">{currentStock}</div>
             </div>
             <div className="bg-accent-subtle/50 p-3 px-4 rounded-xl border border-accent/10 transition-colors group-hover:bg-accent-subtle">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-accent mb-1">AI Recommendation</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-accent mb-1">คำแนะนำจาก AI</div>
               <div className="text-xl font-black text-accent tabular-nums tracking-tighter">
                 + {recommendedQty}
               </div>
@@ -254,12 +254,12 @@ function ReorderCard({
             {accepting ? (
               <>
                 <iconify-icon icon="solar:refresh-bold-duotone" width="16" height="16" className="animate-spin" />
-                Processing...
+                กำลังประมวลผล...
               </>
             ) : (
               <>
                 <iconify-icon icon="solar:cart-plus-bold-duotone" width="18" height="18" />
-                Approve &amp; Add
+                อนุมัติและเพิ่ม
               </>
             )}
           </button>
@@ -268,7 +268,7 @@ function ReorderCard({
             disabled={accepting || dismissing}
             className="flex-1 md:flex-none inline-flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-muted hover:text-danger hover:bg-danger-subtle/50 px-6 py-2.5 rounded-xl transition-all focus:outline-none"
           >
-            {dismissing ? 'Dismissing…' : 'Dismiss Alert'}
+            {dismissing ? 'กำลังยกเลิก…' : 'ยกเลิกคำแนะนำ'}
           </button>
         </div>
       </div>

@@ -62,8 +62,8 @@ export const add = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await verifyWorkspace(ctx, args.workspaceId);
-    checkRole(user, ['owner', 'admin', 'manager']);
+    const { membership } = await verifyWorkspace(ctx, args.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager']);
 
     return ctx.db.insert('suppliers', { ...args, createdAt: Date.now() });
   },
@@ -75,8 +75,8 @@ export const remove = mutation({
     const supplier = await ctx.db.get(id);
     if (!supplier) throw new Error('Supplier not found');
 
-    const user = await verifyWorkspace(ctx, supplier.workspaceId);
-    checkRole(user, ['owner', 'admin']);
+    const { membership } = await verifyWorkspace(ctx, supplier.workspaceId);
+    checkRole(membership, ['owner', 'admin']);
 
     const existingOrders = await ctx.db
       .query('purchaseOrders')
