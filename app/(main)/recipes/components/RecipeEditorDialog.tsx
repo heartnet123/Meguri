@@ -287,7 +287,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
             aria-label="ปิดหน้าต่าง"
             className="text-muted hover:text-foreground transition-colors"
           >
-            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
+            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" aria-hidden="true" />
           </button>
         </div>
 
@@ -520,8 +520,9 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                           type="button"
                           onClick={() => removeIngredient(ing._localId)}
                           className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          aria-label="ลบวัตถุดิบ"
                         >
-                          <iconify-icon icon="solar:trash-bin-trash-linear" width="16" height="16" />
+                          <iconify-icon icon="solar:trash-bin-trash-linear" width="16" height="16" aria-hidden="true" />
                         </button>
                       </div>
                     );
