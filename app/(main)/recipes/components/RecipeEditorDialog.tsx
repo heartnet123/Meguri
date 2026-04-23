@@ -287,7 +287,7 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
             aria-label="ปิดหน้าต่าง"
             className="text-muted hover:text-foreground transition-colors"
           >
-            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
+            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" aria-hidden="true" />
           </button>
         </div>
 
