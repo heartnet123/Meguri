@@ -370,6 +370,7 @@ export default function AlertsPage() {
                       <div className="space-y-1.5">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">ผู้รับผิดชอบ</span>
                         <select
+                          aria-label="เลือกผู้รับผิดชอบ"
                           value={alert.assignedTo ?? ''}
                           onChange={(e) => handleAssign(alert._id, e.target.value)}
                           disabled={assigningId === alert._id || !workspaceUsers}
@@ -388,6 +389,7 @@ export default function AlertsPage() {
                         <div className="space-y-1.5">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 block px-1">บันทึกการแก้ไข</span>
                           <input
+                            aria-label="บันทึกการแก้ไข"
                             type="text"
                             value={resolutionDrafts[alert._id] ?? ''}
                             onChange={(e) =>
