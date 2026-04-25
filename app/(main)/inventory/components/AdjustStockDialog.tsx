@@ -82,9 +82,10 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
           <h2 className="text-lg font-semibold text-foreground">ปรับสต็อก</h2>
           <button
             onClick={handleClose}
+            aria-label="ปิด"
             className="text-muted hover:text-foreground transition-colors p-1 rounded-lg hover:bg-surface-raised"
           >
-            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
+            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" aria-hidden="true" />
           </button>
         </div>
 
