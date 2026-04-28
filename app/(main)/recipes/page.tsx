@@ -77,7 +77,7 @@ export default function RecipesPage() {
           onClick={handleCreate}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors shadow-sm"
         >
-          <iconify-icon icon="solar:add-circle-linear" width="20" height="20" />
+          <iconify-icon icon="solar:add-circle-linear" width="20" height="20" aria-hidden="true" />
           สร้างสินค้าพร้อมขาย
         </button>
       </div>
@@ -114,19 +114,22 @@ export default function RecipesPage() {
             icon="solar:magnifer-linear"
             width="18" height="18"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+            aria-hidden="true"
           />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า…"
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
+            aria-label="ค้นหาสินค้า"
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
+          aria-label="กรองตามหมวดหมู่"
+          className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all min-w-[160px]"
         >
           <option value="">ทุกหมวดหมู่</option>
           {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
@@ -193,15 +196,17 @@ export default function RecipesPage() {
                           onClick={() => handleEdit(r)}
                           className="p-2 text-muted hover:text-accent hover:bg-accent-subtle rounded-lg transition-all"
                           title="แก้ไขสินค้า"
+                          aria-label="แก้ไขสินค้า"
                         >
-                          <iconify-icon icon="solar:pen-linear" width="18" height="18" />
+                          <iconify-icon icon="solar:pen-linear" width="18" height="18" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => handleDelete(r._id)}
                           className="p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg transition-all"
                           title="ลบสินค้า"
+                          aria-label="ลบสินค้า"
                         >
-                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" />
+                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" aria-hidden="true" />
                         </button>
                       </div>
                     </td>
