@@ -55,6 +55,7 @@ export default function SellableItemsPage() {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState<SellableItemRow | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState<SellableItemFormState>({
     name: '', sku: '', purchaseCost: '', salePrice: '', currentStock: '0', minStockLevel: '0', trackStock: true, notes: '',
   });
@@ -89,6 +90,8 @@ export default function SellableItemsPage() {
 
   const submit = async () => {
     if (!workspaceId) return;
+    setIsSubmitting(true);
+    try {
     const createPayload = {
       workspaceId,
       displayId: editing?.displayId ?? `SIT-${Date.now().toString().slice(-5)}`,
@@ -119,6 +122,9 @@ export default function SellableItemsPage() {
     }
 
     setIsOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -223,8 +229,11 @@ export default function SellableItemsPage() {
                 ติดตามสต็อก
               </label>
               <div className="flex gap-2">
-                <button onClick={() => setIsOpen(false)} className="rounded-xl border border-border px-4 py-2.5 text-sm">ยกเลิก</button>
-                <button onClick={submit} className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white">{editing ? 'บันทึกการเปลี่ยนแปลง' : 'สร้างสินค้า'}</button>
+                <button onClick={() => setIsOpen(false)} disabled={isSubmitting} className="rounded-xl border border-border px-4 py-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed">ยกเลิก</button>
+                <button onClick={submit} disabled={isSubmitting} className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isSubmitting && <iconify-icon icon="solar:refresh-circle-linear" width="16" height="16" className="animate-spin" />}
+                  {editing ? 'บันทึกการเปลี่ยนแปลง' : 'สร้างสินค้า'}
+                </button>
               </div>
             </div>
           </div>
