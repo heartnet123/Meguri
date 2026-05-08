@@ -292,7 +292,5 @@ export default internalMutation({
       status: "accepted",  
       generatedAt: now,  
     });  
-  
-    console.log("Seed complete — Joe's Kitchen workspace ready.");  
   },  
 });
