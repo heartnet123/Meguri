@@ -140,8 +140,22 @@ export default function SellableItemsPage() {
         <Metric label="มูลค่าสต็อก" value={formatCurrency(summary?.totalValue ?? 0)} />
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า" className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-accent" />
+      <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <iconify-icon
+            icon="solar:magnifer-linear"
+            width="18" height="18"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า…"
+            aria-label="ค้นหาสินค้า"
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
+          />
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
