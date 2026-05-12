@@ -304,10 +304,18 @@ export default function SuppliersPage() {
             }
           </div>
           <div className="flex gap-2">
-            <button className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]" disabled>
+            <button
+              className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]"
+              disabled
+              aria-label="หน้าก่อนหน้า"
+            >
                <iconify-icon icon="solar:alt-arrow-left-linear" width="18" height="18" />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]" disabled>
+            <button
+              className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]"
+              disabled
+              aria-label="หน้าถัดไป"
+            >
                <iconify-icon icon="solar:alt-arrow-right-linear" width="18" height="18" />
             </button>
           </div>
