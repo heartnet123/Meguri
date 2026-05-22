@@ -77,7 +77,7 @@ export default function RecipesPage() {
           onClick={handleCreate}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors shadow-sm"
         >
-          <iconify-icon icon="solar:add-circle-linear" width="20" height="20" />
+          <iconify-icon icon="solar:add-circle-linear" width="20" height="20" aria-hidden="true" />
           สร้างสินค้าพร้อมขาย
         </button>
       </div>
@@ -86,21 +86,21 @@ export default function RecipesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 bg-surface border border-border rounded-xl shadow-sm">
           <div className="flex items-center gap-3 text-muted mb-2">
-            <iconify-icon icon="solar:layers-minimalistic-linear" width="18" height="18" />
+            <iconify-icon icon="solar:layers-minimalistic-linear" width="18" height="18" aria-hidden="true" />
             <span className="text-xs font-medium uppercase tracking-wider">สินค้าทั้งหมด</span>
           </div>
           <div className="text-2xl font-bold text-foreground">{stats.total}</div>
         </div>
         <div className="p-4 bg-surface border border-border rounded-xl shadow-sm">
           <div className="flex items-center gap-3 text-muted mb-2">
-            <iconify-icon icon="solar:chart-square-linear" width="18" height="18" />
+            <iconify-icon icon="solar:chart-square-linear" width="18" height="18" aria-hidden="true" />
             <span className="text-xs font-medium uppercase tracking-wider">กำไรเฉลี่ย</span>
           </div>
           <div className="text-2xl font-bold text-success">{stats.avgMargin}%</div>
         </div>
         <div className="p-4 bg-surface border border-border rounded-xl shadow-sm">
           <div className="flex items-center gap-3 text-muted mb-2">
-            <iconify-icon icon="solar:dollar-minimalistic-linear" width="18" height="18" />
+            <iconify-icon icon="solar:dollar-minimalistic-linear" width="18" height="18" aria-hidden="true" />
             <span className="text-xs font-medium uppercase tracking-wider">ราคาเฉลี่ย</span>
           </div>
           <div className="text-2xl font-bold text-foreground">{formatCurrency(stats.totalValue / (stats.total || 1))}</div>
@@ -114,18 +114,21 @@ export default function RecipesPage() {
             icon="solar:magnifer-linear"
             width="18" height="18"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+            aria-hidden="true"
           />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า…"
+            aria-label="ค้นหาสินค้า"
             className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
+          aria-label="กรองตามหมวดหมู่"
           className="px-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
         >
           <option value="">ทุกหมวดหมู่</option>
@@ -159,7 +162,7 @@ export default function RecipesPage() {
               ) : filteredRecipes.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-muted">
-                    <iconify-icon icon="solar:ghost-linear" width="48" height="48" className="mx-auto mb-3 opacity-20" />
+                    <iconify-icon icon="solar:ghost-linear" width="48" height="48" className="mx-auto mb-3 opacity-20" aria-hidden="true" />
                     <p className="text-sm">ไม่พบสินค้าในแคตตาล็อกของคุณ</p>
                   </td>
                 </tr>
@@ -193,15 +196,17 @@ export default function RecipesPage() {
                           onClick={() => handleEdit(r)}
                           className="p-2 text-muted hover:text-accent hover:bg-accent-subtle rounded-lg transition-all"
                           title="แก้ไขสินค้า"
+                          aria-label="แก้ไขสินค้า"
                         >
-                          <iconify-icon icon="solar:pen-linear" width="18" height="18" />
+                          <iconify-icon icon="solar:pen-linear" width="18" height="18" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => handleDelete(r._id)}
                           className="p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg transition-all"
                           title="ลบสินค้า"
+                          aria-label="ลบสินค้า"
                         >
-                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" />
+                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" aria-hidden="true" />
                         </button>
                       </div>
                     </td>
