@@ -177,8 +177,8 @@ export default function SellableItemsPage() {
                   <td className="px-6 py-4 tabular-nums">{item.trackStock ? (item.currentStock ?? 0) : '—'}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
-                      <button onClick={() => openEdit(item)} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised">แก้ไข</button>
-                      <button onClick={() => removeItem({ sellableItemId: item._id })} className="rounded-lg px-3 py-2 text-sm text-danger hover:bg-danger-subtle">ลบ</button>
+                      <button onClick={() => openEdit(item)} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised" aria-label="แก้ไขสินค้า">แก้ไข</button>
+                      <button onClick={() => removeItem({ sellableItemId: item._id })} className="rounded-lg px-3 py-2 text-sm text-danger hover:bg-danger-subtle" aria-label="ลบสินค้า">ลบ</button>
                     </div>
                   </td>
                 </tr>
@@ -196,7 +196,7 @@ export default function SellableItemsPage() {
                 <h2 className="text-xl font-semibold text-foreground">{editing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า'}</h2>
                 <p className="text-sm text-muted">ต้นทุน ราคาขาย และกำไรจะคำนวณตามกฎธุรกิจอัตโนมัติ</p>
               </div>
-              <button onClick={() => setIsOpen(false)} className="rounded-xl px-3 py-2 text-sm hover:bg-surface-raised">ปิด</button>
+              <button onClick={() => setIsOpen(false)} className="rounded-xl px-3 py-2 text-sm hover:bg-surface-raised" aria-label="ปิดหน้าต่าง">ปิด</button>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
