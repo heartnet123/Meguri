@@ -193,15 +193,17 @@ export default function RecipesPage() {
                           onClick={() => handleEdit(r)}
                           className="p-2 text-muted hover:text-accent hover:bg-accent-subtle rounded-lg transition-all"
                           title="แก้ไขสินค้า"
+                          aria-label="แก้ไขสินค้า"
                         >
-                          <iconify-icon icon="solar:pen-linear" width="18" height="18" />
+                          <iconify-icon icon="solar:pen-linear" width="18" height="18" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => handleDelete(r._id)}
                           className="p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg transition-all"
                           title="ลบสินค้า"
+                          aria-label="ลบสินค้า"
                         >
-                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" />
+                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" aria-hidden="true" />
                         </button>
                       </div>
                     </td>
