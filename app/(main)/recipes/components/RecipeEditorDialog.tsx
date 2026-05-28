@@ -285,9 +285,9 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
           <button
             onClick={onClose}
             aria-label="ปิดหน้าต่าง"
-            className="text-muted hover:text-foreground transition-colors"
+            className="text-muted hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-accent/20 rounded-lg"
           >
-            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
+            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" aria-hidden="true" />
           </button>
         </div>
 
@@ -447,12 +447,14 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                   icon="solar:magnifer-linear"
                   width="16" height="16"
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+                  aria-hidden="true"
                 />
                 <input
                   type="search"
                   value={ingredientSearch}
                   onChange={(e) => setIngredientSearch(e.target.value)}
                   placeholder="เพิ่มวัตถุดิบจากสินค้าคงคลัง…"
+                  aria-label="ค้นหาวัตถุดิบ"
                   className="w-full pl-9 pr-4 py-2 text-sm border border-border bg-surface text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20"
                 />
               </div>
@@ -519,9 +521,10 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                         <button
                           type="button"
                           onClick={() => removeIngredient(ing._localId)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all focus:outline-none focus:ring-2 focus:ring-danger/20"
+                          aria-label="ลบ"
                         >
-                          <iconify-icon icon="solar:trash-bin-trash-linear" width="16" height="16" />
+                          <iconify-icon icon="solar:trash-bin-trash-linear" width="16" height="16" aria-hidden="true" />
                         </button>
                       </div>
                     );

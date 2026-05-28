@@ -114,12 +114,14 @@ export default function RecipesPage() {
             icon="solar:magnifer-linear"
             width="18" height="18"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+            aria-hidden="true"
           />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า…"
+            aria-label="ค้นหาสินค้า"
             className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
@@ -188,20 +190,22 @@ export default function RecipesPage() {
                       <div className="text-[10px] text-muted mt-0.5">กำไร: {formatCurrency(r.price - r.unitCost)}</div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEdit(r)}
-                          className="p-2 text-muted hover:text-accent hover:bg-accent-subtle rounded-lg transition-all"
+                          className="p-2 text-muted hover:text-accent hover:bg-accent-subtle rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-accent/20"
                           title="แก้ไขสินค้า"
+                          aria-label="แก้ไข"
                         >
-                          <iconify-icon icon="solar:pen-linear" width="18" height="18" />
+                          <iconify-icon icon="solar:pen-linear" width="18" height="18" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => handleDelete(r._id)}
-                          className="p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg transition-all"
+                          className="p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-danger/20"
                           title="ลบสินค้า"
+                          aria-label="ลบ"
                         >
-                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" />
+                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" aria-hidden="true" />
                         </button>
                       </div>
                     </td>
