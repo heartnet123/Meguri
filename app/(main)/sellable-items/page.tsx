@@ -141,7 +141,19 @@ export default function SellableItemsPage() {
       </div>
 
       <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า" className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-accent" />
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted">
+            <iconify-icon icon="solar:magnifer-linear" className="text-lg"></iconify-icon>
+          </div>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า"
+            aria-label="ค้นหาสินค้าพร้อมขาย"
+            className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
+          />
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
