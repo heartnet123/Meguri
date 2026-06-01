@@ -89,7 +89,7 @@ export default function ReportsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {reports.map((report) => (
           <div key={report.id} className="group bg-surface border border-border rounded-2xl shadow-sm hover:shadow-2xl hover:shadow-accent/5 hover:border-accent/20 transition-all duration-500 flex flex-col h-full overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                <span className="text-[10px] font-black uppercase tracking-widest text-muted/20">{report.id}</span>
             </div>
             

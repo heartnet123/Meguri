@@ -331,7 +331,7 @@ export default function TeamSettingsPage() {
                         {canEdit && (
                           <button
                             onClick={() => handleStartRoleEdit(member._id, member.role)}
-                            className="opacity-0 group-hover:opacity-100 text-xs font-medium text-muted hover:text-accent transition-all px-2 py-1.5 rounded-lg hover:bg-accent-subtle"
+                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-xs font-medium text-muted hover:text-accent transition-all px-2 py-1.5 rounded-lg hover:bg-accent-subtle"
                             aria-label={`เปลี่ยนบทบาทของ ${member.name}`}
                           >
                             <iconify-icon icon="solar:pen-bold-duotone" width="14" height="14" aria-hidden="true" />
@@ -340,7 +340,7 @@ export default function TeamSettingsPage() {
                         {canRemove && (
                           <button
                             onClick={() => handleRemoveMember(member._id as Id<'users'>, member.name)}
-                            className="opacity-0 group-hover:opacity-100 text-xs font-medium text-muted hover:text-red-600 transition-all px-2 py-1.5 rounded-lg hover:bg-red-50"
+                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-xs font-medium text-muted hover:text-red-600 transition-all px-2 py-1.5 rounded-lg hover:bg-red-50"
                             aria-label={`ลบ ${member.name} ออกจากทีม`}
                           >
                             <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="14" height="14" aria-hidden="true" />
