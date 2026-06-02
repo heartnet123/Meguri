@@ -54,6 +54,7 @@ export default function SellableItemsPage() {
 
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editing, setEditing] = useState<SellableItemRow | null>(null);
   const [form, setForm] = useState<SellableItemFormState>({
     name: '', sku: '', purchaseCost: '', salePrice: '', currentStock: '0', minStockLevel: '0', trackStock: true, notes: '',
@@ -89,36 +90,42 @@ export default function SellableItemsPage() {
 
   const submit = async () => {
     if (!workspaceId) return;
-    const createPayload = {
-      workspaceId,
-      displayId: editing?.displayId ?? `SIT-${Date.now().toString().slice(-5)}`,
-      name: form.name,
-      sku: form.sku,
-      purchaseCost: Number(form.purchaseCost || 0),
-      salePrice: Number(form.salePrice || 0),
-      trackStock: form.trackStock,
-      currentStock: Number(form.currentStock || 0),
-      minStockLevel: Number(form.minStockLevel || 0),
-      notes: form.notes || undefined,
-    };
 
-    if (editing) {
-      await updateItem({
-        sellableItemId: editing._id,
-        name: createPayload.name,
-        sku: createPayload.sku,
-        purchaseCost: createPayload.purchaseCost,
-        salePrice: createPayload.salePrice,
-        trackStock: createPayload.trackStock,
-        currentStock: createPayload.currentStock,
-        minStockLevel: createPayload.minStockLevel,
-        notes: createPayload.notes,
-      });
-    } else {
-      await createItem(createPayload);
+    setIsSubmitting(true);
+    try {
+      const createPayload = {
+        workspaceId,
+        displayId: editing?.displayId ?? `SIT-${Date.now().toString().slice(-5)}`,
+        name: form.name,
+        sku: form.sku,
+        purchaseCost: Number(form.purchaseCost || 0),
+        salePrice: Number(form.salePrice || 0),
+        trackStock: form.trackStock,
+        currentStock: Number(form.currentStock || 0),
+        minStockLevel: Number(form.minStockLevel || 0),
+        notes: form.notes || undefined,
+      };
+
+      if (editing) {
+        await updateItem({
+          sellableItemId: editing._id,
+          name: createPayload.name,
+          sku: createPayload.sku,
+          purchaseCost: createPayload.purchaseCost,
+          salePrice: createPayload.salePrice,
+          trackStock: createPayload.trackStock,
+          currentStock: createPayload.currentStock,
+          minStockLevel: createPayload.minStockLevel,
+          notes: createPayload.notes,
+        });
+      } else {
+        await createItem(createPayload);
+      }
+
+      setIsOpen(false);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsOpen(false);
   };
 
   return (
@@ -223,8 +230,11 @@ export default function SellableItemsPage() {
                 ติดตามสต็อก
               </label>
               <div className="flex gap-2">
-                <button onClick={() => setIsOpen(false)} className="rounded-xl border border-border px-4 py-2.5 text-sm">ยกเลิก</button>
-                <button onClick={submit} className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white">{editing ? 'บันทึกการเปลี่ยนแปลง' : 'สร้างสินค้า'}</button>
+                <button onClick={() => setIsOpen(false)} disabled={isSubmitting} className="rounded-xl border border-border px-4 py-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed">ยกเลิก</button>
+                <button onClick={submit} disabled={isSubmitting} className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isSubmitting && <iconify-icon icon="solar:refresh-linear" width="16" height="16" className="animate-spin" aria-hidden="true" />}
+                  {editing ? 'บันทึกการเปลี่ยนแปลง' : 'สร้างสินค้า'}
+                </button>
               </div>
             </div>
           </div>
