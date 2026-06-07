@@ -377,7 +377,7 @@ function InventoryRow({
         </span>
       </td>
       <td className="px-6 py-5 text-right">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-200">
           <button
             onClick={onHistory}
             className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none"
