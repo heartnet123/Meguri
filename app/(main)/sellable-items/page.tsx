@@ -58,6 +58,7 @@ export default function SellableItemsPage() {
   const [form, setForm] = useState<SellableItemFormState>({
     name: '', sku: '', purchaseCost: '', salePrice: '', currentStock: '0', minStockLevel: '0', trackStock: true, notes: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filtered = useMemo(() => {
     const s = search.toLowerCase();
@@ -89,7 +90,10 @@ export default function SellableItemsPage() {
 
   const submit = async () => {
     if (!workspaceId) return;
-    const createPayload = {
+
+    setIsSubmitting(true);
+    try {
+      const createPayload = {
       workspaceId,
       displayId: editing?.displayId ?? `SIT-${Date.now().toString().slice(-5)}`,
       name: form.name,
@@ -115,10 +119,13 @@ export default function SellableItemsPage() {
         notes: createPayload.notes,
       });
     } else {
-      await createItem(createPayload);
-    }
+        await createItem(createPayload);
+      }
 
-    setIsOpen(false);
+      setIsOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -178,7 +185,16 @@ export default function SellableItemsPage() {
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => openEdit(item)} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised">แก้ไข</button>
-                      <button onClick={() => removeItem({ sellableItemId: item._id })} className="rounded-lg px-3 py-2 text-sm text-danger hover:bg-danger-subtle">ลบ</button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบ ${item.name}?`)) {
+                            removeItem({ sellableItemId: item._id });
+                          }
+                        }}
+                        className="rounded-lg px-3 py-2 text-sm text-danger hover:bg-danger-subtle"
+                      >
+                        ลบ
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -223,8 +239,15 @@ export default function SellableItemsPage() {
                 ติดตามสต็อก
               </label>
               <div className="flex gap-2">
-                <button onClick={() => setIsOpen(false)} className="rounded-xl border border-border px-4 py-2.5 text-sm">ยกเลิก</button>
-                <button onClick={submit} className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white">{editing ? 'บันทึกการเปลี่ยนแปลง' : 'สร้างสินค้า'}</button>
+                <button onClick={() => setIsOpen(false)} className="rounded-xl border border-border px-4 py-2.5 text-sm" disabled={isSubmitting}>ยกเลิก</button>
+                <button
+                  onClick={submit}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting && <iconify-icon icon="solar:refresh-linear" className="animate-spin" aria-hidden="true" />}
+                  {editing ? 'บันทึกการเปลี่ยนแปลง' : 'สร้างสินค้า'}
+                </button>
               </div>
             </div>
           </div>
