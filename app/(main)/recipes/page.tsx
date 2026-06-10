@@ -188,7 +188,7 @@ export default function RecipesPage() {
                       <div className="text-[10px] text-muted mt-0.5">กำไร: {formatCurrency(r.price - r.unitCost)}</div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEdit(r)}
                           className="p-2 text-muted hover:text-accent hover:bg-accent-subtle rounded-lg transition-all"

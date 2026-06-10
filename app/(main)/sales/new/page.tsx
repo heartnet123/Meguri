@@ -369,7 +369,7 @@ export default function NewOrderPage() {
                       <span className="text-sm font-medium text-neutral-900 tabular-nums">
                         {formatCurrency(recipe.price)}
                       </span>
-                      <span className="text-xs text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                      <span className="text-xs text-neutral-400 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity flex items-center gap-1">
                         <iconify-icon icon="solar:add-circle-linear" width="14" height="14" aria-hidden="true" />
 เพิ่ม
                       </span>
