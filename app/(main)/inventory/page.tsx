@@ -377,10 +377,10 @@ function InventoryRow({
         </span>
       </td>
       <td className="px-6 py-5 text-right">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-200">
           <button
             onClick={onHistory}
-            className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none"
+            className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={`ประวัติของ ${item.name}`}
             title="ประวัติการเคลื่อนไหว"
           >
@@ -388,7 +388,7 @@ function InventoryRow({
           </button>
           <button
             onClick={onAdjust}
-            className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none"
+            className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={`ปรับสต็อกของ ${item.name}`}
             title="ปรับสต็อก"
           >
@@ -396,7 +396,7 @@ function InventoryRow({
           </button>
           <button
             onClick={onEdit}
-            className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none"
+            className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={`แก้ไข ${item.name}`}
             title="แก้ไขสินค้า"
           >
@@ -404,7 +404,7 @@ function InventoryRow({
           </button>
           <button
             onClick={onArchive}
-            className="w-8 h-8 flex items-center justify-center text-muted hover:text-danger hover:bg-danger-subtle/30 rounded-lg transition-all focus:outline-none"
+            className="w-8 h-8 flex items-center justify-center text-muted hover:text-danger hover:bg-danger-subtle/30 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
             aria-label={`เก็บ ${item.name} เป็นคลังเก่า`}
             title="เก็บเข้าคลังเก่า"
           >
