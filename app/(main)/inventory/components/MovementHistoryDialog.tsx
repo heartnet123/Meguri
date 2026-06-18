@@ -39,9 +39,10 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
           </h2>
           <button
             onClick={onClose}
+            aria-label="ปิดหน้าต่าง"
             className="text-muted hover:text-foreground transition-colors p-1 rounded-lg hover:bg-surface-raised"
           >
-            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
+            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" aria-hidden="true" />
           </button>
         </div>
 
