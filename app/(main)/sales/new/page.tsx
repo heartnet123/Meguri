@@ -268,7 +268,7 @@ export default function NewOrderPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/sales"
-            className="p-2 text-neutral-500 hover:text-neutral-900 rounded-md hover:bg-neutral-100 transition-colors focus:outline-none"
+            className="p-2 text-neutral-500 hover:text-neutral-900 rounded-md hover:bg-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
             aria-label="กลับไปหน้าขาย"
           >
             <iconify-icon icon="solar:arrow-left-linear" width="20" height="20" aria-hidden="true" />
@@ -281,7 +281,7 @@ export default function NewOrderPage() {
         {cart.length > 0 && (
           <button
             onClick={clearCart}
-            className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
+            className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded"
           >
 ล้างตะกร้า
           </button>
@@ -343,7 +343,7 @@ export default function NewOrderPage() {
                   <button
                     key={recipe._id}
                     onClick={() => addToCart(recipe)}
-                    className={`group relative bg-white border rounded-md p-4 text-left transition-all focus:outline-none flex flex-col justify-between min-h-[110px] ${
+                    className={`group relative bg-white border rounded-md p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 flex flex-col justify-between min-h-[110px] ${
                       inCart
                         ? 'border-neutral-400 bg-neutral-50'
                         : 'border-neutral-200 hover:border-neutral-400'
@@ -406,7 +406,7 @@ export default function NewOrderPage() {
                   <button
                     key={opt.value}
                     onClick={() => setPaymentMethod(opt.value)}
-                    className={`flex-1 flex flex-col items-center gap-1 py-2 text-xs rounded-sm transition-colors focus:outline-none ${
+                    className={`flex-1 flex flex-col items-center gap-1 py-2 text-xs rounded-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 ${
                       paymentMethod === opt.value
                         ? 'bg-white shadow-sm border border-neutral-200/50 text-neutral-900 font-medium'
                         : 'text-neutral-500 hover:text-neutral-700'
@@ -447,7 +447,7 @@ export default function NewOrderPage() {
                       <div className="flex items-center border border-neutral-200 rounded-sm bg-neutral-50">
                         <button
                           onClick={() => updateQuantity(item.recipeId, item.quantity - 1)}
-                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
+                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-sm z-10"
                           aria-label="ลดจำนวน"
                         >
                           <iconify-icon icon="solar:minus-linear" width="12" height="12" aria-hidden="true" />
@@ -457,7 +457,7 @@ export default function NewOrderPage() {
                         </span>
                         <button
                           onClick={() => updateQuantity(item.recipeId, item.quantity + 1)}
-                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
+                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-sm z-10"
                           aria-label="เพิ่มจำนวน"
                         >
                           <iconify-icon icon="solar:add-linear" width="12" height="12" aria-hidden="true" />
@@ -564,7 +564,7 @@ export default function NewOrderPage() {
           <button
             onClick={handleCheckout}
             disabled={cart.length === 0 || isSubmitting || hasInsufficientStock}
-            className="w-full py-3.5 px-4 text-sm font-medium text-white bg-neutral-900 rounded-md hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center justify-center gap-2"
+            className="w-full py-3.5 px-4 text-sm font-medium text-white bg-neutral-900 rounded-md hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <>
