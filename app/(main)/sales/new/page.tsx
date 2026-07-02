@@ -447,7 +447,7 @@ export default function NewOrderPage() {
                       <div className="flex items-center border border-neutral-200 rounded-sm bg-neutral-50">
                         <button
                           onClick={() => updateQuantity(item.recipeId, item.quantity - 1)}
-                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
+                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-sm z-10"
                           aria-label="ลดจำนวน"
                         >
                           <iconify-icon icon="solar:minus-linear" width="12" height="12" aria-hidden="true" />
@@ -457,7 +457,7 @@ export default function NewOrderPage() {
                         </span>
                         <button
                           onClick={() => updateQuantity(item.recipeId, item.quantity + 1)}
-                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus:outline-none"
+                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-sm z-10"
                           aria-label="เพิ่มจำนวน"
                         >
                           <iconify-icon icon="solar:add-linear" width="12" height="12" aria-hidden="true" />
