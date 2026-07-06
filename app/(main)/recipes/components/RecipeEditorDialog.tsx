@@ -519,9 +519,10 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
                         <button
                           type="button"
                           onClick={() => removeIngredient(ing._localId)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                          aria-label="ลบ"
                         >
-                          <iconify-icon icon="solar:trash-bin-trash-linear" width="16" height="16" />
+                          <iconify-icon icon="solar:trash-bin-trash-linear" width="16" height="16" aria-hidden="true" />
                         </button>
                       </div>
                     );
