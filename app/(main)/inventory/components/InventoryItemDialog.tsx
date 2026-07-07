@@ -128,9 +128,10 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
           </h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-foreground transition-colors"
+            className="text-muted hover:text-foreground transition-colors rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label="ปิดหน้าต่าง"
           >
-            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
+            <iconify-icon icon="solar:close-circle-linear" width="24" height="24" aria-hidden="true" />
           </button>
         </div>
 
