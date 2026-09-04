@@ -171,6 +171,10 @@ export const accept = mutation({
 
     const user = await ensureCurrentUser(ctx);
 
+    if (inv.email.toLowerCase() !== user.email.toLowerCase()) {
+      throw new ConvexError('This invitation was sent to a different invited email address.');
+    }
+
     // Check if already a member
     const existingMembership = await getMembership(ctx, user._id, inv.workspaceId);
     if (existingMembership) {

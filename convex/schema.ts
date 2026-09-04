@@ -238,6 +238,7 @@ export default defineSchema({
     trendPct: v.optional(v.number()),
     confidence: v.union(v.literal('high'), v.literal('medium'), v.literal('low')),
     model: v.string(),
+    fallback_mode: v.optional(v.boolean()),
     warning: v.optional(v.string()),
     generatedAt: v.number(),
   })

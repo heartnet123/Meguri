@@ -1,9 +1,12 @@
 import { query, mutation } from './_generated/server';
-import { v } from 'convex/values';
+import { v, ConvexError } from 'convex/values';
+import { verifyWorkspace, checkRole } from './utils';
 
 export const recommendations = query({
   args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, { workspaceId }) => {
+    await verifyWorkspace(ctx, workspaceId);
+
     const recs = await ctx.db
       .query('reorderRecommendations')
       .withIndex('by_workspace_status', (q) =>
@@ -36,6 +39,12 @@ export const recommendations = query({
 export const accept = mutation({
   args: { id: v.id('reorderRecommendations') },
   handler: async (ctx, { id }) => {
+    const rec = await ctx.db.get(id);
+    if (!rec) throw new ConvexError('Recommendation not found.');
+
+    const { membership } = await verifyWorkspace(ctx, rec.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
+
     await ctx.db.patch(id, { status: 'accepted' });
   },
 });
@@ -43,6 +52,12 @@ export const accept = mutation({
 export const dismiss = mutation({
   args: { id: v.id('reorderRecommendations') },
   handler: async (ctx, { id }) => {
+    const rec = await ctx.db.get(id);
+    if (!rec) throw new ConvexError('Recommendation not found.');
+
+    const { membership } = await verifyWorkspace(ctx, rec.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
+
     await ctx.db.patch(id, { status: 'dismissed' });
   },
 });
@@ -50,6 +65,8 @@ export const dismiss = mutation({
 export const draftOrders = query({
   args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, { workspaceId }) => {
+    await verifyWorkspace(ctx, workspaceId);
+
     return ctx.db
       .query('purchaseOrders')
       .withIndex('by_workspace_status', (q) =>
