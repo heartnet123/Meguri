@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { useQuery, useConvexAuth } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useState, useMemo } from "react";
+import { useQuery, useConvexAuth } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useWorkspaceId } from "@/app/providers/WorkspaceProvider";
 
 type Supplier = {
   _id: string;
@@ -14,12 +14,12 @@ type Supplier = {
   email: string;
   phone: string;
   rating: number;
-  status: 'active' | 'needs_review' | 'inactive';
+  status: "active" | "needs_review" | "inactive";
   leadTimeMinDays: number;
   leadTimeMaxDays: number;
 };
 
-const SKEL_WIDTHS = ['w-2/3', 'w-1/3', 'w-1/2', 'w-1/4', 'w-1/5', 'w-1/4', 'w-8'];
+const SKEL_WIDTHS = ["w-2/3", "w-1/3", "w-1/2", "w-1/4", "w-1/5", "w-1/4", "w-8"];
 
 function SkeletonRow() {
   return (
@@ -42,26 +42,26 @@ function leadTimeLabel(min: number, max: number) {
   return `${min}–${max} วัน`;
 }
 
-function statusLabel(status: Supplier['status']) {
-  return status === 'active' ? 'ใช้งานอยู่' : status === 'needs_review' ? 'ต้องตรวจสอบ' : 'ไม่ใช้งาน';
+function statusLabel(status: Supplier["status"]) {
+  return status === "active" ? "ใช้งานอยู่" : status === "needs_review" ? "ต้องตรวจสอบ" : "ไม่ใช้งาน";
 }
 
 export default function SuppliersPage() {
   const { isAuthenticated } = useConvexAuth();
   const workspaceId = useWorkspaceId();
-  const args = (workspaceId && isAuthenticated) ? { workspaceId } : 'skip';
+  const args = workspaceId && isAuthenticated ? { workspaceId } : "skip";
   const suppliers = useQuery(api.suppliers.list, args) as Supplier[] | undefined;
   const stats = useQuery(api.suppliers.stats, args);
 
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const isLoading = workspaceId !== undefined && suppliers === undefined;
 
   const categories = useMemo(
     () => [...new Set(suppliers?.map((s) => s.category) ?? [])].sort(),
-    [suppliers]
+    [suppliers],
   );
 
   const filtered = useMemo(() => {
@@ -84,15 +84,28 @@ export default function SuppliersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">เครือข่ายซัพพลายเชน</h1>
-          <p className="text-sm text-muted mt-1.5 leading-relaxed">จัดการความสัมพันธ์กับผู้ขาย รายการจัดซื้อ และตัวชี้วัดประสิทธิภาพ</p>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">
+            จัดการความสัมพันธ์กับผู้ขาย รายการจัดซื้อ และตัวชี้วัดประสิทธิภาพ
+          </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.98]">
-            <iconify-icon icon="solar:export-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
+            <iconify-icon
+              icon="solar:export-bold-duotone"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              className="text-muted"
+            />
             ส่งออกข้อมูล
           </button>
           <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 active:scale-[0.98]">
-            <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
+            <iconify-icon
+              icon="solar:add-circle-bold-duotone"
+              width="18"
+              height="18"
+              aria-hidden="true"
+            />
             เพิ่มซัพพลายเออร์
           </button>
         </div>
@@ -102,10 +115,15 @@ export default function SuppliersPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-accent/20 transition-all">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-accent-subtle/50 flex items-center justify-center text-accent border border-accent/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+            <div
+              className="w-10 h-10 rounded-xl bg-accent-subtle/50 flex items-center justify-center text-accent border border-accent/10 group-hover:scale-110 transition-transform"
+              aria-hidden="true"
+            >
               <iconify-icon icon="solar:delivery-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">ซัพพลายเออร์ทั้งหมด</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">
+              ซัพพลายเออร์ทั้งหมด
+            </h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground">
             {stats === undefined ? <StatSkeleton /> : stats.total.toLocaleString()}
@@ -113,24 +131,40 @@ export default function SuppliersPage() {
         </div>
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-success/20 transition-all">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-success-subtle/50 flex items-center justify-center text-success border border-success/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+            <div
+              className="w-10 h-10 rounded-xl bg-success-subtle/50 flex items-center justify-center text-success border border-success/10 group-hover:scale-110 transition-transform"
+              aria-hidden="true"
+            >
               <iconify-icon icon="solar:star-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">ความน่าเชื่อถือเฉลี่ย</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">
+              ความน่าเชื่อถือเฉลี่ย
+            </h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground flex items-baseline gap-1.5">
-            {stats === undefined
-              ? <StatSkeleton />
-              : <>{stats.avgRating}<span className="text-[10px] text-muted/40 font-black tracking-[0.2em] uppercase align-baseline">คะแนน</span></>
-            }
+            {stats === undefined ? (
+              <StatSkeleton />
+            ) : (
+              <>
+                {stats.avgRating}
+                <span className="text-[10px] text-muted/40 font-black tracking-[0.2em] uppercase align-baseline">
+                  คะแนน
+                </span>
+              </>
+            )}
           </div>
         </div>
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm group hover:border-warning/20 transition-all">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-warning-subtle/50 flex items-center justify-center text-warning border border-warning/10 group-hover:scale-110 transition-transform" aria-hidden="true">
+            <div
+              className="w-10 h-10 rounded-xl bg-warning-subtle/50 flex items-center justify-center text-warning border border-warning/10 group-hover:scale-110 transition-transform"
+              aria-hidden="true"
+            >
               <iconify-icon icon="solar:clock-circle-bold-duotone" width="22" height="22" />
             </div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">รายการรอดำเนินการ</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted/60">
+              รายการรอดำเนินการ
+            </h3>
           </div>
           <div className="text-3xl font-bold tracking-tight text-foreground">
             {stats === undefined ? <StatSkeleton /> : stats.pendingOrderCount.toLocaleString()}
@@ -143,14 +177,18 @@ export default function SuppliersPage() {
         <div className="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-raised/30">
           <div className="relative max-w-md w-full">
             <iconify-icon
-              icon="solar:magnifer-linear" width="18" height="18"
+              icon="solar:magnifer-linear"
+              width="18"
+              height="18"
               className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
               aria-hidden="true"
             />
             <input
               type="search"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
               placeholder="ค้นหาจากชื่อซัพพลายเออร์หรือผู้ติดต่อ…"
               aria-label="ค้นหาซัพพลายเออร์"
               className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
@@ -164,7 +202,11 @@ export default function SuppliersPage() {
               className="px-4 py-2.5 bg-surface border border-border rounded-xl text-xs font-bold uppercase tracking-widest text-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent/10 hover:border-accent/40 transition-colors"
             >
               <option value="">ทุกหมวดหมู่</option>
-              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
             <select
               aria-label="กรองตามสถานะ"
@@ -185,13 +227,27 @@ export default function SuppliersPage() {
             <caption className="sr-only">รายการซัพพลายเออร์พร้อมข้อมูลติดต่อ คะแนน และสถานะ</caption>
             <thead className="text-[10px] text-muted/60 font-bold uppercase tracking-widest bg-surface-raised/50 border-b border-border">
               <tr>
-                <th scope="col" className="px-6 py-4">ข้อมูลซัพพลายเออร์</th>
-                <th scope="col" className="px-6 py-4">ประเภทเชิงพาณิชย์</th>
-                <th scope="col" className="px-6 py-4">ช่องทางติดต่อ</th>
-                <th scope="col" className="px-6 py-4 text-center">รอบการจัดส่ง</th>
-                <th scope="col" className="px-6 py-4 text-center">ดัชนีความน่าเชื่อถือ</th>
-                <th scope="col" className="px-6 py-4 text-center">สถานะการดำเนินงาน</th>
-                <th scope="col" className="px-6 py-4 text-right">การจัดการ</th>
+                <th scope="col" className="px-6 py-4">
+                  ข้อมูลซัพพลายเออร์
+                </th>
+                <th scope="col" className="px-6 py-4">
+                  ประเภทเชิงพาณิชย์
+                </th>
+                <th scope="col" className="px-6 py-4">
+                  ช่องทางติดต่อ
+                </th>
+                <th scope="col" className="px-6 py-4 text-center">
+                  รอบการจัดส่ง
+                </th>
+                <th scope="col" className="px-6 py-4 text-center">
+                  ดัชนีความน่าเชื่อถือ
+                </th>
+                <th scope="col" className="px-6 py-4 text-center">
+                  สถานะการดำเนินงาน
+                </th>
+                <th scope="col" className="px-6 py-4 text-right">
+                  การจัดการ
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -201,10 +257,18 @@ export default function SuppliersPage() {
                 <tr>
                   <td colSpan={7} className="px-6 py-20 text-center">
                     <div className="w-20 h-20 rounded-3xl bg-surface-raised flex items-center justify-center mx-auto mb-6 border border-border shadow-inner">
-                      <iconify-icon icon="solar:delivery-bold-duotone" width="40" height="40" className="text-muted/20" aria-hidden="true" />
+                      <iconify-icon
+                        icon="solar:delivery-bold-duotone"
+                        width="40"
+                        height="40"
+                        className="text-muted/20"
+                        aria-hidden="true"
+                      />
                     </div>
                     <p className="text-lg font-bold text-foreground">ยังไม่มีซัพพลายเออร์</p>
-                    <p className="text-sm text-muted mt-2 leading-relaxed max-w-xs mx-auto">เริ่มต้นเครือข่ายซัพพลายเชนของคุณด้วยการเพิ่มผู้ขายหลักก่อน</p>
+                    <p className="text-sm text-muted mt-2 leading-relaxed max-w-xs mx-auto">
+                      เริ่มต้นเครือข่ายซัพพลายเชนของคุณด้วยการเพิ่มผู้ขายหลักก่อน
+                    </p>
                   </td>
                 </tr>
               ) : noResults ? (
@@ -217,13 +281,21 @@ export default function SuppliersPage() {
                 </tr>
               ) : (
                 filtered.map((supplier) => (
-                  <tr key={supplier._id} className="hover:bg-accent-subtle/5 transition-colors group">
+                  <tr
+                    key={supplier._id}
+                    className="hover:bg-accent-subtle/5 transition-colors group"
+                  >
                     <td className="px-6 py-5 min-w-0">
-                      <div className="font-bold text-foreground max-w-[240px] truncate group-hover:text-accent transition-colors" title={supplier.name}>
+                      <div
+                        className="font-bold text-foreground max-w-[240px] truncate group-hover:text-accent transition-colors"
+                        title={supplier.name}
+                      >
                         {supplier.name}
                       </div>
                       <div className="text-[10px] font-black uppercase tracking-widest text-muted/40 mt-1.5 flex items-center gap-2">
-                         <span className="px-1.5 py-0.5 rounded bg-surface-raised border border-border/50">{supplier.displayId}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-surface-raised border border-border/50">
+                          {supplier.displayId}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-5">
@@ -232,7 +304,10 @@ export default function SuppliersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-5 min-w-0">
-                      <div className="font-bold text-foreground truncate max-w-[180px] pb-1 text-xs" title={supplier.contactName}>
+                      <div
+                        className="font-bold text-foreground truncate max-w-[180px] pb-1 text-xs"
+                        title={supplier.contactName}
+                      >
                         {supplier.contactName}
                       </div>
                       <div className="flex flex-col gap-1.5 mt-1">
@@ -241,7 +316,13 @@ export default function SuppliersPage() {
                           className="text-[10px] font-medium text-muted/60 hover:text-accent flex items-center gap-2 transition-colors focus:outline-none truncate max-w-[180px]"
                           aria-label={`ส่งอีเมลถึง ${supplier.contactName}`}
                         >
-                          <iconify-icon icon="solar:letter-bold-duotone" width="14" height="14" className="shrink-0 text-muted/20" aria-hidden="true" />
+                          <iconify-icon
+                            icon="solar:letter-bold-duotone"
+                            width="14"
+                            height="14"
+                            className="shrink-0 text-muted/20"
+                            aria-hidden="true"
+                          />
                           {supplier.email}
                         </a>
                         <a
@@ -249,35 +330,55 @@ export default function SuppliersPage() {
                           className="text-[10px] font-medium text-muted/60 hover:text-accent flex items-center gap-2 transition-colors focus:outline-none"
                           aria-label={`โทรหา ${supplier.contactName}`}
                         >
-                          <iconify-icon icon="solar:phone-bold-duotone" width="14" height="14" className="shrink-0 text-muted/20" aria-hidden="true" />
+                          <iconify-icon
+                            icon="solar:phone-bold-duotone"
+                            width="14"
+                            height="14"
+                            className="shrink-0 text-muted/20"
+                            aria-hidden="true"
+                          />
                           {supplier.phone}
                         </a>
                       </div>
                     </td>
                     <td className="px-6 py-5 text-center">
-                       <span className="text-[10px] font-black tracking-widest text-foreground/70 uppercase">
-                          {leadTimeLabel(supplier.leadTimeMinDays, supplier.leadTimeMaxDays)}
-                       </span>
+                      <span className="text-[10px] font-black tracking-widest text-foreground/70 uppercase">
+                        {leadTimeLabel(supplier.leadTimeMinDays, supplier.leadTimeMaxDays)}
+                      </span>
                     </td>
                     <td className="px-6 py-5 text-center">
                       <div className="flex items-center justify-center gap-1.5 text-warning group/rating">
-                        <iconify-icon icon="solar:star-bold-duotone" width="16" height="16" className="group-hover/rating:scale-125 transition-transform" aria-hidden="true" />
-                        <span className="font-black text-foreground tabular-nums tracking-tighter text-sm">{supplier.rating.toFixed(1)}</span>
+                        <iconify-icon
+                          icon="solar:star-bold-duotone"
+                          width="16"
+                          height="16"
+                          className="group-hover/rating:scale-125 transition-transform"
+                          aria-hidden="true"
+                        />
+                        <span className="font-black text-foreground tabular-nums tracking-tighter text-sm">
+                          {supplier.rating.toFixed(1)}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-5 text-center">
                       <span
                         className={`inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap shadow-sm border ${
-                          supplier.status === 'active'
-                            ? 'bg-success-subtle/50 text-success border-success/10'
-                            : supplier.status === 'inactive'
-                            ? 'bg-surface-raised text-muted/40 border-border/50'
-                            : 'bg-warning-subtle/50 text-warning border-warning/10'
+                          supplier.status === "active"
+                            ? "bg-success-subtle/50 text-success border-success/10"
+                            : supplier.status === "inactive"
+                              ? "bg-surface-raised text-muted/40 border-border/50"
+                              : "bg-warning-subtle/50 text-warning border-warning/10"
                         }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full mr-2 shadow-sm ${
-                          supplier.status === 'active' ? 'bg-success' : supplier.status === 'inactive' ? 'bg-muted/30' : 'bg-warning'
-                        }`} />
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full mr-2 shadow-sm ${
+                            supplier.status === "active"
+                              ? "bg-success"
+                              : supplier.status === "inactive"
+                                ? "bg-muted/30"
+                                : "bg-warning"
+                          }`}
+                        />
                         {statusLabel(supplier.status)}
                       </span>
                     </td>
@@ -286,7 +387,12 @@ export default function SuppliersPage() {
                         className="w-9 h-9 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-subtle/30 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-accent/10 active:scale-[0.9] border border-transparent hover:border-accent/10"
                         aria-label={`การจัดการสำหรับ ${supplier.name}`}
                       >
-                        <iconify-icon icon="solar:menu-dots-bold-duotone" width="22" height="22" aria-hidden="true" />
+                        <iconify-icon
+                          icon="solar:menu-dots-bold-duotone"
+                          width="22"
+                          height="22"
+                          aria-hidden="true"
+                        />
                       </button>
                     </td>
                   </tr>
@@ -298,17 +404,32 @@ export default function SuppliersPage() {
 
         <div className="p-5 border-t border-border flex items-center justify-between bg-surface-raised/30">
           <div className="text-[10px] font-black uppercase tracking-widest text-muted/40">
-            {isLoading
-              ? <div className="h-4 w-40 bg-surface-raised rounded-lg animate-pulse" />
-              : <>แสดงซัพพลายเออร์ <span className="text-foreground/60">{filtered.length.toLocaleString()}</span> จากทั้งหมด <span className="text-foreground/60">{(suppliers ?? []).length.toLocaleString()}</span> ราย</>
-            }
+            {isLoading ? (
+              <div className="h-4 w-40 bg-surface-raised rounded-lg animate-pulse" />
+            ) : (
+              <>
+                แสดงซัพพลายเออร์{" "}
+                <span className="text-foreground/60">{filtered.length.toLocaleString()}</span>{" "}
+                จากทั้งหมด{" "}
+                <span className="text-foreground/60">
+                  {(suppliers ?? []).length.toLocaleString()}
+                </span>{" "}
+                ราย
+              </>
+            )}
           </div>
           <div className="flex gap-2">
-            <button className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]" disabled>
-               <iconify-icon icon="solar:alt-arrow-left-linear" width="18" height="18" />
+            <button
+              className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]"
+              disabled
+            >
+              <iconify-icon icon="solar:alt-arrow-left-linear" width="18" height="18" />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]" disabled>
-               <iconify-icon icon="solar:alt-arrow-right-linear" width="18" height="18" />
+            <button
+              className="w-9 h-9 flex items-center justify-center text-muted border border-border rounded-xl hover:bg-surface-raised transition-all disabled:opacity-20 active:scale-[0.95]"
+              disabled
+            >
+              <iconify-icon icon="solar:alt-arrow-right-linear" width="18" height="18" />
             </button>
           </div>
         </div>

@@ -1,43 +1,43 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useQuery, useMutation, useConvexAuth } from 'convex/react';
-import Link from 'next/link';
-import { api } from '@/convex/_generated/api';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
-import { Id } from '@/convex/_generated/dataModel';
+import { useState } from "react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
+import Link from "next/link";
+import { api } from "@/convex/_generated/api";
+import { useWorkspaceId } from "@/app/providers/WorkspaceProvider";
+import { Id } from "@/convex/_generated/dataModel";
 
 const ROLE_LABELS: Record<string, string> = {
-  owner: 'เจ้าของ',
-  admin: 'ผู้ดูแลระบบ',
-  manager: 'ผู้จัดการ',
-  staff: 'พนักงาน',
-  viewer: 'ผู้ดู',
+  owner: "เจ้าของ",
+  admin: "ผู้ดูแลระบบ",
+  manager: "ผู้จัดการ",
+  staff: "พนักงาน",
+  viewer: "ผู้ดู",
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  owner: 'bg-amber-100 text-amber-800 border-amber-200',
-  admin: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-  manager: 'bg-teal-100 text-teal-800 border-teal-200',
-  staff: 'bg-neutral-100 text-neutral-600 border-neutral-200',
-  viewer: 'bg-neutral-50 text-neutral-400 border-neutral-200',
+  owner: "bg-amber-100 text-amber-800 border-amber-200",
+  admin: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  manager: "bg-teal-100 text-teal-800 border-teal-200",
+  staff: "bg-neutral-100 text-neutral-600 border-neutral-200",
+  viewer: "bg-neutral-50 text-neutral-400 border-neutral-200",
 };
 
 function getInitials(name: string) {
   return name
-    .split(' ')
+    .split(" ")
     .map((w) => w[0])
-    .join('')
+    .join("")
     .slice(0, 2)
     .toUpperCase();
 }
 
-type AssignableRole = 'admin' | 'manager' | 'staff' | 'viewer';
+type AssignableRole = "admin" | "manager" | "staff" | "viewer";
 
 export default function TeamSettingsPage() {
   const { isAuthenticated } = useConvexAuth();
   const workspaceId = useWorkspaceId();
-  const args = workspaceId && isAuthenticated ? { workspaceId } : 'skip';
+  const args = workspaceId && isAuthenticated ? { workspaceId } : "skip";
 
   const me = useQuery(api.users.me);
   const workspaces = useQuery(api.workspaces.myWorkspaces);
@@ -50,52 +50,52 @@ export default function TeamSettingsPage() {
 
   // Current user's role in this workspace
   const myRole = workspaces?.find((w) => w._id === workspaceId)?.role;
-  const canManage = myRole === 'owner' || myRole === 'admin';
+  const canManage = myRole === "owner" || myRole === "admin";
 
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState<AssignableRole>('staff');
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<AssignableRole>("staff");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Track which member is having role changed inline
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
-  const [pendingRole, setPendingRole] = useState<AssignableRole>('staff');
+  const [pendingRole, setPendingRole] = useState<AssignableRole>("staff");
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workspaceId || !email.trim()) return;
 
     setIsSubmitting(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       await createInvitation({ workspaceId, email: email.trim().toLowerCase(), role });
       setSuccess(`ส่งคำเชิญไปที่ ${email} แล้ว`);
-      setEmail('');
+      setEmail("");
     } catch (err: any) {
-      setError(err.data ?? err.message ?? 'ส่งคำเชิญไม่สำเร็จ');
+      setError(err.data ?? err.message ?? "ส่งคำเชิญไม่สำเร็จ");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleCancel = async (invitationId: Id<'invitations'>) => {
+  const handleCancel = async (invitationId: Id<"invitations">) => {
     try {
       await cancelInvitation({ invitationId });
     } catch (err: any) {
-      setError(err.data ?? err.message ?? 'ยกเลิกคำเชิญไม่สำเร็จ');
+      setError(err.data ?? err.message ?? "ยกเลิกคำเชิญไม่สำเร็จ");
     }
   };
 
-  const handleRemoveMember = async (userId: Id<'users'>, name: string) => {
+  const handleRemoveMember = async (userId: Id<"users">, name: string) => {
     if (!workspaceId) return;
     if (!confirm(`ต้องการลบ ${name} ออกจากเวิร์กสเปซนี้ใช่ไหม?`)) return;
     try {
       await removeMember({ workspaceId, userId });
     } catch (err: any) {
-      setError(err.data ?? err.message ?? 'ลบสมาชิกไม่สำเร็จ');
+      setError(err.data ?? err.message ?? "ลบสมาชิกไม่สำเร็จ");
     }
   };
 
@@ -104,21 +104,22 @@ export default function TeamSettingsPage() {
     setPendingRole(currentRole as AssignableRole);
   };
 
-  const handleSaveRole = async (userId: Id<'users'>) => {
+  const handleSaveRole = async (userId: Id<"users">) => {
     if (!workspaceId) return;
     try {
       await changeMemberRole({ workspaceId, userId, newRole: pendingRole });
       setEditingMemberId(null);
     } catch (err: any) {
-      setError(err.data ?? err.message ?? 'เปลี่ยนบทบาทไม่สำเร็จ');
+      setError(err.data ?? err.message ?? "เปลี่ยนบทบาทไม่สำเร็จ");
     }
   };
 
   const pendingInvitations = invitations?.filter(
-    (inv) => inv.status === 'pending' && !inv.isExpired,
+    (inv) => inv.status === "pending" && !inv.isExpired,
   );
 
-  const isLoading = workspaceId !== undefined && (members === undefined || invitations === undefined);
+  const isLoading =
+    workspaceId !== undefined && (members === undefined || invitations === undefined);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -152,29 +153,39 @@ export default function TeamSettingsPage() {
       {/* Invite Form — only shown to owner/admin */}
       {canManage && (
         <div className="bg-surface border border-border rounded-2xl shadow-sm p-6">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted/60 mb-4">เชิญสมาชิกใหม่เข้าทีม</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted/60 mb-4">
+            เชิญสมาชิกใหม่เข้าทีม
+          </h2>
           <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
-              <label htmlFor="invite-email" className="sr-only">ที่อยู่อีเมล</label>
+              <label htmlFor="invite-email" className="sr-only">
+                ที่อยู่อีเมล
+              </label>
               <input
                 id="invite-email"
                 type="email"
                 required
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setError(''); setSuccess(''); }}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError("");
+                  setSuccess("");
+                }}
                 placeholder="colleague@example.com"
                 className="w-full px-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/10 focus:border-accent transition-all placeholder:text-muted/40 text-foreground"
               />
             </div>
             <div>
-              <label htmlFor="invite-role" className="sr-only">บทบาท</label>
+              <label htmlFor="invite-role" className="sr-only">
+                บทบาท
+              </label>
               <select
                 id="invite-role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as AssignableRole)}
                 className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-accent/10"
               >
-                {myRole === 'owner' && <option value="admin">ผู้ดูแลระบบ</option>}
+                {myRole === "owner" && <option value="admin">ผู้ดูแลระบบ</option>}
                 <option value="manager">ผู้จัดการ</option>
                 <option value="staff">พนักงาน</option>
                 <option value="viewer">ผู้ดู</option>
@@ -187,12 +198,23 @@ export default function TeamSettingsPage() {
             >
               {isSubmitting ? (
                 <>
-                  <iconify-icon icon="solar:loading-linear" width="16" height="16" className="animate-spin" aria-hidden="true" />
+                  <iconify-icon
+                    icon="solar:loading-linear"
+                    width="16"
+                    height="16"
+                    className="animate-spin"
+                    aria-hidden="true"
+                  />
                   กำลังส่ง...
                 </>
               ) : (
                 <>
-                  <iconify-icon icon="solar:letter-bold-duotone" width="16" height="16" aria-hidden="true" />
+                  <iconify-icon
+                    icon="solar:letter-bold-duotone"
+                    width="16"
+                    height="16"
+                    aria-hidden="true"
+                  />
                   ส่งคำเชิญ
                 </>
               )}
@@ -217,7 +239,12 @@ export default function TeamSettingsPage() {
               <div key={inv._id} className="px-6 py-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                    <iconify-icon icon="solar:clock-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
+                    <iconify-icon
+                      icon="solar:clock-circle-bold-duotone"
+                      width="18"
+                      height="18"
+                      aria-hidden="true"
+                    />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{inv.email}</p>
@@ -227,7 +254,9 @@ export default function TeamSettingsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${ROLE_COLORS[inv.role] ?? ROLE_COLORS.staff}`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${ROLE_COLORS[inv.role] ?? ROLE_COLORS.staff}`}
+                  >
                     {ROLE_LABELS[inv.role]}
                   </span>
                   {canManage && (
@@ -274,14 +303,18 @@ export default function TeamSettingsPage() {
           <div className="divide-y divide-border">
             {members.map((member) => {
               const isMe = me?._id === member._id;
-              const isOwner = member.role === 'owner';
+              const isOwner = member.role === "owner";
               const isEditing = editingMemberId === member._id;
               // Admin cannot manage owners or other admins
-              const canEdit = canManage && !isOwner && !(myRole === 'admin' && member.role === 'admin');
+              const canEdit =
+                canManage && !isOwner && !(myRole === "admin" && member.role === "admin");
               const canRemove = canEdit && !isMe;
 
               return (
-                <div key={member._id} className="px-6 py-4 flex items-center justify-between gap-4 group hover:bg-surface-raised/30 transition-colors">
+                <div
+                  key={member._id}
+                  className="px-6 py-4 flex items-center justify-between gap-4 group hover:bg-surface-raised/30 transition-colors"
+                >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-accent-subtle flex items-center justify-center text-sm font-semibold text-accent shrink-0">
                       {getInitials(member.name)}
@@ -305,13 +338,13 @@ export default function TeamSettingsPage() {
                           className="px-3 py-1.5 bg-surface border border-border rounded-lg text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-accent/10"
                           aria-label="เลือกบทบาทใหม่"
                         >
-                          {myRole === 'owner' && <option value="admin">ผู้ดูแลระบบ</option>}
+                          {myRole === "owner" && <option value="admin">ผู้ดูแลระบบ</option>}
                           <option value="manager">ผู้จัดการ</option>
                           <option value="staff">พนักงาน</option>
                           <option value="viewer">ผู้ดู</option>
                         </select>
                         <button
-                          onClick={() => handleSaveRole(member._id as Id<'users'>)}
+                          onClick={() => handleSaveRole(member._id as Id<"users">)}
                           className="px-3 py-1.5 text-xs font-bold text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors"
                         >
                           บันทึก
@@ -325,7 +358,9 @@ export default function TeamSettingsPage() {
                       </div>
                     ) : (
                       <>
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${ROLE_COLORS[member.role] ?? ROLE_COLORS.staff}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${ROLE_COLORS[member.role] ?? ROLE_COLORS.staff}`}
+                        >
                           {ROLE_LABELS[member.role] ?? member.role}
                         </span>
                         {canEdit && (
@@ -334,16 +369,28 @@ export default function TeamSettingsPage() {
                             className="opacity-0 group-hover:opacity-100 text-xs font-medium text-muted hover:text-accent transition-all px-2 py-1.5 rounded-lg hover:bg-accent-subtle"
                             aria-label={`เปลี่ยนบทบาทของ ${member.name}`}
                           >
-                            <iconify-icon icon="solar:pen-bold-duotone" width="14" height="14" aria-hidden="true" />
+                            <iconify-icon
+                              icon="solar:pen-bold-duotone"
+                              width="14"
+                              height="14"
+                              aria-hidden="true"
+                            />
                           </button>
                         )}
                         {canRemove && (
                           <button
-                            onClick={() => handleRemoveMember(member._id as Id<'users'>, member.name)}
+                            onClick={() =>
+                              handleRemoveMember(member._id as Id<"users">, member.name)
+                            }
                             className="opacity-0 group-hover:opacity-100 text-xs font-medium text-muted hover:text-red-600 transition-all px-2 py-1.5 rounded-lg hover:bg-red-50"
                             aria-label={`ลบ ${member.name} ออกจากทีม`}
                           >
-                            <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="14" height="14" aria-hidden="true" />
+                            <iconify-icon
+                              icon="solar:trash-bin-trash-bold-duotone"
+                              width="14"
+                              height="14"
+                              aria-hidden="true"
+                            />
                           </button>
                         )}
                       </>

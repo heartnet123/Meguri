@@ -1,12 +1,12 @@
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 type StockMovementRow = {
-  _id: Id<'stockMovements'>;
+  _id: Id<"stockMovements">;
   createdAt: number;
   quantity: number;
-  type: 'delivery' | 'sale' | 'adjustment' | 'wastage' | 'transfer' | 'initial_stock' | 'archive';
+  type: "delivery" | "sale" | "adjustment" | "wastage" | "transfer" | "initial_stock" | "archive";
   note?: string;
   itemName: string;
   userName: string;
@@ -15,17 +15,19 @@ type StockMovementRow = {
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  workspaceId?: Id<'workspaces'>;
-  inventoryItemId?: Id<'inventoryItems'> | null;
+  workspaceId?: Id<"workspaces">;
+  inventoryItemId?: Id<"inventoryItems"> | null;
 };
 
 export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryItemId }: Props) {
   const movements = useQuery(
     api.stockMovements.list,
-    isOpen && workspaceId ? {
-      workspaceId,
-      inventoryItemId: inventoryItemId ?? undefined,
-    } : 'skip'
+    isOpen && workspaceId
+      ? {
+          workspaceId,
+          inventoryItemId: inventoryItemId ?? undefined,
+        }
+      : "skip",
   ) as StockMovementRow[] | undefined;
 
   if (!isOpen) return null;
@@ -34,9 +36,7 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-surface rounded-xl shadow-xl border border-border w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface">
-          <h2 className="text-lg font-semibold text-foreground">
-            ประวัติการเคลื่อนไหวของสต็อก
-          </h2>
+          <h2 className="text-lg font-semibold text-foreground">ประวัติการเคลื่อนไหวของสต็อก</h2>
           <button
             onClick={onClose}
             className="text-muted hover:text-foreground transition-colors p-1 rounded-lg hover:bg-surface-raised"
@@ -48,24 +48,48 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
         <div className="p-0 overflow-y-auto">
           {movements === undefined ? (
             <div className="p-12 text-center">
-               <iconify-icon icon="solar:refresh-circle-linear" width="32" height="32" className="animate-spin text-accent mx-auto mb-3 block" />
-               <p className="text-sm font-medium text-muted">กำลังโหลดประวัติ...</p>
+              <iconify-icon
+                icon="solar:refresh-circle-linear"
+                width="32"
+                height="32"
+                className="animate-spin text-accent mx-auto mb-3 block"
+              />
+              <p className="text-sm font-medium text-muted">กำลังโหลดประวัติ...</p>
             </div>
           ) : movements.length === 0 ? (
             <div className="p-12 text-center">
-               <iconify-icon icon="solar:history-linear" width="32" height="32" className="text-muted/30 mx-auto mb-3 block" />
-               <p className="text-sm font-medium text-muted">ไม่พบประวัติการเคลื่อนไหวของสต็อก</p>
+              <iconify-icon
+                icon="solar:history-linear"
+                width="32"
+                height="32"
+                className="text-muted/30 mx-auto mb-3 block"
+              />
+              <p className="text-sm font-medium text-muted">ไม่พบประวัติการเคลื่อนไหวของสต็อก</p>
             </div>
           ) : (
             <table className="w-full text-left text-sm">
               <thead className="text-xs text-muted uppercase bg-surface-raised border-b border-border sticky top-0">
                 <tr>
-                  <th scope="col" className="px-6 py-3 font-medium">วันที่</th>
-                  {!inventoryItemId && <th scope="col" className="px-6 py-3 font-medium">สินค้า</th>}
-                  <th scope="col" className="px-6 py-3 font-medium">ประเภท</th>
-                  <th scope="col" className="px-6 py-3 font-medium text-right">จำนวน</th>
-                  <th scope="col" className="px-6 py-3 font-medium">ผู้ใช้</th>
-                  <th scope="col" className="px-6 py-3 font-medium">หมายเหตุ</th>
+                  <th scope="col" className="px-6 py-3 font-medium">
+                    วันที่
+                  </th>
+                  {!inventoryItemId && (
+                    <th scope="col" className="px-6 py-3 font-medium">
+                      สินค้า
+                    </th>
+                  )}
+                  <th scope="col" className="px-6 py-3 font-medium">
+                    ประเภท
+                  </th>
+                  <th scope="col" className="px-6 py-3 font-medium text-right">
+                    จำนวน
+                  </th>
+                  <th scope="col" className="px-6 py-3 font-medium">
+                    ผู้ใช้
+                  </th>
+                  <th scope="col" className="px-6 py-3 font-medium">
+                    หมายเหตุ
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
@@ -73,35 +97,52 @@ export function MovementHistoryDialog({ isOpen, onClose, workspaceId, inventoryI
                   <tr key={m._id} className="hover:bg-surface-raised/50 transition-colors">
                     <td className="px-6 py-3 text-foreground whitespace-nowrap">
                       {new Date(m.createdAt).toLocaleString(undefined, {
-                        dateStyle: 'short', timeStyle: 'short'
+                        dateStyle: "short",
+                        timeStyle: "short",
                       })}
                     </td>
                     {!inventoryItemId && (
-                      <td className="px-6 py-3 text-foreground max-w-[120px] truncate font-medium" title={m.itemName}>
+                      <td
+                        className="px-6 py-3 text-foreground max-w-[120px] truncate font-medium"
+                        title={m.itemName}
+                      >
                         {m.itemName}
                       </td>
                     )}
                     <td className="px-6 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${
-                        m.type === 'delivery' ? 'bg-success-subtle text-success' :
-                        m.type === 'sale' ? 'bg-accent-subtle text-accent' :
-                        m.type === 'wastage' ? 'bg-danger-subtle text-danger' :
-                        m.type === 'adjustment' ? 'bg-warning-subtle text-warning' :
-                        'bg-surface-raised text-muted'
-                      }`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${
+                          m.type === "delivery"
+                            ? "bg-success-subtle text-success"
+                            : m.type === "sale"
+                              ? "bg-accent-subtle text-accent"
+                              : m.type === "wastage"
+                                ? "bg-danger-subtle text-danger"
+                                : m.type === "adjustment"
+                                  ? "bg-warning-subtle text-warning"
+                                  : "bg-surface-raised text-muted"
+                        }`}
+                      >
                         {m.type}
                       </span>
                     </td>
-                    <td className={`px-6 py-3 text-right font-medium whitespace-nowrap ${
-                      m.quantity > 0 ? 'text-success' : m.quantity < 0 ? 'text-danger' : 'text-foreground'
-                    }`}>
-                      {m.quantity > 0 ? '+' : ''}{m.quantity}
+                    <td
+                      className={`px-6 py-3 text-right font-medium whitespace-nowrap ${
+                        m.quantity > 0
+                          ? "text-success"
+                          : m.quantity < 0
+                            ? "text-danger"
+                            : "text-foreground"
+                      }`}
+                    >
+                      {m.quantity > 0 ? "+" : ""}
+                      {m.quantity}
                     </td>
                     <td className="px-6 py-3 text-muted max-w-[100px] truncate" title={m.userName}>
                       {m.userName}
                     </td>
                     <td className="px-6 py-3 text-muted max-w-[150px] truncate" title={m.note}>
-                      {m.note || '-'}
+                      {m.note || "-"}
                     </td>
                   </tr>
                 ))}

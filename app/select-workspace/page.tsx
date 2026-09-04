@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import Link from 'next/link';
+import React from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import Link from "next/link";
 
 export default function SelectWorkspacePage() {
   const router = useRouter();
@@ -12,21 +12,28 @@ export default function SelectWorkspacePage() {
   const pendingInvites = useQuery(api.invitations.getPendingForUser);
   const onboardingState = useQuery(api.users.getOnboardingState);
 
-  const isLoading = workspaces === undefined || pendingInvites === undefined || onboardingState === undefined;
+  const isLoading =
+    workspaces === undefined || pendingInvites === undefined || onboardingState === undefined;
 
   const handleSelectWorkspace = (workspaceId: string) => {
-    localStorage.setItem('smartstock-current-workspace', workspaceId);
-    router.push('/dashboard');
+    localStorage.setItem("smartstock-current-workspace", workspaceId);
+    router.push("/dashboard");
   };
 
   const roleLabel = (role: string) => {
     switch (role) {
-      case 'owner': return 'เจ้าของ';
-      case 'admin': return 'ผู้ดูแลระบบ';
-      case 'manager': return 'ผู้จัดการ';
-      case 'staff': return 'พนักงาน';
-      case 'viewer': return 'ผู้ดู';
-      default: return role;
+      case "owner":
+        return "เจ้าของ";
+      case "admin":
+        return "ผู้ดูแลระบบ";
+      case "manager":
+        return "ผู้จัดการ";
+      case "staff":
+        return "พนักงาน";
+      case "viewer":
+        return "ผู้ดู";
+      default:
+        return role;
     }
   };
 
@@ -50,8 +57,18 @@ export default function SelectWorkspacePage() {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="mx-auto w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center mb-4">
-            <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            <svg
+              className="w-6 h-6 text-teal-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
             </svg>
           </div>
           <h1 className="text-2xl font-semibold text-neutral-900">เลือกเวิร์กสเปซของคุณ</h1>
@@ -74,8 +91,18 @@ export default function SelectWorkspacePage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      <svg
+                        className="w-5 h-5 text-amber-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
                       </svg>
                     </div>
                     <div>
@@ -123,8 +150,18 @@ export default function SelectWorkspacePage() {
                       </p>
                     </div>
                   </div>
-                  <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="w-5 h-5 text-neutral-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               ))}
@@ -136,8 +173,18 @@ export default function SelectWorkspacePage() {
         {!hasWorkspaces && !hasInvites && (
           <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-8 text-center mb-8">
             <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              <svg
+                className="w-8 h-8 text-neutral-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
               </svg>
             </div>
             <h3 className="text-lg font-medium text-neutral-900 mb-2">ยังไม่มีเวิร์กสเปซ</h3>
@@ -154,7 +201,12 @@ export default function SelectWorkspacePage() {
             className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-teal-600 text-white font-medium rounded-xl hover:bg-teal-700 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
             สร้างเวิร์กสเปซใหม่
           </Link>
@@ -164,7 +216,12 @@ export default function SelectWorkspacePage() {
             className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-white border border-neutral-300 text-neutral-700 font-medium rounded-xl hover:bg-neutral-50 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+              />
             </svg>
             เข้าร่วมด้วยรหัสเชิญ
           </Link>

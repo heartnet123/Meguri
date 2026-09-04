@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "node --no-warnings ./node_modules/eslint/bin/eslint.js .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run tests --environment edge-runtime --passWithNoTests --pool threads",
+    "test": "vitest run --passWithNoTests --pool threads",
     "clean": "next clean"
   },
   "dependencies": {

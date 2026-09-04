@@ -1,9 +1,11 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
+import { verifyWorkspace, checkRole } from './utils';
 
 export const latestByItem = query({
   args: { workspaceId: v.id('workspaces'), periodDays: v.optional(v.number()) },
   handler: async (ctx, { workspaceId, periodDays }) => {
+    await verifyWorkspace(ctx, workspaceId);
     const allItems = await ctx.db
       .query('inventoryItems')
       .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
@@ -35,6 +37,8 @@ export const latestByItem = query({
 export const stats = query({
   args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, { workspaceId }) => {
+    await verifyWorkspace(ctx, workspaceId);
+
     const allItems = await ctx.db
       .query('inventoryItems')
       .withIndex('by_workspace', (q) => q.eq('workspaceId', workspaceId))
@@ -73,9 +77,12 @@ export const saveSnapshot = mutation({
     trendPct: v.optional(v.number()),
     confidence: v.union(v.literal('high'), v.literal('medium'), v.literal('low')),
     model: v.string(),
+    fallback_mode: v.optional(v.boolean()),
     warning: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const { membership } = await verifyWorkspace(ctx, args.workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
     return ctx.db.insert('forecastSnapshots', { ...args, generatedAt: Date.now() });
   },
 });
@@ -83,6 +90,8 @@ export const saveSnapshot = mutation({
 export const generate = mutation({
   args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, { workspaceId }) => {
+    const { membership } = await verifyWorkspace(ctx, workspaceId);
+    checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
     // 1. Fetch all inventory items
     const items = await ctx.db
       .query('inventoryItems')
@@ -128,6 +137,7 @@ export const generate = mutation({
           unit: item.unit,
           confidence,
           model: 'Moving Average',
+          fallback_mode: true,
           warning,
           generatedAt: now,
         });

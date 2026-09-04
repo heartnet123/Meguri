@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { authClient } from '@/lib/auth-client';
+import { useEffect, useRef } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { authClient } from "@/lib/auth-client";
 
 /**
  * Keeps the app-level Convex user profile in sync with Better Auth sessions.
@@ -25,7 +25,7 @@ export function AuthProfileSync() {
       return;
     }
 
-    const syncKey = sessionUser.id ?? sessionUser.email ?? 'authenticated-user';
+    const syncKey = sessionUser.id ?? sessionUser.email ?? "authenticated-user";
     if (lastSyncedUserKey.current === syncKey) {
       return;
     }
@@ -39,7 +39,7 @@ export function AuthProfileSync() {
         }
       })
       .catch((error) => {
-        console.error('Failed to sync authenticated user profile', error);
+        console.error("Failed to sync authenticated user profile", error);
       });
 
     return () => {

@@ -125,7 +125,7 @@ export const assign = mutation({
     const alert = await ctx.db.get(id);
     if (!alert) throw new Error('Alert not found');
 
-    const { user, membership } = await verifyWorkspace(ctx, alert.workspaceId);
+    const { membership } = await verifyWorkspace(ctx, alert.workspaceId);
     checkRole(membership, ['owner', 'admin', 'manager', 'staff']);
 
     if (assignedTo !== null) {

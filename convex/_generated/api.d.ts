@@ -18,6 +18,7 @@ import type * as maintenance from "../maintenance.js";
 import type * as purchasePlanning from "../purchasePlanning.js";
 import type * as recipes from "../recipes.js";
 import type * as sales from "../sales.js";
+import type * as seedJoe from "../seedJoe.js";
 import type * as sellableItems from "../sellableItems.js";
 import type * as stockMovements from "../stockMovements.js";
 import type * as suppliers from "../suppliers.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   purchasePlanning: typeof purchasePlanning;
   recipes: typeof recipes;
   sales: typeof sales;
+  seedJoe: typeof seedJoe;
   sellableItems: typeof sellableItems;
   stockMovements: typeof stockMovements;
   suppliers: typeof suppliers;

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 interface SettingsSection {
   id: string;
@@ -10,12 +10,43 @@ interface SettingsSection {
 
 export default function SettingsPage() {
   const sections: SettingsSection[] = [
-    { id: 'profile', title: 'โปรไฟล์', description: 'อัปเดตชื่อ อีเมล และรหัสผ่านของคุณ', icon: 'solar:user-bold-duotone' },
-    { id: 'workspace', title: 'เวิร์กสเปซ', description: 'แก้ไขชื่อเวิร์กสเปซ สาขา และการตั้งค่าภูมิภาค', icon: 'solar:buildings-bold-duotone' },
-    { id: 'notifications', title: 'การแจ้งเตือน', description: 'เลือกประเภทการแจ้งเตือนสต็อกที่คุณต้องการรับ', icon: 'solar:bell-bold-duotone' },
-    { id: 'team', title: 'ทีมงาน', description: 'เชิญเพื่อนร่วมทีมและจัดการระดับสิทธิ์การเข้าถึง', icon: 'solar:shield-user-bold-duotone', href: '/settings/team' },
-    { id: 'integrations', title: 'การเชื่อมต่อระบบ', description: 'เชื่อมต่อระบบ POS, ERP และเครื่องมือด้านโลจิสติกส์', icon: 'solar:database-bold-duotone' },
-    { id: 'billing', title: 'การเรียกเก็บเงิน', description: 'ตรวจสอบแพ็กเกจ ใบแจ้งหนี้ และประวัติการชำระเงิน', icon: 'solar:card-bold-duotone' },
+    {
+      id: "profile",
+      title: "โปรไฟล์",
+      description: "อัปเดตชื่อ อีเมล และรหัสผ่านของคุณ",
+      icon: "solar:user-bold-duotone",
+    },
+    {
+      id: "workspace",
+      title: "เวิร์กสเปซ",
+      description: "แก้ไขชื่อเวิร์กสเปซ สาขา และการตั้งค่าภูมิภาค",
+      icon: "solar:buildings-bold-duotone",
+    },
+    {
+      id: "notifications",
+      title: "การแจ้งเตือน",
+      description: "เลือกประเภทการแจ้งเตือนสต็อกที่คุณต้องการรับ",
+      icon: "solar:bell-bold-duotone",
+    },
+    {
+      id: "team",
+      title: "ทีมงาน",
+      description: "เชิญเพื่อนร่วมทีมและจัดการระดับสิทธิ์การเข้าถึง",
+      icon: "solar:shield-user-bold-duotone",
+      href: "/settings/team",
+    },
+    {
+      id: "integrations",
+      title: "การเชื่อมต่อระบบ",
+      description: "เชื่อมต่อระบบ POS, ERP และเครื่องมือด้านโลจิสติกส์",
+      icon: "solar:database-bold-duotone",
+    },
+    {
+      id: "billing",
+      title: "การเรียกเก็บเงิน",
+      description: "ตรวจสอบแพ็กเกจ ใบแจ้งหนี้ และประวัติการชำระเงิน",
+      icon: "solar:card-bold-duotone",
+    },
   ];
 
   return (
@@ -50,7 +81,12 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-subtle text-muted transition-colors group-hover:bg-accent-subtle group-hover:text-accent">
-                  <iconify-icon icon="solar:alt-arrow-right-linear" width="18" height="18" aria-hidden="true" />
+                  <iconify-icon
+                    icon="solar:alt-arrow-right-linear"
+                    width="18"
+                    height="18"
+                    aria-hidden="true"
+                  />
                 </div>
               </>
             );
@@ -86,7 +122,12 @@ export default function SettingsPage() {
           <p>ระบบควบคุมสิทธิ์เข้าถึงเวิร์กสเปซและบันทึกการตรวจสอบกำลังทำงานอยู่</p>
         </div>
         <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-success-subtle px-3 py-1 text-xs font-medium text-success sm:mt-0">
-          <iconify-icon icon="solar:shield-check-bold-duotone" width="14" height="14" aria-hidden="true" />
+          <iconify-icon
+            icon="solar:shield-check-bold-duotone"
+            width="14"
+            height="14"
+            aria-hidden="true"
+          />
           ปลอดภัย
         </div>
       </div>

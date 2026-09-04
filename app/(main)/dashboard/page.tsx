@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useMemo } from 'react';
-import { useQuery, useConvexAuth } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import Link from "next/link";
+import { useMemo } from "react";
+import { useQuery, useConvexAuth } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useWorkspaceId } from "@/app/providers/WorkspaceProvider";
 
 type TrendDay = { label: string; revenue: number; orderCount: number };
 type LowStockItem = {
@@ -13,7 +13,7 @@ type LowStockItem = {
   currentStock: number;
   minStockLevel: number;
   unit: string;
-  status: 'Critical' | 'Warning' | 'วิกฤต' | 'เฝ้าระวัง';
+  status: "Critical" | "Warning" | "วิกฤต" | "เฝ้าระวัง";
 };
 type Recommendation = {
   _id: string;
@@ -29,55 +29,65 @@ type Anomaly = {
 };
 
 const DEFAULT_TREND_DAYS: TrendDay[] = [
-  { label: 'จ.', revenue: 0, orderCount: 0 },
-  { label: 'อ.', revenue: 0, orderCount: 0 },
-  { label: 'พ.', revenue: 0, orderCount: 0 },
-  { label: 'พฤ.', revenue: 0, orderCount: 0 },
-  { label: 'ศ.', revenue: 0, orderCount: 0 },
-  { label: 'ส.', revenue: 0, orderCount: 0 },
-  { label: 'อา.', revenue: 0, orderCount: 0 },
+  { label: "จ.", revenue: 0, orderCount: 0 },
+  { label: "อ.", revenue: 0, orderCount: 0 },
+  { label: "พ.", revenue: 0, orderCount: 0 },
+  { label: "พฤ.", revenue: 0, orderCount: 0 },
+  { label: "ศ.", revenue: 0, orderCount: 0 },
+  { label: "ส.", revenue: 0, orderCount: 0 },
+  { label: "อา.", revenue: 0, orderCount: 0 },
 ];
 
 function StatSkeleton({ wide }: { wide?: boolean }) {
-  return <div aria-hidden="true" className={`h-8 rounded-lg bg-surface-raised ${wide ? 'w-32' : 'w-20'} animate-pulse`} />;
+  return (
+    <div
+      aria-hidden="true"
+      className={`h-8 rounded-lg bg-surface-raised ${wide ? "w-32" : "w-20"} animate-pulse`}
+    />
+  );
 }
 
-function TextSkeleton({ className = 'w-24' }: { className?: string }) {
-  return <div aria-hidden="true" className={`h-4 rounded-md bg-surface-raised ${className} animate-pulse`} />;
+function TextSkeleton({ className = "w-24" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`h-4 rounded-md bg-surface-raised ${className} animate-pulse`}
+    />
+  );
 }
 
 function fmtCurrency(value: number) {
-  return new Intl.NumberFormat('th-TH', {
-    style: 'currency',
-    currency: 'THB',
+  return new Intl.NumberFormat("th-TH", {
+    style: "currency",
+    currency: "THB",
     maximumFractionDigits: 0,
   }).format(value);
 }
 
-function metaToneClass(tone: 'muted' | 'success' | 'danger') {
-  if (tone === 'success') return 'text-success';
-  if (tone === 'danger') return 'text-danger';
-  return 'text-muted';
+function metaToneClass(tone: "muted" | "success" | "danger") {
+  if (tone === "success") return "text-success";
+  if (tone === "danger") return "text-danger";
+  return "text-muted";
 }
 
 function KpiCard({
   title,
   value,
   meta,
-  tone = 'muted',
+  tone = "muted",
   loading,
 }: {
   title: string;
   value?: string | number;
   meta?: string;
-  tone?: 'muted' | 'success' | 'danger';
+  tone?: "muted" | "success" | "danger";
   loading?: boolean;
 }) {
   return (
     <section className="rounded-xl border border-border bg-surface p-5">
       <p className="text-sm font-medium text-muted">{title}</p>
       <div className="mt-3 text-3xl font-semibold tracking-tight text-foreground tabular-nums">
-        {loading ? <StatSkeleton wide /> : (value ?? '—')}
+        {loading ? <StatSkeleton wide /> : (value ?? "—")}
       </div>
       {loading ? (
         <div className="mt-2">
@@ -94,7 +104,7 @@ function SalesTrendChart({ data, loading }: { data: TrendDay[] | undefined; load
   const chartData = data ?? DEFAULT_TREND_DAYS;
   const maxRevenue = useMemo(
     () => (chartData.length > 0 ? Math.max(...chartData.map((day) => day.revenue), 1) : 1),
-    [chartData]
+    [chartData],
   );
   const isEmpty = chartData.every((day) => day.revenue === 0);
 
@@ -103,7 +113,10 @@ function SalesTrendChart({ data, loading }: { data: TrendDay[] | undefined; load
       <div className="grid h-56 grid-cols-7 items-end gap-3" aria-hidden="true">
         {DEFAULT_TREND_DAYS.map((day, index) => (
           <div key={day.label} className="flex flex-col gap-3">
-            <div className="h-44 rounded-t-lg bg-surface-raised/70 animate-pulse" style={{ opacity: 0.6 + index * 0.04 }} />
+            <div
+              className="h-44 rounded-t-lg bg-surface-raised/70 animate-pulse"
+              style={{ opacity: 0.6 + index * 0.04 }}
+            />
             <div className="mx-2 h-3 rounded-full bg-surface-raised animate-pulse" />
           </div>
         ))}
@@ -118,19 +131,21 @@ function SalesTrendChart({ data, loading }: { data: TrendDay[] | undefined; load
         role="img"
         aria-label={
           isEmpty
-            ? 'ยังไม่มีการบันทึกยอดขายในสัปดาห์นี้'
+            ? "ยังไม่มีการบันทึกยอดขายในสัปดาห์นี้"
             : `กราฟยอดขายรายสัปดาห์ วันที่สูงสุดมียอดขาย ${fmtCurrency(maxRevenue)}`
         }
       >
         {chartData.map((day) => {
-          const height = isEmpty ? 8 : Math.max((day.revenue / maxRevenue) * 100, day.revenue > 0 ? 12 : 0);
+          const height = isEmpty
+            ? 8
+            : Math.max((day.revenue / maxRevenue) * 100, day.revenue > 0 ? 12 : 0);
 
           return (
             <div key={day.label} className="flex flex-col gap-3">
               <div className="relative h-44 overflow-hidden rounded-t-lg bg-faint">
                 <div
                   className={`absolute inset-x-0 bottom-0 rounded-t-lg transition-[height] duration-500 ${
-                    isEmpty ? 'bg-surface-raised' : 'bg-accent'
+                    isEmpty ? "bg-surface-raised" : "bg-accent"
                   }`}
                   style={{ height: `${height}%` }}
                 />
@@ -147,8 +162,8 @@ function SalesTrendChart({ data, loading }: { data: TrendDay[] | undefined; load
 }
 
 function LowStockRow({ item }: { item: LowStockItem }) {
-  const isCritical = item.status === 'Critical' || item.status === 'วิกฤต';
-  const statusLabel = isCritical ? 'วิกฤต' : 'เฝ้าระวัง';
+  const isCritical = item.status === "Critical" || item.status === "วิกฤต";
+  const statusLabel = isCritical ? "วิกฤต" : "เฝ้าระวัง";
 
   return (
     <div className="flex items-start justify-between gap-4 border-t border-border py-4 first:border-0 first:pt-0 last:pb-0">
@@ -162,10 +177,14 @@ function LowStockRow({ item }: { item: LowStockItem }) {
       </div>
 
       <div className="text-right">
-        <p className={`text-sm font-semibold tabular-nums ${isCritical ? 'text-danger' : 'text-warning'}`}>
+        <p
+          className={`text-sm font-semibold tabular-nums ${isCritical ? "text-danger" : "text-warning"}`}
+        >
           {item.currentStock.toLocaleString()} {item.unit}
         </p>
-        <p className={`mt-1 text-xs ${isCritical ? 'text-danger' : 'text-warning'}`}>{statusLabel}</p>
+        <p className={`mt-1 text-xs ${isCritical ? "text-danger" : "text-warning"}`}>
+          {statusLabel}
+        </p>
       </div>
     </div>
   );
@@ -199,7 +218,9 @@ function RecommendationRow({ rec }: { rec: Recommendation }) {
         <p className="line-clamp-2 text-sm text-muted">{rec.reason}</p>
       </div>
       <div className="shrink-0 text-right">
-        <p className="text-xl font-semibold tabular-nums text-foreground">{rec.recommendedQty.toLocaleString()}</p>
+        <p className="text-xl font-semibold tabular-nums text-foreground">
+          {rec.recommendedQty.toLocaleString()}
+        </p>
         <p className="text-xs text-muted">หน่วย</p>
       </div>
     </div>
@@ -228,11 +249,13 @@ function AnomalyRow({ anomaly }: { anomaly: Anomaly }) {
 export default function DashboardPage() {
   const { isAuthenticated } = useConvexAuth();
   const workspaceId = useWorkspaceId();
-  const args = workspaceId && isAuthenticated ? { workspaceId } : 'skip';
+  const args = workspaceId && isAuthenticated ? { workspaceId } : "skip";
 
   const summary = useQuery(api.dashboard.summary, args);
   const lowStockItems = useQuery(api.dashboard.lowStockItems, args) as LowStockItem[] | undefined;
-  const reorderRecs = useQuery(api.dashboard.reorderRecommendations, args) as Recommendation[] | undefined;
+  const reorderRecs = useQuery(api.dashboard.reorderRecommendations, args) as
+    | Recommendation[]
+    | undefined;
   const anomalies = useQuery(api.dashboard.anomalies, args) as Anomaly[] | undefined;
   const salesTrend = useQuery(api.dashboard.salesTrend, args) as TrendDay[] | undefined;
 
@@ -244,11 +267,11 @@ export default function DashboardPage() {
 
   const weeklyRevenue = useMemo(
     () => (salesTrend ?? []).reduce((total, day) => total + day.revenue, 0),
-    [salesTrend]
+    [salesTrend],
   );
   const weeklyOrders = useMemo(
     () => (salesTrend ?? []).reduce((total, day) => total + day.orderCount, 0),
-    [salesTrend]
+    [salesTrend],
   );
 
   const stockRiskCount = lowStockItems?.length ?? 0;
@@ -286,7 +309,7 @@ export default function DashboardPage() {
           title="สินค้าที่สต็อกต่ำ"
           value={summary?.lowStockCount}
           meta={summary ? `${summary.criticalCount} รายการต้องรีบดูแล` : undefined}
-          tone={summary && summary.criticalCount > 0 ? 'danger' : 'muted'}
+          tone={summary && summary.criticalCount > 0 ? "danger" : "muted"}
           loading={isLoadingSummary}
         />
         <KpiCard
@@ -298,8 +321,8 @@ export default function DashboardPage() {
         <KpiCard
           title="การแจ้งเตือนที่เปิดอยู่"
           value={summary?.openAlertCount}
-          meta={summary?.openAlertCount === 0 ? 'ไม่มีประเด็นค้าง' : 'ยังมีรายการรอตรวจสอบ'}
-          tone={summary?.openAlertCount === 0 ? 'success' : 'danger'}
+          meta={summary?.openAlertCount === 0 ? "ไม่มีประเด็นค้าง" : "ยังมีรายการรอตรวจสอบ"}
+          tone={summary?.openAlertCount === 0 ? "success" : "danger"}
           loading={isLoadingSummary}
         />
       </section>
@@ -362,7 +385,10 @@ export default function DashboardPage() {
               <h2 className="text-lg font-semibold text-foreground">คำแนะนำการจัดซื้อ</h2>
               <p className="mt-1 text-sm text-muted">รายการถัดไปที่ควรสั่งซื้อจากความต้องการปัจจุบัน</p>
             </div>
-            <Link href="/purchase-planning" className="text-sm font-medium text-accent hover:text-accent/80">
+            <Link
+              href="/purchase-planning"
+              className="text-sm font-medium text-accent hover:text-accent/80"
+            >
               เปิดแผนจัดซื้อ
             </Link>
           </div>
@@ -395,7 +421,9 @@ export default function DashboardPage() {
             ) : displayedAnomalies.length === 0 ? (
               <p className="text-sm text-muted">ไม่มีความผิดปกติที่เปิดค้างอยู่</p>
             ) : (
-              displayedAnomalies.map((anomaly) => <AnomalyRow key={anomaly._id} anomaly={anomaly} />)
+              displayedAnomalies.map((anomaly) => (
+                <AnomalyRow key={anomaly._id} anomaly={anomaly} />
+              ))
             )}
           </div>
         </div>

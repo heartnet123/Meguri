@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meguri AI Implementation Roadmap — Interactive Kanban</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f3ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              900: '#1e1b4b',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-200 overflow-x-hidden">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-4 shrink-0">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      
+      <!-- Left: Logo & Project Vision -->
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg tracking-wider shrink-0 shadow-lg shadow-indigo-500/20">
+          MG
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-semibold text-white tracking-tight">Meguri AI Extensions</h1>
+            <span class="px-2 py-0.5 text-xs font-mono font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded">v1.0 Kanban</span>
+          </div>
+          <p class="text-xs text-slate-400 max-w-2xl mt-0.5 line-clamp-1">
+            An intelligent, cost-effective AI layer built natively on Convex to automate data entry, provide operational answers, and optimize inventory without overengineering.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: Global Actions & Search -->
+      <div class="flex items-center flex-wrap gap-2.5 shrink-0">
+        <!-- Search Input -->
+        <div class="relative min-w-[200px]">
+          <iconify-icon icon="solar:magnifer-linear" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base"></iconify-icon>
+          <input type="text" id="searchInput" placeholder="Search features..." 
+            class="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
+        </div>
+
+        <!-- Priority Filter Dropdown -->
+        <select id="priorityFilter" class="px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer">
+          <option value="ALL">All Priorities</option>
+          <option value="Must">Must Have</option>
+          <option value="Should">Should Have</option>
+          <option value="Could">Could Have</option>
+        </select>
+
+        <!-- Reset Board Button -->
+        <button id="resetBoardBtn" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors" title="Reset phases to default source order">
+          <iconify-icon icon="solar:restart-linear" class="text-sm"></iconify-icon>
+          <span>Reset Board</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- METRICS BAR -->
+    <div class="max-w-7xl mx-auto mt-4 pt-3 border-t border-slate-800/50 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 text-xs font-mono">
+      <div class="bg-slate-950/60 px-3 py-1.5 rounded-md border border-slate-800/80 flex items-center justify-between">
+        <span class="text-slate-400">Total Features:</span>
+        <span id="statTotal" class="text-white font-semibold">8</span>
+      </div>
+      <div class="bg-slate-950/60 px-3 py-1.5 rounded-md border border-slate-800/80 flex items-center justify-between">
+        <span class="text-emerald-400">Must Have:</span>
+        <span id="statMust" class="text-emerald-300 font-semibold">3</span>
+      </div>
+      <div class="bg-slate-950/60 px-3 py-1.5 rounded-md border border-slate-800/80 flex items-center justify-between">
+        <span class="text-blue-400">Should Have:</span>
+        <span id="statShould" class="text-blue-300 font-semibold">3</span>
+      </div>
+      <div class="bg-slate-950/60 px-3 py-1.5 rounded-md border border-slate-800/80 flex items-center justify-between">
+        <span class="text-amber-400">Could Have:</span>
+        <span id="statCould" class="text-amber-300 font-semibold">2</span>
+      </div>
+      <div class="bg-slate-950/60 px-3 py-1.5 rounded-md border border-slate-800/80 flex items-center justify-between">
+        <span class="text-slate-500">Wont Have:</span>
+        <span id="statWont" class="text-slate-400 font-semibold">0</span>
+      </div>
+      <div class="bg-slate-950/60 px-3 py-1.5 rounded-md border border-slate-800/80 flex items-center justify-between">
+        <span class="text-indigo-400">Phases:</span>
+        <span class="text-indigo-300 font-semibold">4</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN KANBAN BOARD CONTAINER -->
+  <main class="flex-1 overflow-x-auto p-4 lg:p-8">
+    <div class="max-w-7xl mx-auto min-w-[1000px] grid grid-cols-4 gap-4 h-full items-start">
+
+      <!-- PHASE 1 COLUMN -->
+      <section class="phase-column bg-slate-900/50 border border-slate-800/80 rounded-xl flex flex-col max-h-[calc(100vh-220px)] min-h-[500px]" data-phase-id="Phase 1: Foundation / MVP">
+        <div class="p-4 border-b border-slate-800/80 bg-slate-900/80 rounded-t-xl shrink-0">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+              <h2 class="font-semibold text-sm text-white tracking-tight">Phase 1: Foundation / MVP</h2>
+            </div>
+            <span class="count-badge px-2 py-0.5 text-xs font-mono font-medium bg-slate-800 text-slate-300 rounded-full border border-slate-700/60">0</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-2 leading-relaxed">Establish secure Convex AI infrastructure & automate data entry MVP.</p>
+          <div class="mt-2.5 pt-2 border-t border-slate-800/60 text-[11px] text-emerald-400/90 flex items-center gap-1.5">
+            <iconify-icon icon="solar:target-linear" class="shrink-0 text-sm"></iconify-icon>
+            <span class="truncate">Target: Convex `@google/genai` action & Invoice parsing draft PO.</span>
+          </div>
+        </div>
+
+        <div class="cards-container flex-1 p-3 overflow-y-auto space-y-3" data-phase-id="Phase 1: Foundation / MVP">
+          <!-- Cards injected dynamically -->
+        </div>
+      </section>
+
+      <!-- PHASE 2 COLUMN -->
+      <section class="phase-column bg-slate-900/50 border border-slate-800/80 rounded-xl flex flex-col max-h-[calc(100vh-220px)] min-h-[500px]" data-phase-id="Phase 2: Enhancement">
+        <div class="p-4 border-b border-slate-800/80 bg-slate-900/80 rounded-t-xl shrink-0">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
+              <h2 class="font-semibold text-sm text-white tracking-tight">Phase 2: Enhancement</h2>
+            </div>
+            <span class="count-badge px-2 py-0.5 text-xs font-mono font-medium bg-slate-800 text-slate-300 rounded-full border border-slate-700/60">0</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-2 leading-relaxed">Introduce interactive intelligence & operational recipe assistance.</p>
+          <div class="mt-2.5 pt-2 border-t border-slate-800/60 text-[11px] text-blue-400/90 flex items-center gap-1.5">
+            <iconify-icon icon="solar:target-linear" class="shrink-0 text-sm"></iconify-icon>
+            <span class="truncate">Target: Real-time Copilot Function Calling & Recipe Generator.</span>
+          </div>
+        </div>
+
+        <div class="cards-container flex-1 p-3 overflow-y-auto space-y-3" data-phase-id="Phase 2: Enhancement">
+          <!-- Cards injected dynamically -->
+        </div>
+      </section>
+
+      <!-- PHASE 3 COLUMN -->
+      <section class="phase-column bg-slate-900/50 border border-slate-800/80 rounded-xl flex flex-col max-h-[calc(100vh-220px)] min-h-[500px]" data-phase-id="Phase 3: Scale / Growth">
+        <div class="p-4 border-b border-slate-800/80 bg-slate-900/80 rounded-t-xl shrink-0">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
+              <h2 class="font-semibold text-sm text-white tracking-tight">Phase 3: Scale / Growth</h2>
+            </div>
+            <span class="count-badge px-2 py-0.5 text-xs font-mono font-medium bg-slate-800 text-slate-300 rounded-full border border-slate-700/60">0</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-2 leading-relaxed">Predictive reorder optimization & Vector Search RAG.</p>
+          <div class="mt-2.5 pt-2 border-t border-slate-800/60 text-[11px] text-indigo-400/90 flex items-center gap-1.5">
+            <iconify-icon icon="solar:target-linear" class="shrink-0 text-sm"></iconify-icon>
+            <span class="truncate">Target: Seasonal forecasting logic & Semantic item search.</span>
+          </div>
+        </div>
+
+        <div class="cards-container flex-1 p-3 overflow-y-auto space-y-3" data-phase-id="Phase 3: Scale / Growth">
+          <!-- Cards injected dynamically -->
+        </div>
+      </section>
+
+      <!-- PHASE 4 COLUMN -->
+      <section class="phase-column bg-slate-900/50 border border-slate-800/80 rounded-xl flex flex-col max-h-[calc(100vh-220px)] min-h-[500px]" data-phase-id="Phase 4: Future / Vision">
+        <div class="p-4 border-b border-slate-800/80 bg-slate-900/80 rounded-t-xl shrink-0">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>
+              <h2 class="font-semibold text-sm text-white tracking-tight">Phase 4: Future / Vision</h2>
+            </div>
+            <span class="count-badge px-2 py-0.5 text-xs font-mono font-medium bg-slate-800 text-slate-300 rounded-full border border-slate-700/60">0</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-2 leading-relaxed">Proactive background agents & autonomous replenishment.</p>
+          <div class="mt-2.5 pt-2 border-t border-slate-800/60 text-[11px] text-purple-400/90 flex items-center gap-1.5">
+            <iconify-icon icon="solar:target-linear" class="shrink-0 text-sm"></iconify-icon>
+            <span class="truncate">Target: CRON anomaly detection & Multi-supplier PO drafting.</span>
+          </div>
+        </div>
+
+        <div class="cards-container flex-1 p-3 overflow-y-auto space-y-3" data-phase-id="Phase 4: Future / Vision">
+          <!-- Cards injected dynamically -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FEATURE DETAIL MODAL -->
+  <div id="featureModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in duration-200" role="dialog" aria-modal="true">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-800 flex items-start justify-between gap-4 bg-slate-900/90 shrink-0">
+        <div class="space-y-1.5">
+          <div class="flex items-center flex-wrap gap-2">
+            <span id="modalPriorityBadge" class="px-2.5 py-0.5 text-xs font-mono font-semibold rounded-md border"></span>
+            <span id="modalComplexityBadge" class="px-2.5 py-0.5 text-xs font-mono text-slate-300 bg-slate-800 border border-slate-700 rounded-md"></span>
+            <span id="modalImpactBadge" class="px-2.5 py-0.5 text-xs font-mono text-slate-300 bg-slate-800 border border-slate-700 rounded-md"></span>
+            <span id="modalStatusBadge" class="px-2.5 py-0.5 text-xs font-mono text-slate-400 bg-slate-950 border border-slate-800 rounded-md"></span>
+          </div>
+          <h3 id="modalTitle" class="text-xl font-bold text-white tracking-tight"></h3>
+          <div class="flex items-center gap-2 text-xs font-mono text-indigo-400">
+            <iconify-icon icon="solar:git-branch-linear" class="text-sm"></iconify-icon>
+            <span id="modalBranch" class="select-all"></span>
+          </div>
+        </div>
+        
+        <button id="modalCloseBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+          <iconify-icon icon="solar:close-square-linear" class="text-xl"></iconify-icon>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto space-y-6 text-sm leading-relaxed text-slate-300">
+        
+        <!-- Description & Rationale -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-1.5">
+            <div class="text-xs font-semibold text-indigo-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <iconify-icon icon="solar:notes-linear"></iconify-icon>
+              <span>Description</span>
+            </div>
+            <p id="modalDescription" class="text-slate-200 text-xs"></p>
+          </div>
+          <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-1.5">
+            <div class="text-xs font-semibold text-purple-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <iconify-icon icon="solar:lightbulb-linear"></iconify-icon>
+              <span>Rationale</span>
+            </div>
+            <p id="modalRationale" class="text-slate-200 text-xs"></p>
+          </div>
+        </div>
+
+        <!-- Problem Solved & Beneficiaries -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-1.5">
+            <div class="text-xs font-semibold text-rose-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <iconify-icon icon="solar:danger-circle-linear"></iconify-icon>
+              <span>Problem Solved</span>
+            </div>
+            <p id="modalProblem" class="text-slate-200 text-xs"></p>
+          </div>
+          <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-1.5">
+            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <iconify-icon icon="solar:users-group-two-rounded-linear"></iconify-icon>
+              <span>Who Benefits</span>
+            </div>
+            <p id="modalBeneficiaries" class="text-slate-200 text-xs"></p>
+          </div>
+        </div>
+
+        <!-- Metadata Grid -->
+        <div class="bg-slate-950/40 p-4 rounded-xl border border-slate-800/60 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+          <div>
+            <span class="text-slate-500 block">Source Phase:</span>
+            <span id="modalSourcePhase" class="text-slate-200 font-medium"></span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Current Phase:</span>
+            <span id="modalCurrentPhase" class="text-indigo-300 font-medium"></span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Impact Confidence:</span>
+            <span id="modalImpactConfidence" class="text-slate-200 font-medium"></span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Dependencies:</span>
+            <span id="modalDependencies" class="text-slate-200 font-medium truncate block"></span>
+          </div>
+        </div>
+
+        <!-- Expected Impact Section -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono flex items-center gap-2 border-b border-slate-800 pb-2">
+            <iconify-icon icon="solar:graph-up-linear" class="text-indigo-400 text-base"></iconify-icon>
+            <span>Expected Impact / Success Definition (ผลลัพธ์ที่ตรวจสอบได้)</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div class="p-3 bg-slate-950/60 rounded-lg border border-slate-800">
+              <span class="text-indigo-400 font-semibold block mb-1">User Impact</span>
+              <p id="modalUserImpact" class="text-slate-300"></p>
+            </div>
+            <div class="p-3 bg-slate-950/60 rounded-lg border border-slate-800">
+              <span class="text-emerald-400 font-semibold block mb-1">Business / Product</span>
+              <p id="modalBusinessImpact" class="text-slate-300"></p>
+            </div>
+            <div class="p-3 bg-slate-950/60 rounded-lg border border-slate-800">
+              <span class="text-blue-400 font-semibold block mb-1">Tech / Operational</span>
+              <p id="modalTechImpact" class="text-slate-300"></p>
+            </div>
+          </div>
+          <div class="p-3 bg-slate-950/80 rounded-lg border border-slate-800 flex items-start gap-3">
+            <iconify-icon icon="solar:verified-check-linear" class="text-emerald-400 text-lg shrink-0 mt-0.5"></iconify-icon>
+            <div class="text-xs">
+              <span class="text-slate-400 font-mono block">Success Signal & Time Horizon:</span>
+              <span id="modalSuccessSignal" class="text-slate-200 font-medium"></span>
+              <span id="modalHorizon" class="ml-2 px-2 py-0.5 text-[10px] font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acceptance Criteria -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono flex items-center gap-2 border-b border-slate-800 pb-2">
+            <iconify-icon icon="solar:check-square-linear" class="text-emerald-400 text-base"></iconify-icon>
+            <span>Acceptance Criteria</span>
+          </h4>
+          <ul id="modalAcceptanceCriteria" class="space-y-1.5 pl-1"></ul>
+        </div>
+
+        <!-- User Stories -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono flex items-center gap-2 border-b border-slate-800 pb-2">
+            <iconify-icon icon="solar:chat-round-line-linear" class="text-blue-400 text-base"></iconify-icon>
+            <span>User Stories</span>
+          </h4>
+          <div id="modalUserStories" class="space-y-2"></div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <button id="copyPromptBtn" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95">
+            <iconify-icon icon="solar:copy-linear" class="text-base"></iconify-icon>
+            <span>Copy Prompt</span>
+          </button>
+
+          <button id="copyBranchBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs rounded-xl border border-slate-700 transition-colors active:scale-95">
+            <iconify-icon icon="solar:git-branch-linear" class="text-base text-indigo-400"></iconify-icon>
+            <span>Copy Branch Name</span>
+          </button>
+        </div>
+
+        <span id="toastFeedback" class="text-xs font-mono text-emerald-400 transition-opacity opacity-0"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EMBEDDED ROADMAP DATA & INTERACTIVE LOGIC -->
+  <script>
+    // IMMUTABLE SOURCE ROADMAP DATA (100% extracted from ROADMAP-AI.md)
+    const ROADMAP_DATA = [
+      {
+        id: "secure-ai-action-infrastructure-llmops-baseline",
+        title: "Secure AI Action Infrastructure & LLMOps Baseline",
+        description: "Set up the `@google/genai` client inside Convex Actions. Implement standard prompts, workspace-aware data fetching, and basic LLMOps logging (tokens, latency, errors) as defined in the `llm-app-patterns` skill.",
+        problemSolved: "Insecure or fragmented AI calls across backend functions.",
+        whoBenefits: "Developers, system administrators, and security team.",
+        rationale: "Solves the problem of fragmented or insecure AI calls. By centralizing the LLM client, we ensure all future AI features inherit workspace security and logging.",
+        priority: "Must",
+        complexity: "Low",
+        impact: "High",
+        impactConfidence: "High",
+        sourcePhase: "Phase 1: Foundation / MVP",
+        dependencies: ["Convex backend", "`@google/genai` dependency", "existing workspace auth"],
+        branch: "feat/ai-infrastructure-llmops",
+        status: "Planned",
+        expectedImpact: {
+          userImpact: "Developers can build AI features faster with centralized auth & logging without writing custom boilerplate.",
+          businessProductImpact: "Ensures strict multi-tenant isolation, eliminating cross-tenant data leak risks.",
+          technicalOperationalImpact: "Establishes baseline LLMOps tracking (token usage, latency, error rate metrics).",
+          successSignals: "Unified `ai:generate` action in production with 100% of LLM calls logged for cost/latency.",
+          timeHorizon: "Immediate"
+        },
+        acceptanceCriteria: [
+          "Convex Action `ai:generate` exists and securely fetches the API key from environment variables.",
+          "AI requests automatically log token usage and latency for monitoring.",
+          "Hardcoded system prompts enforce workspace isolation (AI cannot see other tenant data)."
+        ],
+        userStories: [
+          "As a developer, I want a unified Convex Action for AI so I don't have to rewrite API calls and security checks."
+        ]
+      },
+      {
+        id: "ai-invoice-data-extraction-structured-output",
+        title: "AI Invoice Data Extraction (Structured Output)",
+        description: "An action that takes raw text or parsed document data from an invoice and uses Gemini's Structured Output to return a JSON array of `[item_name, quantity, unit_price]`.",
+        problemSolved: "Manual data entry friction and typos when receiving inventory stock from paper/PDF supplier invoices.",
+        whoBenefits: "Kitchen managers, inventory intake staff, purchasing managers.",
+        rationale: "Solves the manual friction of entering received inventory. It is the safest first AI feature because it is stateless and immediately verifiable by the user before committing to the DB.",
+        priority: "Must",
+        complexity: "Medium",
+        impact: "High",
+        impactConfidence: "High",
+        sourcePhase: "Phase 1: Foundation / MVP",
+        dependencies: ["Feature 1", "File upload/text extraction utility", "Supplier and Purchase Order schema"],
+        branch: "feat/ai-invoice-extraction",
+        status: "Planned",
+        expectedImpact: {
+          userImpact: "Cuts invoice logging time from ~10 minutes down to ~15 seconds per receipt.",
+          businessProductImpact: "Immediate tangible AI value demonstrated to users, boosting app daily active usage.",
+          technicalOperationalImpact: "Validates Gemini Structured Output JSON schema enforcement inside Convex Actions.",
+          successSignals: ">85% accuracy in extracted line items verified by user review before PO creation.",
+          timeHorizon: "Immediate"
+        },
+        acceptanceCriteria: [
+          "User can submit invoice text/image.",
+          "LLM returns strictly typed JSON matching Meguri's PO item schema.",
+          "UI displays a \"Draft PO\" for the user to review and correct before saving."
+        ],
+        userStories: [
+          "As a kitchen manager, I want to upload my supplier receipt so I don't have to manually type in 20 ingredient restocks."
+        ]
+      },
+      {
+        id: "ai-operations-copilot-function-calling",
+        title: "AI Operations Copilot (Function Calling)",
+        description: "A chat interface where users can ask operational questions (e.g., \"What is low on stock?\"). The AI uses the **Function Calling** pattern to invoke Convex queries (`getLowStock`, `getOpenAlerts`) and synthesizes an answer.",
+        problemSolved: "Time spent manually sifting through multiple dashboards and data tables to answer routine operational questions.",
+        whoBenefits: "Store managers, kitchen supervisors, business owners.",
+        rationale: "Solves the problem of navigating complex dashboards to find simple answers. Function Calling ensures the LLM's answers are 100% grounded in real-time database reality, preventing hallucinations.",
+        priority: "Must",
+        complexity: "High",
+        impact: "High",
+        impactConfidence: "High",
+        sourcePhase: "Phase 2: Enhancement",
+        dependencies: ["Feature 1", "existing inventory/alerts queries exposed as LLM tools"],
+        branch: "feat/ai-copilot-function-calling",
+        status: "Planned",
+        expectedImpact: {
+          userImpact: "Instant natural language answers to stock & alert queries without clicking through menu screens.",
+          businessProductImpact: "Increases user engagement and transforms SmartStock into an interactive assistant.",
+          technicalOperationalImpact: "100% grounded DB queries via tool-calling prevents LLM hallucinations.",
+          successSignals: "Users successfully perform >50 stock queries/week via Copilot with zero hallucinated counts.",
+          timeHorizon: "Near-term"
+        },
+        acceptanceCriteria: [
+          "Copilot has access to specific tools: `check_inventory`, `list_alerts`.",
+          "When asked about stock, the LLM calls `check_inventory` and formats the JSON response into a natural language reply.",
+          "Copilot refuses to answer non-operational questions."
+        ],
+        userStories: [
+          "As an owner, I want to ask \"What ingredients are running out today?\" and get an instant, accurate answer based on live data."
+        ]
+      },
+      {
+        id: "ai-assisted-recipe-generation",
+        title: "AI-Assisted Recipe Generation",
+        description: "A tool that suggests ingredients and standard quantities for a new product (e.g., \"I want to add a Matcha Latte to the menu\").",
+        problemSolved: "Cold-start friction when onboarding new menu items and manually defining complex Bills of Materials (BOM).",
+        whoBenefits: "Café owners, chefs, menu managers.",
+        rationale: "Helps new users adopt the recipe deduction feature faster by minimizing the tedious setup of Bills of Materials (BOM).",
+        priority: "Should",
+        complexity: "Medium",
+        impact: "Medium",
+        impactConfidence: "Medium",
+        sourcePhase: "Phase 2: Enhancement",
+        dependencies: ["Feature 1", "Recipe schema", "existing inventory items"],
+        branch: "feat/ai-recipe-generation",
+        status: "Planned",
+        expectedImpact: {
+          userImpact: "Accelerates menu item creation by 70% by pre-filling ingredient lists.",
+          businessProductImpact: "Drives faster feature adoption of recipe-based inventory deduction.",
+          technicalOperationalImpact: "Leverages fuzzy matching to automatically link AI suggestions to current inventory IDs.",
+          successSignals: ">60% of suggested recipes are saved by users with minimal manual edits.",
+          timeHorizon: "Near-term"
+        },
+        acceptanceCriteria: [
+          "User types a product name; AI suggests a list of ingredients and quantities.",
+          "AI attempts to map suggested ingredients to the workspace's *existing* inventory items using fuzzy matching.",
+          "User can accept, edit, or reject the suggested recipe."
+        ],
+        userStories: [
+          "As a café owner, I want the AI to generate a baseline recipe for a new drink so I only have to tweak the quantities rather than starting from scratch."
+        ]
+      },
+      {
+        id: "advanced-forecasting-reorder-optimization",
+        title: "Advanced Forecasting & Reorder Optimization",
+        description: "Expand the existing `aiForecastingLogic.ts` to analyze longer historical trends, detect seasonality, and adjust reorder recommendations beyond simple minimum-stock thresholds.",
+        problemSolved: "Overstocking capital lockup and stockout losses caused by static min/max inventory rules.",
+        whoBenefits: "Purchasing managers, finance leads, inventory controllers.",
+        rationale: "Solves overstocking and understocking caused by rigid minimum levels. By analyzing sales history, the AI can suggest dynamic reorder points.",
+        priority: "Should",
+        complexity: "High",
+        impact: "High",
+        impactConfidence: "Medium",
+        sourcePhase: "Phase 3: Scale / Growth",
+        dependencies: ["Significant historical sales data", "existing forecasting tables"],
+        branch: "feat/ai-forecasting-reorder",
+        status: "Planned",
+        expectedImpact: {
+          userImpact: "Intelligent reorder recommendations with clear step-by-step reasoning explanations.",
+          businessProductImpact: "Reduces inventory holding costs by 15-20% and prevents stockouts during peak periods.",
+          technicalOperationalImpact: "Advanced time-series analysis integrated into existing `aiForecastingLogic.ts`.",
+          successSignals: "30% reduction in stockout occurrences reported across active store locations.",
+          timeHorizon: "Long-term"
+        },
+        acceptanceCriteria: [
+          "AI analyzes a time-series window of sales and supplier lead times.",
+          "AI provides a recommendation with a confidence score and a \"Reasoning\" string explaining the logic.",
+          "Users can review the reasoning before accepting the PO."
+        ],
+        userStories: [
+          "As a purchasing manager, I want the system to suggest ordering more coffee cups before the summer rush begins, based on last year's trends."
+        ]
+      },
+      {
+        id: "vector-search-rag-semantic-inventory",
+        title: "Vector Search & RAG for Semantic Inventory",
+        description: "Use Convex's native Vector Search to generate embeddings for all inventory items, recipes, and supplier notes. Copilot is upgraded to use RAG (Retrieval-Augmented Generation) for unstructured queries.",
+        problemSolved: "Inability to search inventory by concept, dietary constraint, or natural language attributes.",
+        whoBenefits: "Kitchen staff, store managers, customer support.",
+        rationale: "Enables users to search for \"dairy-free alternatives\" or \"items from the Tokyo supplier\" without needing exact keyword matches.",
+        priority: "Should",
+        complexity: "Medium",
+        impact: "Medium",
+        impactConfidence: "High",
+        sourcePhase: "Phase 3: Scale / Growth",
+        dependencies: ["Convex Vector Search feature", "Embedding generation action"],
+        branch: "feat/vector-search-rag",
+        status: "Planned",
+        expectedImpact: {
+          userImpact: "Natural language search across items, recipes, and supplier notes without memorizing item codes.",
+          businessProductImpact: "Increases Copilot versatility to handle complex queries (e.g. allergen lookup, supplier grouping).",
+          technicalOperationalImpact: "Seamless vector embedding indexing powered by Convex Vector Search.",
+          successSignals: "Semantic search returns relevant results in <300ms for non-exact queries.",
+          timeHorizon: "Near-term"
+        },
+        acceptanceCriteria: [
+          "Creating/updating an item automatically updates its vector embedding.",
+          "Copilot can retrieve relevant items based on semantic intent."
+        ],
+        userStories: [
+          "As a staff member, I want to ask the Copilot \"Which recipes use allergens?\" and get an accurate list via semantic search."
+        ]
+      },
+      {
+        id: "proactive-ai-alerts-anomaly-detection",
+        title: "Proactive AI Alerts & Anomaly Detection",
+        description: "A Convex CRON job runs nightly, feeding the day's sales and stock movements into an AI analysis action to detect strange patterns (e.g., \"Wastage of milk is 300% higher than average this week\").",
+        problemSolved: "Unnoticed inventory shrinkage, spoilage, or theft accumulating unnoticed until end-of-month audits.",
+        whoBenefits: "Business owners, general managers, auditors.",
+        rationale: "Moves the system from reactive dashboards to proactive alerting.",
+        priority: "Could",
+        complexity: "High",
+        impact: "High",
+        impactConfidence: "Low",
+        sourcePhase: "Phase 4: Future / Vision",
+        dependencies: ["Feature 5", "Alerts system", "Convex CRON jobs"],
+        branch: "feat/proactive-ai-alerts",
+        status: "Deferred",
+        expectedImpact: {
+          userImpact: "Proactive early warnings sent automatically for wastage spikes, shrinkage, or abnormal margin dips.",
+          businessProductImpact: "Prevents loss and theft by identifying operational issues within 24 hours instead of 30 days.",
+          technicalOperationalImpact: "Scheduled nightly Convex CRON pipeline for batch statistical + LLM anomaly evaluation.",
+          successSignals: "Identifies >80% of actual waste spikes with <10% false positive alert rate.",
+          timeHorizon: "Long-term"
+        },
+        acceptanceCriteria: [
+          "AI runs scheduled batch analysis.",
+          "Anomalies generate alerts with severity levels and explanation text."
+        ],
+        userStories: [
+          "As an owner, I want to wake up to an alert explaining *why* our margin dropped yesterday without having to dig through reports manually."
+        ]
+      },
+      {
+        id: "plan-and-execute-autonomous-purchasing",
+        title: "Plan-and-Execute Autonomous Purchasing",
+        description: "An advanced multi-step agent that can draft multi-supplier purchase orders automatically when stock is low, evaluating costs and lead times.",
+        problemSolved: "Time-consuming multi-supplier order coordination when stock levels cross thresholds.",
+        whoBenefits: "Operations directors, head buyers, multi-location managers.",
+        rationale: "The final evolution of replenishment. The AI does the heavy lifting of figuring out what to order from whom.",
+        priority: "Could",
+        complexity: "High",
+        impact: "Medium",
+        impactConfidence: "Low",
+        sourcePhase: "Phase 4: Future / Vision",
+        dependencies: ["Feature 3 (Function Calling)", "Feature 5", "Supplier matrices"],
+        branch: "feat/autonomous-purchasing",
+        status: "Deferred",
+        expectedImpact: {
+          userImpact: "Hands-free automated draft generation for multi-supplier purchase orders every morning.",
+          businessProductImpact: "Ultimate operational efficiency — reduces purchasing management labor to simple 1-click approvals.",
+          technicalOperationalImpact: "Multi-step autonomous agent workflow with guaranteed human-in-the-loop safety guardrails.",
+          successSignals: ">90% of automated draft POs are approved without requiring structural changes.",
+          timeHorizon: "Long-term"
+        },
+        acceptanceCriteria: [
+          "Agent can execute a sequence: Check Stock -> Identify Suppliers -> Draft POs.",
+          "Always remains a *Draft* requiring human approval (Human-in-the-loop)."
+        ],
+        userStories: [
+          "As a manager, I want the system to have my weekly supplier orders pre-drafted every Monday morning for me to simply review and click \"Send\"."
+        ]
+      }
+    ];
+
+    const LOCAL_STORAGE_KEY = 'meguri_ai_roadmap_state_v1';
+    let boardState = []; // Array of { id, currentPhase }
+    let activeModalFeature = null;
+
+    // INITIALIZATION
+    document.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      renderBoard();
+      setupEventListeners();
+    });
+
+    // STATE MANAGEMENT
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length === ROADMAP_DATA.length) {
+            const valid = parsed.every(item => ROADMAP_DATA.some(f => f.id === item.id));
+            if (valid) {
+              boardState = parsed;
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Stale localStorage, resetting to default:', e);
+      }
+
+      // Default state
+      boardState = ROADMAP_DATA.map(f => ({
+        id: f.id,
+        currentPhase: f.sourcePhase
+      }));
+      saveState();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(boardState));
+      } catch (e) {
+        console.error('Failed to save state to localStorage:', e);
+      }
+    }
+
+    function resetBoard() {
+      boardState = ROADMAP_DATA.map(f => ({
+        id: f.id,
+        currentPhase: f.sourcePhase
+      }));
+      saveState();
+      renderBoard();
+      showToast('Board reset to default source roadmap phase assignments!');
+    }
+
+    // RENDER FUNCTIONS
+    function renderBoard() {
+      const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
+      const priorityFilter = document.getElementById('priorityFilter').value;
+
+      // Clear all column containers
+      document.querySelectorAll('.cards-container').forEach(container => {
+        container.innerHTML = '';
+      });
+
+      const phaseCounts = {
+        "Phase 1: Foundation / MVP": 0,
+        "Phase 2: Enhancement": 0,
+        "Phase 3: Scale / Growth": 0,
+        "Phase 4: Future / Vision": 0
+      };
+
+      // Render cards into respective columns
+      boardState.forEach(stateItem => {
+        const feature = ROADMAP_DATA.find(f => f.id === stateItem.id);
+        if (!feature) return;
+
+        // Apply Search & Priority filters
+        const matchesSearch = !searchKeyword || 
+          feature.title.toLowerCase().includes(searchKeyword) ||
+          feature.description.toLowerCase().includes(searchKeyword) ||
+          feature.branch.toLowerCase().includes(searchKeyword);
+        const matchesPriority = priorityFilter === 'ALL' || feature.priority === priorityFilter;
+
+        if (matchesSearch && matchesPriority) {
+          const container = document.querySelector(`.cards-container[data-phase-id="${stateItem.currentPhase}"]`);
+          if (container) {
+            const cardEl = createCardElement(feature, stateItem.currentPhase);
+            container.appendChild(cardEl);
+            phaseCounts[stateItem.currentPhase] = (phaseCounts[stateItem.currentPhase] || 0) + 1;
+          }
+        }
+      });
+
+      // Update Column Count Badges
+      Object.keys(phaseCounts).forEach(phaseId => {
+        const column = document.querySelector(`.phase-column[data-phase-id="${phaseId}"]`);
+        if (column) {
+          const badge = column.querySelector('.count-badge');
+          if (badge) badge.textContent = phaseCounts[phaseId];
+        }
+      });
+
+      setupDragAndDrop();
+    }
+
+    function createCardElement(feature, currentPhase) {
+      const card = document.createElement('article');
+      card.className = 'feature-card bg-slate-950/80 border border-slate-800 hover:border-slate-700 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group relative select-none';
+      card.setAttribute('draggable', 'true');
+      card.setAttribute('data-id', feature.id);
+
+      // Priority styling badge
+      let priorityClass = 'bg-slate-800 text-slate-300 border-slate-700';
+      if (feature.priority === 'Must') priorityClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      else if (feature.priority === 'Should') priorityClass = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      else if (feature.priority === 'Could') priorityClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <span class="px-2 py-0.5 text-[10px] font-mono font-semibold rounded-md border ${priorityClass}">
+            ${feature.priority}
+          </span>
+          <div class="flex items-center gap-1 text-slate-500 group-hover:text-slate-400 transition-colors">
+            <iconify-icon icon="solar:reorder-linear" class="drag-handle text-base cursor-grab active:cursor-grabbing" title="Drag to reorder"></iconify-icon>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-sm text-white group-hover:text-indigo-300 transition-colors line-clamp-2 leading-snug">
+          ${feature.title}
+        </h3>
+
+        <p class="text-xs text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
+          ${feature.description}
+        </p>
+
+        <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[11px] font-mono text-slate-400">
+          <div class="flex items-center gap-1.5 text-indigo-400 truncate">
+            <iconify-icon icon="solar:git-branch-linear" class="text-xs shrink-0"></iconify-icon>
+            <span class="truncate">${feature.branch}</span>
+          </div>
+          <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-400 shrink-0">
+            ${feature.complexity}
+          </span>
+        </div>
+      `;
+
+      card.addEventListener('click', (e) => {
+        if (!e.target.closest('.drag-handle')) {
+          openModal(feature, currentPhase);
+        }
+      });
+
+      return card;
+    }
+
+    // DRAG AND DROP HANDLERS
+    let draggedCardId = null;
+
+    function setupDragAndDrop() {
+      const cards = document.querySelectorAll('.feature-card');
+      const containers = document.querySelectorAll('.cards-container');
+
+      cards.forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          draggedCardId = card.getAttribute('data-id');
+          card.classList.add('opacity-40', 'scale-[0.98]');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        card.addEventListener('dragend', () => {
+          card.classList.remove('opacity-40', 'scale-[0.98]');
+          draggedCardId = null;
+          document.querySelectorAll('.cards-container').forEach(c => c.classList.remove('bg-indigo-500/5', 'border-indigo-500/30'));
+        });
+      });
+
+      containers.forEach(container => {
+        container.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          container.classList.add('bg-indigo-500/5', 'border-indigo-500/30');
+        });
+
+        container.addEventListener('dragleave', (e) => {
+          if (!container.contains(e.relatedTarget)) {
+            container.classList.remove('bg-indigo-500/5', 'border-indigo-500/30');
+          }
+        });
+
+        container.addEventListener('drop', (e) => {
+          e.preventDefault();
+          container.classList.remove('bg-indigo-500/5', 'border-indigo-500/30');
+          const targetPhase = container.getAttribute('data-phase-id');
+          if (draggedCardId && targetPhase) {
+            updateFeaturePhase(draggedCardId, targetPhase);
+          }
+        });
+      });
+    }
+
+    function updateFeaturePhase(featureId, newPhase) {
+      const index = boardState.findIndex(item => item.id === featureId);
+      if (index !== -1) {
+        boardState[index].currentPhase = newPhase;
+        saveState();
+        renderBoard();
+      }
+    }
+
+    // MODAL HANDLERS
+    function openModal(feature, currentPhase) {
+      activeModalFeature = feature;
+
+      document.getElementById('modalTitle').textContent = feature.title;
+      document.getElementById('modalBranch').textContent = feature.branch;
+      document.getElementById('modalDescription').textContent = feature.description;
+      document.getElementById('modalRationale').textContent = feature.rationale;
+      document.getElementById('modalProblem').textContent = feature.problemSolved;
+      document.getElementById('modalBeneficiaries').textContent = feature.whoBenefits;
+
+      // Badges
+      const priorityEl = document.getElementById('modalPriorityBadge');
+      priorityEl.textContent = `Priority: ${feature.priority}`;
+      if (feature.priority === 'Must') priorityEl.className = 'px-2.5 py-0.5 text-xs font-mono font-semibold rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      else if (feature.priority === 'Should') priorityEl.className = 'px-2.5 py-0.5 text-xs font-mono font-semibold rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20';
+      else priorityEl.className = 'px-2.5 py-0.5 text-xs font-mono font-semibold rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20';
+
+      document.getElementById('modalComplexityBadge').textContent = `Complexity: ${feature.complexity}`;
+      document.getElementById('modalImpactBadge').textContent = `Impact: ${feature.impact}`;
+      document.getElementById('modalStatusBadge').textContent = `Status: ${feature.status}`;
+
+      document.getElementById('modalSourcePhase').textContent = feature.sourcePhase;
+      document.getElementById('modalCurrentPhase').textContent = currentPhase;
+      document.getElementById('modalImpactConfidence').textContent = feature.impactConfidence;
+      document.getElementById('modalDependencies').textContent = feature.dependencies.join(', ');
+
+      // Expected Impact
+      document.getElementById('modalUserImpact').textContent = feature.expectedImpact.userImpact;
+      document.getElementById('modalBusinessImpact').textContent = feature.expectedImpact.businessProductImpact;
+      document.getElementById('modalTechImpact').textContent = feature.expectedImpact.technicalOperationalImpact;
+      document.getElementById('modalSuccessSignal').textContent = feature.expectedImpact.successSignals;
+      document.getElementById('modalHorizon').textContent = feature.expectedImpact.timeHorizon;
+
+      // Acceptance Criteria
+      const criteriaList = document.getElementById('modalAcceptanceCriteria');
+      criteriaList.innerHTML = feature.acceptanceCriteria.map(item => `
+        <li class="flex items-start gap-2 text-xs text-slate-300">
+          <iconify-icon icon="solar:check-circle-linear" class="text-emerald-400 text-base shrink-0 mt-0.5"></iconify-icon>
+          <span>${item}</span>
+        </li>
+      `).join('');
+
+      // User Stories
+      const storiesList = document.getElementById('modalUserStories');
+      storiesList.innerHTML = feature.userStories.map(story => `
+        <div class="p-3 bg-slate-950/60 rounded-lg border border-slate-800 text-xs italic text-slate-300 flex items-start gap-2.5">
+          <iconify-icon icon="solar:quote-up-linear" class="text-blue-400 text-base shrink-0 not-italic"></iconify-icon>
+          <span>"${story}"</span>
+        </div>
+      `).join('');
+
+      const modal = document.getElementById('featureModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('featureModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+      activeModalFeature = null;
+    }
+
+    // CLIPBOARD ACTIONS
+    function copyText(value) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(value).then(() => true).catch(() => fallbackCopy(value));
+      }
+      return Promise.resolve(fallbackCopy(value));
+    }
+
+    function fallbackCopy(value) {
+      const textarea = document.createElement('textarea');
+      textarea.value = value;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        const success = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        return success;
+      } catch (err) {
+        document.body.removeChild(textarea);
+        return false;
+      }
+    }
+
+    function generatePromptText(feature) {
+      return `IMPLEMENTATION SPECIFICATION PROMPT: ${feature.title}
+
+Feature ID: ${feature.id}
+Branch: ${feature.branch}
+Priority: ${feature.priority} | Complexity: ${feature.complexity} | Impact: ${feature.impact}
+Phase: ${feature.sourcePhase}
+
+--- OBJECTIVE ---
+${feature.description}
+
+--- PROBLEM SOLVED ---
+${feature.problemSolved}
+
+--- BENEFICIARIES ---
+${feature.whoBenefits}
+
+--- RATIONALE ---
+${feature.rationale}
+
+--- DEPENDENCIES ---
+${feature.dependencies.join(', ')}
+
+--- EXPECTED IMPACT ---
+- User Impact: ${feature.expectedImpact.userImpact}
+- Business/Product Impact: ${feature.expectedImpact.businessProductImpact}
+- Technical/Operational Impact: ${feature.expectedImpact.technicalOperationalImpact}
+- Success Signal: ${feature.expectedImpact.successSignals}
+- Time Horizon: ${feature.expectedImpact.timeHorizon}
+
+--- ACCEPTANCE CRITERIA ---
+${feature.acceptanceCriteria.map((c, i) => `${i+1}. ${c}`).join('\n')}
+
+--- USER STORIES ---
+${feature.userStories.map((u, i) => `${i+1}. ${u}`).join('\n')}
+
+--- EXECUTION INSTRUCTIONS ---
+Please implement ONLY this feature on branch \`${feature.branch}\`. Verify every acceptance criterion with tests/runtime checks prior to completion. Do not add unrelated scope expansion.`;
+    }
+
+    function showToast(msg) {
+      const feedback = document.getElementById('toastFeedback');
+      feedback.textContent = msg;
+      feedback.classList.remove('opacity-0');
+      setTimeout(() => {
+        feedback.classList.add('opacity-0');
+      }, 3000);
+    }
+
+    // EVENT LISTENERS
+    function setupEventListeners() {
+      document.getElementById('resetBoardBtn').addEventListener('click', resetBoard);
+      document.getElementById('searchInput').addEventListener('input', renderBoard);
+      document.getElementById('priorityFilter').addEventListener('change', renderBoard);
+
+      document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+      document.getElementById('featureModal').addEventListener('click', (e) => {
+        if (e.target.id === 'featureModal') closeModal();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && activeModalFeature) closeModal();
+      });
+
+      document.getElementById('copyPromptBtn').addEventListener('click', () => {
+        if (!activeModalFeature) return;
+        const promptText = generatePromptText(activeModalFeature);
+        copyText(promptText).then(ok => {
+          showToast(ok ? 'Prompt copied to clipboard!' : 'Failed to copy prompt');
+        });
+      });
+
+      document.getElementById('copyBranchBtn').addEventListener('click', () => {
+        if (!activeModalFeature) return;
+        copyText(activeModalFeature.branch).then(ok => {
+          showToast(ok ? `Branch "${activeModalFeature.branch}" copied!` : 'Failed to copy branch');
+        });
+      });
+    }
+  </script>
+</body>
+</html>

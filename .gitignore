@@ -3,6 +3,7 @@ node_modules/
 coverage/
 .DS_Store
 *.log
+*.tsbuildinfo
 .env*
 !.env.example
 **/.omx/
@@ -10,6 +11,7 @@ coverage/
 
 # Auto Claude data directory
 .auto-claude/
+.agents/
 
 # Auto Claude generated files
 .auto-claude-security.json
