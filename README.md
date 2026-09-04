@@ -127,8 +127,8 @@ Ensure you have the following installed:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-org/smartstock.git
-   cd smartstock
+   git clone https://github.com/heartnet123/Meguri.git
+   cd Meguri
    ```
 
 2. **Install dependencies**:
