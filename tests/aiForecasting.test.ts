@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { anonymizeSalesData, forecastSchema } from '../convex/aiForecastingLogic';
-import { z } from 'zod';
 
 describe('AI Forecasting Logic', () => {
   describe('Data Anonymization', () => {

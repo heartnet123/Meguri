@@ -1,5 +1,4 @@
-import { mutation, internalMutation } from './_generated/server';
-import { v } from 'convex/values';
+import { internalMutation } from './_generated/server';
 
 /**
  * CAUTION: This will delete all sales and sale items.

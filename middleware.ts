@@ -7,9 +7,6 @@ const PUBLIC_ROUTES = ['/', '/login', '/register', '/join-workspace', '/select-w
 // Routes that should redirect authenticated users away (auth pages)
 const AUTH_ONLY_ROUTES = ['/login', '/register'];
 
-// Routes that require authentication but are safe for users without a workspace
-const NO_WORKSPACE_SAFE_ROUTES = ['/onboarding', '/select-workspace', '/join-workspace'];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 

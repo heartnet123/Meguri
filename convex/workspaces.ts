@@ -1,6 +1,6 @@
-import { mutation, query, MutationCtx } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import { v, ConvexError } from 'convex/values';
-import { Doc, Id } from './_generated/dataModel';
+import { Doc } from './_generated/dataModel';
 import { ensureCurrentUser, getCurrentUser, getMembership, verifyWorkspace, checkRole } from './utils';
 
 /**
@@ -44,30 +44,6 @@ export const create = mutation({
     return workspaceId;
   },
 });
-
-async function upsertMembership(
-  ctx: MutationCtx,
-  workspaceId: Id<'workspaces'>,
-  userId: Id<'users'>,
-  role: 'owner' | 'admin' | 'manager' | 'staff' | 'viewer'
-) {
-  const existing = await ctx.db
-    .query('workspaceMemberships')
-    .withIndex('by_user_workspace', (q) => q.eq('userId', userId).eq('workspaceId', workspaceId))
-    .unique();
-
-  if (existing) {
-    await ctx.db.patch(existing._id, { role });
-    return existing._id;
-  }
-
-  return ctx.db.insert('workspaceMemberships', {
-    workspaceId,
-    userId,
-    role,
-    joinedAt: Date.now(),
-  });
-}
 
 /**
  * Returns the first workspace the authenticated user belongs to.

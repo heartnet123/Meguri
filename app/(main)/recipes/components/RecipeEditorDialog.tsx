@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -184,11 +184,6 @@ export function RecipeEditorDialog({ isOpen, onClose, recipe }: Props) {
   const unitCost = yieldQty > 0 ? Number((batchCost / yieldQty).toFixed(2)) : 0;
   const margin = price - unitCost;
   const marginPct = price > 0 ? Math.round((margin / price) * 100) : 0;
-
-  const missingCostCount = ingredients.filter((ing) => {
-    const item = inventoryById.get(ing.inventoryItemId);
-    return item?.costPerUnit === undefined;
-  }).length;
 
   const filteredItems = (inventoryItems ?? []).filter((item) => {
     const q = ingredientSearch.toLowerCase();

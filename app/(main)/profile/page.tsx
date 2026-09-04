@@ -181,7 +181,6 @@ export default function ProfilePage() {
   const [firstNameOverride, setFirstNameOverride] = useState<string | null>(null);
   const [lastNameOverride, setLastNameOverride] = useState<string | null>(null);
   const [displayNameOverride, setDisplayNameOverride] = useState<string | null>(null);
-  const [displayNameTouched, setDisplayNameTouched] = useState(false);
   // Derived display name: falls back to first+last when not manually set
   const avatarSrc = avatarSrcOverride ?? baseProfile.avatarSrc;
   const firstName = firstNameOverride ?? baseProfile.firstName;
@@ -477,12 +476,10 @@ export default function ProfilePage() {
                 value={displayName}
                 onChange={(e) => {
                   setDisplayName(e.target.value);
-                  setDisplayNameTouched(true);
                 }}
                 onBlur={() => {
                   if (!displayName.trim()) {
                     setDisplayNameOverride(null);
-                    setDisplayNameTouched(false);
                   }
                 }}
                 autoComplete="nickname"

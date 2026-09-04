@@ -9,7 +9,7 @@ import { api } from "@/convex/_generated/api";
 export default function JoinWorkspacePage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const { isLoading: authLoading } = useConvexAuth();
 
   const token = searchParams.get("token") ?? "";
 

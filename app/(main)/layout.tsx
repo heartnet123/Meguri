@@ -44,11 +44,6 @@ const secondaryNavItems: NavItemConfig[] = [
   { href: "/settings", icon: "solar:settings-bold-duotone", label: "ตั้งค่า" },
 ];
 
-// Nav items visible only to manager+ roles
-const managerOnlyNavItems: NavItemConfig[] = [
-  { href: "/purchase-planning", icon: "solar:cart-large-bold-duotone", label: "วางแผนจัดซื้อ" },
-];
-
 function NavSection({
   label,
   items,

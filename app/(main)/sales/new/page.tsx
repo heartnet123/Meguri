@@ -209,11 +209,6 @@ export default function NewOrderPage() {
     setError(null);
   }, []);
 
-  const removeFromCart = useCallback((recipeId: Id<"recipes">) => {
-    setCart((prev) => prev.filter((c) => c.recipeId !== recipeId));
-    setError(null);
-  }, []);
-
   const clearCart = useCallback(() => {
     setCart([]);
     setError(null);

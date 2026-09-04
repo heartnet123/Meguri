@@ -203,7 +203,7 @@ export const update = mutation({
     if (!item) throw new ConvexError('Item not found.');
     if (item.isArchived) throw new ConvexError('Cannot edit an archived item.');
 
-    const { user, membership } = await verifyWorkspace(ctx, item.workspaceId);
+    const { membership } = await verifyWorkspace(ctx, item.workspaceId);
     checkRole(membership, ['owner', 'admin', 'manager']);
 
     // ── Invariant: non-negative min level ──
@@ -242,7 +242,7 @@ export const updateStock = mutation({
     if (!item) throw new ConvexError('Item not found.');
     if (item.isArchived) throw new ConvexError('Cannot update stock for an archived item.');
 
-    const { user, membership } = await verifyWorkspace(ctx, item.workspaceId);
+    const { membership } = await verifyWorkspace(ctx, item.workspaceId);
     checkRole(membership, ['owner', 'admin', 'manager']);
 
     // ── Invariant: no negative stock ──
@@ -352,7 +352,7 @@ export const remove = mutation({
     const item = await ctx.db.get(id);
     if (!item) throw new ConvexError('Item not found.');
 
-    const { user, membership } = await verifyWorkspace(ctx, item.workspaceId);
+    const { membership } = await verifyWorkspace(ctx, item.workspaceId);
     checkRole(membership, ['owner', 'admin']);
 
     // Block hard-delete if any movement records exist — use archive() instead
