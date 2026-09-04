@@ -34,5 +34,7 @@ _bmad*
 !.codex/skills/
 !.codex/skills/**
 .codex/skills/.system/**
-!.codex/prompts/
 !.codex/prompts/**
+
+ROADMAP.html
+ROADMAP-AI.html
