@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { useMutation, useQuery } from 'convex/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { api } from '@/convex/_generated/api';
+import Image from "next/image";
+import { useMutation, useQuery } from "convex/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { api } from "@/convex/_generated/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,14 +39,13 @@ interface SelectInputProps extends React.SelectHTMLAttributes<HTMLSelectElement>
   hasError?: boolean;
 }
 
-type PasswordStrength = 'weak' | 'fair' | 'strong';
+type PasswordStrength = "weak" | "fair" | "strong";
 
 // ─── Helpers & Static Data ────────────────────────────────────────────────────
 
 const MAX_PROFILE_IMAGE_FILE_BYTES = 700 * 1024;
 const MAX_PROFILE_IMAGE_DATA_URL_BYTES = 900 * 1024;
-const PROFILE_TOO_LARGE_MESSAGE =
-  'รูปโปรไฟล์มีขนาดใหญ่เกินกว่าจะบันทึกได้ กรุณาเลือกภาพที่มีขนาดเล็กกว่า 700 KB';
+const PROFILE_TOO_LARGE_MESSAGE = "รูปโปรไฟล์มีขนาดใหญ่เกินกว่าจะบันทึกได้ กรุณาเลือกภาพที่มีขนาดเล็กกว่า 700 KB";
 
 function getPasswordStrength(pw: string): PasswordStrength | null {
   if (!pw) return null;
@@ -57,59 +56,59 @@ function getPasswordStrength(pw: string): PasswordStrength | null {
     /\d/.test(pw),
     /[^a-zA-Z0-9]/.test(pw),
   ].filter(Boolean).length;
-  if (score <= 2) return 'weak';
-  if (score <= 3) return 'fair';
-  return 'strong';
+  if (score <= 2) return "weak";
+  if (score <= 3) return "fair";
+  return "strong";
 }
 
 const DEPARTMENTS: SelectOption[] = [
-  { value: '', label: 'เลือกแผนก…' },
-  { value: 'operations', label: 'ปฏิบัติการ' },
-  { value: 'purchasing', label: 'จัดซื้อ' },
-  { value: 'finance', label: 'การเงิน' },
-  { value: 'management', label: 'บริหาร' },
-  { value: 'kitchen', label: 'ครัว / การผลิต' },
-  { value: 'other', label: 'อื่น ๆ' },
+  { value: "", label: "เลือกแผนก…" },
+  { value: "operations", label: "ปฏิบัติการ" },
+  { value: "purchasing", label: "จัดซื้อ" },
+  { value: "finance", label: "การเงิน" },
+  { value: "management", label: "บริหาร" },
+  { value: "kitchen", label: "ครัว / การผลิต" },
+  { value: "other", label: "อื่น ๆ" },
 ];
 
 const TIMEZONES: SelectOption[] = [
-  { value: 'Asia/Bangkok', label: '(UTC+07:00) กรุงเทพฯ' },
-  { value: 'Asia/Singapore', label: '(UTC+08:00) สิงคโปร์' },
-  { value: 'Asia/Tokyo', label: '(UTC+09:00) โตเกียว' },
-  { value: 'Australia/Sydney', label: '(UTC+11:00) ซิดนีย์' },
-  { value: 'Europe/London', label: '(UTC+00:00) ลอนดอน' },
-  { value: 'Europe/Paris', label: '(UTC+01:00) ปารีส' },
-  { value: 'America/New_York', label: '(UTC-05:00) นิวยอร์ก' },
-  { value: 'America/Los_Angeles', label: '(UTC-08:00) ลอสแอนเจลิส' },
+  { value: "Asia/Bangkok", label: "(UTC+07:00) กรุงเทพฯ" },
+  { value: "Asia/Singapore", label: "(UTC+08:00) สิงคโปร์" },
+  { value: "Asia/Tokyo", label: "(UTC+09:00) โตเกียว" },
+  { value: "Australia/Sydney", label: "(UTC+11:00) ซิดนีย์" },
+  { value: "Europe/London", label: "(UTC+00:00) ลอนดอน" },
+  { value: "Europe/Paris", label: "(UTC+01:00) ปารีส" },
+  { value: "America/New_York", label: "(UTC-05:00) นิวยอร์ก" },
+  { value: "America/Los_Angeles", label: "(UTC-08:00) ลอสแอนเจลิส" },
 ];
 
 const LANGUAGES: SelectOption[] = [
-  { value: 'en', label: 'อังกฤษ' },
-  { value: 'th', label: 'ไทย' },
-  { value: 'zh', label: 'จีน' },
-  { value: 'ja', label: 'ญี่ปุ่น' },
+  { value: "en", label: "อังกฤษ" },
+  { value: "th", label: "ไทย" },
+  { value: "zh", label: "จีน" },
+  { value: "ja", label: "ญี่ปุ่น" },
 ];
 
 const CURRENCIES: SelectOption[] = [
-  { value: 'THB', label: 'THB — บาทไทย (฿)' },
-  { value: 'USD', label: 'USD — ดอลลาร์สหรัฐ ($)' },
-  { value: 'SGD', label: 'SGD — ดอลลาร์สิงคโปร์ (S$)' },
-  { value: 'EUR', label: 'EUR — ยูโร (€)' },
-  { value: 'GBP', label: 'GBP — ปอนด์สเตอร์ลิง (£)' },
-  { value: 'JPY', label: 'JPY — เยนญี่ปุ่น (¥)' },
+  { value: "THB", label: "THB — บาทไทย (฿)" },
+  { value: "USD", label: "USD — ดอลลาร์สหรัฐ ($)" },
+  { value: "SGD", label: "SGD — ดอลลาร์สิงคโปร์ (S$)" },
+  { value: "EUR", label: "EUR — ยูโร (€)" },
+  { value: "GBP", label: "GBP — ปอนด์สเตอร์ลิง (£)" },
+  { value: "JPY", label: "JPY — เยนญี่ปุ่น (¥)" },
 ];
 
 const DATE_FORMATS: SelectOption[] = [
-  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
-  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
-  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO 8601)' },
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
+  { value: "MM/DD/YYYY", label: "MM/DD/YYYY" },
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD (ISO 8601)" },
 ];
 
 type CurrentUser = {
   _id: string;
   name: string;
   email: string;
-  role: 'owner' | 'admin' | 'manager' | 'staff';
+  role: "owner" | "admin" | "manager" | "staff";
   avatarUrl?: string;
   phone?: string;
   jobTitle?: string;
@@ -122,34 +121,34 @@ type CurrentUser = {
 };
 
 const DEFAULT_PREFERENCES = {
-  department: '',
-  timezone: 'Asia/Bangkok',
-  language: 'th',
-  currency: 'THB',
-  dateFormat: 'DD/MM/YYYY',
+  department: "",
+  timezone: "Asia/Bangkok",
+  language: "th",
+  currency: "THB",
+  dateFormat: "DD/MM/YYYY",
 } as const;
 
 function splitName(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   return {
-    firstName: parts[0] ?? '',
-    lastName: parts.slice(1).join(' '),
+    firstName: parts[0] ?? "",
+    lastName: parts.slice(1).join(" "),
   };
 }
 
 function getProfileSaveErrorMessage(error: unknown) {
   const rawMessage =
-    typeof error === 'object' && error !== null && 'data' in error && typeof error.data === 'string'
+    typeof error === "object" && error !== null && "data" in error && typeof error.data === "string"
       ? error.data
       : error instanceof Error
         ? error.message
-        : '';
+        : "";
 
-  if (rawMessage.includes('Value is too large')) {
+  if (rawMessage.includes("Value is too large")) {
     return PROFILE_TOO_LARGE_MESSAGE;
   }
 
-  return rawMessage || 'ไม่สามารถบันทึกโปรไฟล์ได้';
+  return rawMessage || "ไม่สามารถบันทึกโปรไฟล์ได้";
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -159,15 +158,15 @@ export default function ProfilePage() {
   const updateProfile = useMutation(api.users.updateProfile);
 
   const baseProfile = useMemo(() => {
-    const names = splitName(currentUser?.name ?? '');
+    const names = splitName(currentUser?.name ?? "");
     return {
-      avatarSrc: currentUser?.avatarUrl ?? '',
+      avatarSrc: currentUser?.avatarUrl ?? "",
       firstName: names.firstName,
       lastName: names.lastName,
-      displayName: currentUser?.name ?? '',
-      email: currentUser?.email ?? '',
-      phone: currentUser?.phone ?? '',
-      jobTitle: currentUser?.jobTitle ?? '',
+      displayName: currentUser?.name ?? "",
+      email: currentUser?.email ?? "",
+      phone: currentUser?.phone ?? "",
+      jobTitle: currentUser?.jobTitle ?? "",
       department: currentUser?.department ?? DEFAULT_PREFERENCES.department,
       timezone: currentUser?.timezone ?? DEFAULT_PREFERENCES.timezone,
       language: currentUser?.language ?? DEFAULT_PREFERENCES.language,
@@ -188,8 +187,8 @@ export default function ProfilePage() {
   const firstName = firstNameOverride ?? baseProfile.firstName;
   const lastName = lastNameOverride ?? baseProfile.lastName;
   const displayName = useMemo(
-    () => displayNameOverride ?? [firstName, lastName].filter(Boolean).join(' '),
-    [displayNameOverride, firstName, lastName]
+    () => displayNameOverride ?? [firstName, lastName].filter(Boolean).join(" "),
+    [displayNameOverride, firstName, lastName],
   );
   const setDisplayName = (val: string) => setDisplayNameOverride(val);
   // Contact
@@ -211,9 +210,9 @@ export default function ProfilePage() {
   const currency = currencyOverride ?? baseProfile.currency;
   const dateFormat = dateFormatOverride ?? baseProfile.dateFormat;
   // Security
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   // Form state
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -236,8 +235,8 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     setAvatarError(null);
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setAvatarError('ไฟล์ต้องเป็นรูปภาพประเภท PNG, JPEG หรือ WebP');
+    if (!file.type.startsWith("image/")) {
+      setAvatarError("ไฟล์ต้องเป็นรูปภาพประเภท PNG, JPEG หรือ WebP");
       return;
     }
     if (file.size > MAX_PROFILE_IMAGE_FILE_BYTES) {
@@ -246,9 +245,9 @@ export default function ProfilePage() {
     }
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const result = typeof ev.target?.result === 'string' ? ev.target.result : '';
+      const result = typeof ev.target?.result === "string" ? ev.target.result : "";
       if (!result) {
-        setAvatarError('ไม่สามารถอ่านรูปภาพที่เลือกได้ กรุณาลองอีกครั้ง');
+        setAvatarError("ไม่สามารถอ่านรูปภาพที่เลือกได้ กรุณาลองอีกครั้ง");
         return;
       }
       if (new TextEncoder().encode(result).length > MAX_PROFILE_IMAGE_DATA_URL_BYTES) {
@@ -262,18 +261,18 @@ export default function ProfilePage() {
 
   function validate(): Record<string, string> {
     const errs: Record<string, string> = {};
-    if (!firstName.trim()) errs.firstName = 'กรุณากรอกชื่อจริง';
-    if (!lastName.trim()) errs.lastName = 'กรุณากรอกนามสกุล';
+    if (!firstName.trim()) errs.firstName = "กรุณากรอกชื่อจริง";
+    if (!lastName.trim()) errs.lastName = "กรุณากรอกนามสกุล";
     if (!email.trim()) {
-      errs.email = 'กรุณากรอกอีเมลสำหรับงาน';
+      errs.email = "กรุณากรอกอีเมลสำหรับงาน";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errs.email = 'กรุณากรอกอีเมลให้ถูกต้อง เช่น jane@example.com';
+      errs.email = "กรุณากรอกอีเมลให้ถูกต้อง เช่น jane@example.com";
     }
     if (newPassword && newPassword.length < 8) {
-      errs.newPassword = 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร';
+      errs.newPassword = "รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร";
     }
     if (newPassword && newPassword !== confirmPassword) {
-      errs.confirmPassword = 'รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
+      errs.confirmPassword = "รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง";
     }
     return errs;
   }
@@ -292,7 +291,7 @@ export default function ProfilePage() {
     setSaved(false);
     try {
       await updateProfile({
-        name: displayName.trim() || [firstName, lastName].filter(Boolean).join(' '),
+        name: displayName.trim() || [firstName, lastName].filter(Boolean).join(" "),
         email: email.trim(),
         avatarUrl: avatarSrc || undefined,
         phone: phone.trim() || undefined,
@@ -305,9 +304,9 @@ export default function ProfilePage() {
       });
       setSaving(false);
       setSaved(true);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (error) {
       setSaving(false);
       setErrors((existing) => ({
@@ -319,23 +318,34 @@ export default function ProfilePage() {
 
   const pwStrength = getPasswordStrength(newPassword);
   const memberSinceLabel = currentUser
-    ? new Date(currentUser.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
-    : '—';
+    ? new Date(currentUser.createdAt).toLocaleDateString(undefined, {
+        month: "long",
+        year: "numeric",
+      })
+    : "—";
   const roleLabel = currentUser?.role
-    ? ({ owner: 'เจ้าของ', admin: 'ผู้ดูแลระบบ', manager: 'ผู้จัดการ', staff: 'พนักงาน' }[currentUser.role] ?? currentUser.role)
-    : 'บัญชีผู้ใช้';
+    ? ({ owner: "เจ้าของ", admin: "ผู้ดูแลระบบ", manager: "ผู้จัดการ", staff: "พนักงาน" }[
+        currentUser.role
+      ] ?? currentUser.role)
+    : "บัญชีผู้ใช้";
   const profileInitials = useMemo(() => {
     const parts = [firstName, lastName].filter(Boolean);
-    return parts.map((part) => part[0]?.toUpperCase() ?? '').join('').slice(0, 2) || 'SS';
+    return (
+      parts
+        .map((part) => part[0]?.toUpperCase() ?? "")
+        .join("")
+        .slice(0, 2) || "SS"
+    );
   }, [firstName, lastName]);
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-
       {/* ── Page header ───────────────────────────────────────────────── */}
       <div className="space-y-2">
         <h1 className="text-3xl font-black tracking-tight text-foreground">ข้อมูลโปรไฟล์ผู้ใช้</h1>
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted leading-relaxed">จัดการสิทธิ์การเข้าถึง ข้อมูลมืออาชีพ และการตั้งค่าบัญชี</p>
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted leading-relaxed">
+          จัดการสิทธิ์การเข้าถึง ข้อมูลมืออาชีพ และการตั้งค่าบัญชี
+        </p>
       </div>
 
       {/* ── Identity card ─────────────────────────────────────────────── */}
@@ -361,7 +371,13 @@ export default function ProfilePage() {
             className="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-surface border border-border flex items-center justify-center hover:bg-surface-raised transition-all shadow-lg active:scale-90 focus:outline-none focus:ring-2 focus:ring-accent ring-offset-2"
             aria-label="เปลี่ยนรูปโปรไฟล์"
           >
-            <iconify-icon icon="solar:camera-bold-duotone" width="16" height="16" className="text-accent" aria-hidden="true"></iconify-icon>
+            <iconify-icon
+              icon="solar:camera-bold-duotone"
+              width="16"
+              height="16"
+              className="text-accent"
+              aria-hidden="true"
+            ></iconify-icon>
           </button>
           <input
             ref={fileInputRef}
@@ -374,21 +390,38 @@ export default function ProfilePage() {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-lg font-black text-foreground truncate tracking-tight">{displayName || `${firstName} ${lastName}`.trim() || 'ยังไม่ได้ระบุชื่อ'}</p>
+          <p className="text-lg font-black text-foreground truncate tracking-tight">
+            {displayName || `${firstName} ${lastName}`.trim() || "ยังไม่ได้ระบุชื่อ"}
+          </p>
           <p className="text-sm font-medium text-muted truncate mt-0.5 opacity-70">{email}</p>
           {avatarError && (
-            <p className="text-xs text-danger mt-2 flex items-center gap-1.5 font-black uppercase tracking-widest" role="alert">
-              <iconify-icon icon="solar:danger-circle-bold-duotone" width="14" height="14" aria-hidden="true"></iconify-icon>
+            <p
+              className="text-xs text-danger mt-2 flex items-center gap-1.5 font-black uppercase tracking-widest"
+              role="alert"
+            >
+              <iconify-icon
+                icon="solar:danger-circle-bold-duotone"
+                width="14"
+                height="14"
+                aria-hidden="true"
+              ></iconify-icon>
               {avatarError}
             </p>
           )}
         </div>
         <div className="shrink-0 hidden sm:flex flex-col items-end gap-2 text-right">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-black uppercase tracking-widest text-accent">
-            <iconify-icon icon="solar:shield-check-bold-duotone" width="14" height="14" aria-hidden="true"></iconify-icon>
+            <iconify-icon
+              icon="solar:shield-check-bold-duotone"
+              width="14"
+              height="14"
+              aria-hidden="true"
+            ></iconify-icon>
             ระดับสิทธิ์: {roleLabel}
           </div>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/50 leading-none">ใช้งานตั้งแต่ {memberSinceLabel}</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/50 leading-none">
+            ใช้งานตั้งแต่ {memberSinceLabel}
+          </span>
         </div>
         {/* Decorative corner accent */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-[4rem] -mr-8 -mt-8 blur-2xl" />
@@ -396,7 +429,6 @@ export default function ProfilePage() {
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="space-y-8">
-
           {/* ── Personal information ──────────────────────────────────── */}
           <FormSection
             title="ข้อมูลส่วนตัว"
@@ -415,7 +447,7 @@ export default function ProfilePage() {
                   hasError={!!errors.firstName}
                   aria-required="true"
                   aria-invalid={errors.firstName ? true : undefined}
-                  aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+                  aria-describedby={errors.firstName ? "firstName-error" : undefined}
                 />
               </FormField>
               <FormField label="นามสกุล" htmlFor="lastName" required error={errors.lastName}>
@@ -429,22 +461,30 @@ export default function ProfilePage() {
                   hasError={!!errors.lastName}
                   aria-required="true"
                   aria-invalid={errors.lastName ? true : undefined}
-                  aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+                  aria-describedby={errors.lastName ? "lastName-error" : undefined}
                 />
               </FormField>
             </FormRow>
 
             <FormField
-               label="ชื่อที่ใช้แสดง"
+              label="ชื่อที่ใช้แสดง"
               htmlFor="displayName"
-               hint="ชื่อเรียกที่ต้องการให้แสดงในระบบและระหว่างการทำงานร่วมกัน"
+              hint="ชื่อเรียกที่ต้องการให้แสดงในระบบและระหว่างการทำงานร่วมกัน"
             >
               <TextInput
                 id="displayName"
                 type="text"
                 value={displayName}
-                onChange={(e) => { setDisplayName(e.target.value); setDisplayNameTouched(true); }}
-                onBlur={() => { if (!displayName.trim()) { setDisplayNameOverride(null); setDisplayNameTouched(false); } }}
+                onChange={(e) => {
+                  setDisplayName(e.target.value);
+                  setDisplayNameTouched(true);
+                }}
+                onBlur={() => {
+                  if (!displayName.trim()) {
+                    setDisplayNameOverride(null);
+                    setDisplayNameTouched(false);
+                  }
+                }}
                 autoComplete="nickname"
                 maxLength={80}
                 aria-describedby="displayName-hint"
@@ -469,7 +509,7 @@ export default function ProfilePage() {
                 hasError={!!errors.email}
                 aria-required="true"
                 aria-invalid={errors.email ? true : undefined}
-                aria-describedby={errors.email ? 'email-error' : undefined}
+                aria-describedby={errors.email ? "email-error" : undefined}
               />
             </FormField>
 
@@ -575,7 +615,7 @@ export default function ProfilePage() {
                   <TextInput
                     id="newPassword"
                     type="password"
-                      placeholder="อย่างน้อย 8 ตัวอักษร"
+                    placeholder="อย่างน้อย 8 ตัวอักษร"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     autoComplete="new-password"
@@ -584,53 +624,61 @@ export default function ProfilePage() {
                   />
                 </FormField>
                 {newPassword && (
-                  <div className="space-y-2 p-3 rounded-2xl bg-surface-raised/50 border border-border/50" aria-live="polite" aria-atomic="true">
+                  <div
+                    className="space-y-2 p-3 rounded-2xl bg-surface-raised/50 border border-border/50"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
                     <div className="flex gap-1.5" aria-hidden="true">
-                      {(['weak', 'fair', 'strong'] as PasswordStrength[]).map((level, i) => (
+                      {(["weak", "fair", "strong"] as PasswordStrength[]).map((level, i) => (
                         <div
                           key={level}
                           className={`h-1.5 flex-1 rounded-full transition-all duration-700 ${
-                            pwStrength === 'weak' && i === 0
-                              ? 'bg-danger shadow-[0_0_12px_rgba(239,68,68,0.4)]'
-                              : pwStrength === 'fair' && i <= 1
-                              ? 'bg-warning shadow-[0_0_12px_rgba(245,158,11,0.4)]'
-                              : pwStrength === 'strong'
-                              ? 'bg-success shadow-[0_0_12px_rgba(16,185,129,0.4)]'
-                              : 'bg-surface border border-border/50'
+                            pwStrength === "weak" && i === 0
+                              ? "bg-danger shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+                              : pwStrength === "fair" && i <= 1
+                                ? "bg-warning shadow-[0_0_12px_rgba(245,158,11,0.4)]"
+                                : pwStrength === "strong"
+                                  ? "bg-success shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+                                  : "bg-surface border border-border/50"
                           }`}
                         />
                       ))}
                     </div>
                     <p
                       className={`text-[9px] font-black uppercase tracking-[0.2em] pt-0.5 ${
-                        pwStrength === 'weak'
-                          ? 'text-danger'
-                          : pwStrength === 'fair'
-                          ? 'text-warning'
-                          : 'text-success'
+                        pwStrength === "weak"
+                          ? "text-danger"
+                          : pwStrength === "fair"
+                            ? "text-warning"
+                            : "text-success"
                       }`}
                     >
-                      {pwStrength === 'weak'
-                        ? 'ความปลอดภัยต่ำ'
-                        : pwStrength === 'fair'
-                        ? 'ความปลอดภัยปานกลาง'
-                        : 'ความปลอดภัยสูง'}
+                      {pwStrength === "weak"
+                        ? "ความปลอดภัยต่ำ"
+                        : pwStrength === "fair"
+                          ? "ความปลอดภัยปานกลาง"
+                          : "ความปลอดภัยสูง"}
                     </p>
                   </div>
                 )}
               </div>
 
-              <FormField label="ยืนยันรหัสผ่านใหม่" htmlFor="confirmPassword" error={errors.confirmPassword}>
+              <FormField
+                label="ยืนยันรหัสผ่านใหม่"
+                htmlFor="confirmPassword"
+                error={errors.confirmPassword}
+              >
                 <TextInput
                   id="confirmPassword"
                   type="password"
-                    placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
+                  placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   autoComplete="new-password"
                   hasError={!!errors.confirmPassword}
                   aria-invalid={errors.confirmPassword ? true : undefined}
-                  aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
+                  aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
                 />
               </FormField>
             </FormRow>
@@ -640,7 +688,12 @@ export default function ProfilePage() {
           <div className="flex items-center justify-end gap-5 border-t border-border mt-12 pt-8">
             {errors.submit && (
               <span className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.15em] text-danger mr-auto px-5 py-2.5 bg-danger/5 rounded-2xl border border-danger/20">
-                <iconify-icon icon="solar:danger-circle-bold-duotone" width="18" height="18" aria-hidden="true"></iconify-icon>
+                <iconify-icon
+                  icon="solar:danger-circle-bold-duotone"
+                  width="18"
+                  height="18"
+                  aria-hidden="true"
+                ></iconify-icon>
                 {errors.submit}
               </span>
             )}
@@ -650,7 +703,12 @@ export default function ProfilePage() {
                 role="status"
                 aria-live="polite"
               >
-                <iconify-icon icon="solar:check-circle-bold-duotone" width="18" height="18" aria-hidden="true"></iconify-icon>
+                <iconify-icon
+                  icon="solar:check-circle-bold-duotone"
+                  width="18"
+                  height="18"
+                  aria-hidden="true"
+                ></iconify-icon>
                 บันทึกข้อมูลสำเร็จ
               </span>
             )}
@@ -673,12 +731,16 @@ export default function ProfilePage() {
               ) : (
                 <>
                   บันทึกการเปลี่ยนแปลง
-                  <iconify-icon icon="solar:arrow-right-up-linear" width="18" height="18" className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  <iconify-icon
+                    icon="solar:arrow-right-up-linear"
+                    width="18"
+                    height="18"
+                    className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
+                  />
                 </>
               )}
             </button>
           </div>
-
         </div>
       </form>
     </div>
@@ -692,10 +754,18 @@ function FormSection({ title, description, icon, children }: FormSectionProps) {
     <section className="bg-surface border border-border rounded-[2rem] shadow-2xl shadow-black/5 overflow-hidden group/section transition-all duration-500 hover:border-accent/10">
       <div className="px-8 py-6 border-b border-border/50 flex items-center gap-5 bg-surface-raised/30">
         <div className="w-12 h-12 rounded-2xl bg-surface-raised border border-border flex items-center justify-center shrink-0 shadow-sm group-hover/section:scale-110 group-hover/section:border-accent/30 group-hover/section:text-accent transition-all duration-500">
-          <iconify-icon icon={icon} width="24" height="24" className="text-muted/60 group-hover/section:text-accent transition-colors" aria-hidden="true"></iconify-icon>
+          <iconify-icon
+            icon={icon}
+            width="24"
+            height="24"
+            className="text-muted/60 group-hover/section:text-accent transition-colors"
+            aria-hidden="true"
+          ></iconify-icon>
         </div>
         <div>
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">{title}</h2>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">
+            {title}
+          </h2>
           <p className="text-[11px] text-muted mt-1 opacity-70 leading-relaxed">{description}</p>
         </div>
       </div>
@@ -711,8 +781,16 @@ function FormRow({ children }: { children: React.ReactNode }) {
 function FormField({ label, htmlFor, required, hint, error, children }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-2.5">
-      <label htmlFor={htmlFor} className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/80 pl-1 flex items-center gap-1.5">
-        <iconify-icon icon="solar:tuning-bold-duotone" width="12" height="12" className="text-muted/30" />
+      <label
+        htmlFor={htmlFor}
+        className="text-[9px] font-black uppercase tracking-[0.2em] text-muted/80 pl-1 flex items-center gap-1.5"
+      >
+        <iconify-icon
+          icon="solar:tuning-bold-duotone"
+          width="12"
+          height="12"
+          className="text-muted/30"
+        />
         {label}
         {required && (
           <span className="text-danger ml-0.5" aria-hidden="true">
@@ -722,12 +800,24 @@ function FormField({ label, htmlFor, required, hint, error, children }: FormFiel
       </label>
       {children}
       {error ? (
-        <p id={`${htmlFor}-error`} className="text-[10px] text-danger flex items-center gap-2 font-black uppercase tracking-widest pl-1 pt-1 animate-in fade-in slide-in-from-top-1" role="alert">
-          <iconify-icon icon="solar:danger-circle-bold-duotone" width="14" height="14" aria-hidden="true"></iconify-icon>
+        <p
+          id={`${htmlFor}-error`}
+          className="text-[10px] text-danger flex items-center gap-2 font-black uppercase tracking-widest pl-1 pt-1 animate-in fade-in slide-in-from-top-1"
+          role="alert"
+        >
+          <iconify-icon
+            icon="solar:danger-circle-bold-duotone"
+            width="14"
+            height="14"
+            aria-hidden="true"
+          ></iconify-icon>
           {error}
         </p>
       ) : hint ? (
-        <p id={`${htmlFor}-hint`} className="text-[10px] text-muted/60 leading-relaxed pl-1 font-medium">
+        <p
+          id={`${htmlFor}-hint`}
+          className="text-[10px] text-muted/60 leading-relaxed pl-1 font-medium"
+        >
           {hint}
         </p>
       ) : null}
@@ -740,14 +830,14 @@ function TextInput({ id, hasError, className, ...props }: TextInputProps) {
     <input
       id={id}
       className={[
-        'w-full px-6 py-4 text-sm bg-surface-raised/30 border rounded-2xl text-foreground font-bold tracking-tight',
-        'placeholder:text-muted/30 transition-all duration-500',
-        'focus:outline-none focus:ring-4',
+        "w-full px-6 py-4 text-sm bg-surface-raised/30 border rounded-2xl text-foreground font-bold tracking-tight",
+        "placeholder:text-muted/30 transition-all duration-500",
+        "focus:outline-none focus:ring-4",
         hasError
-          ? 'border-danger/30 focus:ring-danger/10 text-danger bg-danger/5'
-          : 'border-border/60 hover:border-accent/30 hover:bg-surface-raised focus:border-accent/40 focus:ring-accent/10 focus:bg-surface',
-        className ?? '',
-      ].join(' ')}
+          ? "border-danger/30 focus:ring-danger/10 text-danger bg-danger/5"
+          : "border-border/60 hover:border-accent/30 hover:bg-surface-raised focus:border-accent/40 focus:ring-accent/10 focus:bg-surface",
+        className ?? "",
+      ].join(" ")}
       {...props}
     />
   );
@@ -759,24 +849,36 @@ function SelectInput({ id, options, hasError, className, ...props }: SelectInput
       <select
         id={id}
         className={[
-          'w-full appearance-none px-6 py-4 pr-12 text-sm bg-surface-raised/30 border rounded-2xl',
-          'text-foreground cursor-pointer transition-all duration-500 font-bold tracking-tight',
-          'focus:outline-none focus:ring-4',
+          "w-full appearance-none px-6 py-4 pr-12 text-sm bg-surface-raised/30 border rounded-2xl",
+          "text-foreground cursor-pointer transition-all duration-500 font-bold tracking-tight",
+          "focus:outline-none focus:ring-4",
           hasError
-            ? 'border-danger/30 focus:ring-danger/10 text-danger bg-danger/5'
-            : 'border-border/60 hover:border-accent/30 hover:bg-surface-raised focus:border-accent/40 focus:ring-accent/10 focus:bg-surface',
-          className ?? '',
-        ].join(' ')}
+            ? "border-danger/30 focus:ring-danger/10 text-danger bg-danger/5"
+            : "border-border/60 hover:border-accent/30 hover:bg-surface-raised focus:border-accent/40 focus:ring-accent/10 focus:bg-surface",
+          className ?? "",
+        ].join(" ")}
         {...props}
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value} className="bg-surface text-foreground font-medium">
+          <option
+            key={opt.value}
+            value={opt.value}
+            className="bg-surface text-foreground font-medium"
+          >
             {opt.label}
           </option>
         ))}
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center transition-transform group-hover/select:translate-y-0.5" aria-hidden="true">
-        <iconify-icon icon="solar:alt-arrow-down-bold-duotone" width="18" height="18" className="text-muted/40 group-hover/select:text-accent"></iconify-icon>
+      <div
+        className="pointer-events-none absolute inset-y-0 right-5 flex items-center transition-transform group-hover/select:translate-y-0.5"
+        aria-hidden="true"
+      >
+        <iconify-icon
+          icon="solar:alt-arrow-down-bold-duotone"
+          width="18"
+          height="18"
+          className="text-muted/40 group-hover/select:text-accent"
+        ></iconify-icon>
       </div>
     </div>
   );

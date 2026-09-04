@@ -1,48 +1,48 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
-import { RecipeEditorDialog, type RecipeRow } from './components/RecipeEditorDialog';
+import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useWorkspaceId } from "@/app/providers/WorkspaceProvider";
+import { RecipeEditorDialog, type RecipeRow } from "./components/RecipeEditorDialog";
 
 function formatCurrency(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  finished_goods: 'สินค้าสำเร็จรูป',
-  bundles: 'ชุดสินค้า',
-  raw_materials: 'วัตถุดิบ',
+  finished_goods: "สินค้าสำเร็จรูป",
+  bundles: "ชุดสินค้า",
+  raw_materials: "วัตถุดิบ",
 };
 
 export default function RecipesPage() {
   const workspaceId = useWorkspaceId();
-  const recipes = useQuery(
-    api.recipes.list,
-    workspaceId ? { workspaceId } : 'skip'
-  ) as RecipeRow[] | undefined;
+  const recipes = useQuery(api.recipes.list, workspaceId ? { workspaceId } : "skip") as
+    | RecipeRow[]
+    | undefined;
 
   const removeRecipe = useMutation(api.recipes.remove);
 
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeRow | null>(null);
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
   const filteredRecipes = (recipes ?? []).filter((r) => {
     const s = search.toLowerCase();
-    const matchesSearch = s === '' || 
-      r.name.toLowerCase().includes(s) || 
+    const matchesSearch =
+      s === "" ||
+      r.name.toLowerCase().includes(s) ||
       r.sku.toLowerCase().includes(s) ||
       r.displayId.toLowerCase().includes(s);
-    const matchesCategory = categoryFilter === '' || r.category === categoryFilter;
+    const matchesCategory = categoryFilter === "" || r.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
-  const handleDelete = async (id: Id<'recipes'>) => {
-    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้าพร้อมขายนี้?')) {
+  const handleDelete = async (id: Id<"recipes">) => {
+    if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบสินค้าพร้อมขายนี้?")) {
       await removeRecipe({ recipeId: id });
     }
   };
@@ -60,8 +60,8 @@ export default function RecipesPage() {
   // Stats
   const stats = {
     total: recipes?.length ?? 0,
-    avgMargin: recipes?.length 
-      ? Math.round(recipes.reduce((sum, r) => sum + (r.marginPct ?? 0), 0) / recipes.length) 
+    avgMargin: recipes?.length
+      ? Math.round(recipes.reduce((sum, r) => sum + (r.marginPct ?? 0), 0) / recipes.length)
       : 0,
     totalValue: recipes?.reduce((sum, r) => sum + r.price, 0) ?? 0,
   };
@@ -103,7 +103,9 @@ export default function RecipesPage() {
             <iconify-icon icon="solar:dollar-minimalistic-linear" width="18" height="18" />
             <span className="text-xs font-medium uppercase tracking-wider">ราคาเฉลี่ย</span>
           </div>
-          <div className="text-2xl font-bold text-foreground">{formatCurrency(stats.totalValue / (stats.total || 1))}</div>
+          <div className="text-2xl font-bold text-foreground">
+            {formatCurrency(stats.totalValue / (stats.total || 1))}
+          </div>
         </div>
       </div>
 
@@ -112,7 +114,8 @@ export default function RecipesPage() {
         <div className="relative flex-1">
           <iconify-icon
             icon="solar:magnifer-linear"
-            width="18" height="18"
+            width="18"
+            height="18"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
           />
           <input
@@ -130,7 +133,9 @@ export default function RecipesPage() {
         >
           <option value="">ทุกหมวดหมู่</option>
           {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+            <option key={k} value={k}>
+              {v}
+            </option>
           ))}
         </select>
       </div>
@@ -141,25 +146,44 @@ export default function RecipesPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-raised border-b border-border">
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">รหัสและ SKU</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">ชื่อและหมวดหมู่</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">ต้นทุน</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">ราคา</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">กำไร</th>
-                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70 text-right">การจัดการ</th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">
+                  รหัสและ SKU
+                </th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">
+                  ชื่อและหมวดหมู่
+                </th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">
+                  ต้นทุน
+                </th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">
+                  ราคา
+                </th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70">
+                  กำไร
+                </th>
+                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted/70 text-right">
+                  การจัดการ
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {recipes === undefined ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan={6} className="px-6 py-4"><div className="h-4 bg-surface-raised rounded w-full" /></td>
+                    <td colSpan={6} className="px-6 py-4">
+                      <div className="h-4 bg-surface-raised rounded w-full" />
+                    </td>
                   </tr>
                 ))
               ) : filteredRecipes.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-muted">
-                    <iconify-icon icon="solar:ghost-linear" width="48" height="48" className="mx-auto mb-3 opacity-20" />
+                    <iconify-icon
+                      icon="solar:ghost-linear"
+                      width="48"
+                      height="48"
+                      className="mx-auto mb-3 opacity-20"
+                    />
                     <p className="text-sm">ไม่พบสินค้าในแคตตาล็อกของคุณ</p>
                   </td>
                 </tr>
@@ -168,24 +192,36 @@ export default function RecipesPage() {
                   <tr key={r._id} className="group hover:bg-surface-raised/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="text-sm font-bold text-foreground">{r.displayId}</div>
-                      <div className="text-[10px] font-mono text-muted mt-0.5 uppercase tracking-tighter">{r.sku}</div>
+                      <div className="text-[10px] font-mono text-muted mt-0.5 uppercase tracking-tighter">
+                        {r.sku}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-foreground">{r.name}</div>
-                      <div className="text-xs text-muted mt-0.5">{CATEGORY_LABELS[r.category] || r.category}</div>
+                      <div className="text-xs text-muted mt-0.5">
+                        {CATEGORY_LABELS[r.category] || r.category}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-foreground tabular-nums">{formatCurrency(r.unitCost)}</div>
+                      <div className="text-sm text-foreground tabular-nums">
+                        {formatCurrency(r.unitCost)}
+                      </div>
                       <div className="text-[10px] text-muted mt-0.5">{r.ingredientCount} วัตถุดิบ</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-foreground tabular-nums">{formatCurrency(r.price)}</div>
+                      <div className="text-sm font-bold text-foreground tabular-nums">
+                        {formatCurrency(r.price)}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className={`text-sm font-bold tabular-nums ${r.marginPct >= 30 ? 'text-success' : r.marginPct >= 15 ? 'text-warning' : 'text-danger'}`}>
+                      <div
+                        className={`text-sm font-bold tabular-nums ${r.marginPct >= 30 ? "text-success" : r.marginPct >= 15 ? "text-warning" : "text-danger"}`}
+                      >
                         {r.marginPct}%
                       </div>
-                      <div className="text-[10px] text-muted mt-0.5">กำไร: {formatCurrency(r.price - r.unitCost)}</div>
+                      <div className="text-[10px] text-muted mt-0.5">
+                        กำไร: {formatCurrency(r.price - r.unitCost)}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -201,7 +237,11 @@ export default function RecipesPage() {
                           className="p-2 text-muted hover:text-danger hover:bg-danger-subtle rounded-lg transition-all"
                           title="ลบสินค้า"
                         >
-                          <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18" />
+                          <iconify-icon
+                            icon="solar:trash-bin-trash-linear"
+                            width="18"
+                            height="18"
+                          />
                         </button>
                       </div>
                     </td>

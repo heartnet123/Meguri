@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 type Item = {
   _id: string;
@@ -19,9 +19,9 @@ type Props = {
 export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
   const adjustStock = useMutation(api.inventory.adjustStock);
 
-  const [type, setType] = useState<'adjustment' | 'wastage'>('adjustment');
-  const [quantity, setQuantity] = useState<string>('');
-  const [note, setNote] = useState('');
+  const [type, setType] = useState<"adjustment" | "wastage">("adjustment");
+  const [quantity, setQuantity] = useState<string>("");
+  const [note, setNote] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,14 +30,14 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
 
   /** Quantity as a signed delta: wastage is always negative, adjustment uses sign as-entered. */
   const parsedQty = parseFloat(quantity) || 0;
-  const signedQty = type === 'wastage' ? -Math.abs(parsedQty) : parsedQty;
+  const signedQty = type === "wastage" ? -Math.abs(parsedQty) : parsedQty;
   const projectedStock = item.currentStock + signedQty;
   const wouldGoNegative = projectedStock < 0;
 
   const handleClose = () => {
-    setQuantity('');
-    setNote('');
-    setType('adjustment');
+    setQuantity("");
+    setNote("");
+    setType("adjustment");
     setError(null);
     onClose();
   };
@@ -46,13 +46,13 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
     e.preventDefault();
 
     if (parsedQty === 0) {
-      setError('จำนวนต้องไม่เป็นศูนย์');
+      setError("จำนวนต้องไม่เป็นศูนย์");
       return;
     }
     if (wouldGoNegative) {
       setError(
         `การปรับครั้งนี้จะทำให้คงเหลือ ${projectedStock.toFixed(2)} ${item.unit} ซึ่งต่ำกว่าศูนย์ ` +
-        'ไม่สามารถให้สต็อกติดลบได้',
+          "ไม่สามารถให้สต็อกติดลบได้",
       );
       return;
     }
@@ -61,14 +61,14 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
     setError(null);
     try {
       await adjustStock({
-        id: item._id as Id<'inventoryItems'>,
+        id: item._id as Id<"inventoryItems">,
         type,
         quantity: signedQty,
         note: note || undefined,
       });
       handleClose();
     } catch (err: any) {
-      const msg: string = err?.data ?? err?.message ?? 'เกิดข้อผิดพลาดที่ไม่คาดคิด';
+      const msg: string = err?.data ?? err?.message ?? "เกิดข้อผิดพลาดที่ไม่คาดคิด";
       setError(msg);
     } finally {
       setLoading(false);
@@ -90,13 +90,20 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
 
         <div className="p-6">
           <p className="text-sm text-muted mb-4">
-            สต็อกปัจจุบันของ <strong className="text-foreground">{item.name}</strong>:{' '}
-            <span className="text-foreground font-medium">{item.currentStock} {item.unit}</span>
+            สต็อกปัจจุบันของ <strong className="text-foreground">{item.name}</strong>:{" "}
+            <span className="text-foreground font-medium">
+              {item.currentStock} {item.unit}
+            </span>
           </p>
 
           {error && (
             <div className="mb-4 p-3 bg-danger-subtle text-danger text-sm rounded-lg border border-danger/20 flex items-start gap-2">
-              <iconify-icon icon="solar:danger-triangle-linear" width="16" height="16" className="shrink-0 mt-0.5" />
+              <iconify-icon
+                icon="solar:danger-triangle-linear"
+                width="16"
+                height="16"
+                className="shrink-0 mt-0.5"
+              />
               <span>{error}</span>
             </div>
           )}
@@ -106,7 +113,10 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
               <label className="text-sm font-medium text-foreground">ประเภทการปรับ</label>
               <select
                 value={type}
-                onChange={(e) => { setType(e.target.value as any); setError(null); }}
+                onChange={(e) => {
+                  setType(e.target.value as any);
+                  setError(null);
+                }}
                 className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
               >
                 <option value="adjustment">ปรับด้วยตนเอง (+/−)</option>
@@ -116,34 +126,41 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                จำนวน{type === 'wastage' ? 'ที่สูญเสีย' : 'ที่ปรับ'} ({item.unit})
+                จำนวน{type === "wastage" ? "ที่สูญเสีย" : "ที่ปรับ"} ({item.unit})
               </label>
               <input
                 type="number"
                 required
                 step="any"
-                min={type === 'wastage' ? '0.01' : undefined}
+                min={type === "wastage" ? "0.01" : undefined}
                 value={quantity}
-                onChange={(e) => { setQuantity(e.target.value); setError(null); }}
+                onChange={(e) => {
+                  setQuantity(e.target.value);
+                  setError(null);
+                }}
                 className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
-                placeholder={type === 'wastage' ? 'เช่น 5' : 'เช่น −5 หรือ 10'}
+                placeholder={type === "wastage" ? "เช่น 5" : "เช่น −5 หรือ 10"}
               />
-              {type === 'adjustment' && (
+              {type === "adjustment" && (
                 <p className="text-xs text-muted">ใช้ค่าติดลบเพื่อลดสต็อก และค่าบวกเพื่อเพิ่มสต็อก</p>
               )}
             </div>
 
             {parsedQty !== 0 && (
-              <div className={`p-3 rounded-lg border text-sm ${
-                wouldGoNegative
-                  ? 'bg-danger-subtle border-danger/30 text-danger'
-                  : 'bg-surface-raised border-border text-muted'
-              }`}>
-                หลังปรับแล้ว:{' '}
-                <span className={`font-semibold ${wouldGoNegative ? 'text-danger' : 'text-foreground'}`}>
+              <div
+                className={`p-3 rounded-lg border text-sm ${
+                  wouldGoNegative
+                    ? "bg-danger-subtle border-danger/30 text-danger"
+                    : "bg-surface-raised border-border text-muted"
+                }`}
+              >
+                หลังปรับแล้ว:{" "}
+                <span
+                  className={`font-semibold ${wouldGoNegative ? "text-danger" : "text-foreground"}`}
+                >
                   {projectedStock.toFixed(2)} {item.unit}
                 </span>
-                {wouldGoNegative && ' — ไม่สามารถต่ำกว่าศูนย์ได้'}
+                {wouldGoNegative && " — ไม่สามารถต่ำกว่าศูนย์ได้"}
               </div>
             )}
 
@@ -174,7 +191,7 @@ export function AdjustStockDialog({ isOpen, onClose, item }: Props) {
             disabled={loading || wouldGoNegative}
             className="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
           >
-            {loading ? 'กำลังบันทึก…' : 'ยืนยัน'}
+            {loading ? "กำลังบันทึก…" : "ยืนยัน"}
           </button>
         </div>
       </div>

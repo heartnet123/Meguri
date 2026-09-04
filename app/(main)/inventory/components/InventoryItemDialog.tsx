@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-import { useWorkspaceId, useWorkspaceLoading } from '@/app/providers/WorkspaceProvider';
+import { useState, useEffect } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useWorkspaceId, useWorkspaceLoading } from "@/app/providers/WorkspaceProvider";
 
 type Item = {
   _id: string;
@@ -29,14 +29,14 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
   const add = useMutation(api.inventory.add);
   const update = useMutation(api.inventory.update);
 
-  const [name, setName] = useState('');
-  const [sku, setSku] = useState('');
-  const [category, setCategory] = useState('');
-  const [unit, setUnit] = useState('');
+  const [name, setName] = useState("");
+  const [sku, setSku] = useState("");
+  const [category, setCategory] = useState("");
+  const [unit, setUnit] = useState("");
   const [currentStock, setCurrentStock] = useState(0);
   const [minStockLevel, setMinStockLevel] = useState(0);
   const [costPerUnit, setCostPerUnit] = useState(0);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,16 +50,16 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
       setCurrentStock(item.currentStock);
       setMinStockLevel(item.minStockLevel);
       setCostPerUnit(item.costPerUnit ?? 0);
-      setNotes(item.notes ?? '');
+      setNotes(item.notes ?? "");
     } else {
-      setName('');
-      setSku('');
-      setCategory('');
-      setUnit('');
+      setName("");
+      setSku("");
+      setCategory("");
+      setUnit("");
       setCurrentStock(0);
       setMinStockLevel(0);
       setCostPerUnit(0);
-      setNotes('');
+      setNotes("");
     }
     setError(null);
   }, [item, isOpen]);
@@ -70,9 +70,9 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
     e.preventDefault();
 
     if (isWorkspaceLoading) return;
-    
+
     if (!workspaceId) {
-      setError('ไม่พบเวิร์กสเปซที่กำลังใช้งาน กรุณาตั้งค่าเริ่มต้นให้เสร็จหรือ ติดต่อผู้ดูแลระบบ');
+      setError("ไม่พบเวิร์กสเปซที่กำลังใช้งาน กรุณาตั้งค่าเริ่มต้นให้เสร็จหรือ ติดต่อผู้ดูแลระบบ");
       return;
     }
 
@@ -105,12 +105,12 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
       }
       onClose();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง';
+      const message = err instanceof Error ? err.message : "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง";
       // Surface permission issues with a friendlier message
-      if (message.includes('Forbidden')) {
-        setError('คุณไม่มีสิทธิ์ทำรายการนี้ ต้องใช้บทบาทผู้จัดการขึ้นไป');
-      } else if (message.includes('Unauthenticated')) {
-        setError('คุณยังไม่ได้เข้าสู่ระบบ กรุณารีเฟรชหน้าและเข้าสู่ระบบอีกครั้ง');
+      if (message.includes("Forbidden")) {
+        setError("คุณไม่มีสิทธิ์ทำรายการนี้ ต้องใช้บทบาทผู้จัดการขึ้นไป");
+      } else if (message.includes("Unauthenticated")) {
+        setError("คุณยังไม่ได้เข้าสู่ระบบ กรุณารีเฟรชหน้าและเข้าสู่ระบบอีกครั้ง");
       } else {
         setError(message);
       }
@@ -124,12 +124,9 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
       <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">
-            {item ? 'แก้ไขสินค้าคงคลัง' : 'เพิ่มสินค้าคงคลัง'}
+            {item ? "แก้ไขสินค้าคงคลัง" : "เพิ่มสินค้าคงคลัง"}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-muted hover:text-foreground transition-colors"
-          >
+          <button onClick={onClose} className="text-muted hover:text-foreground transition-colors">
             <iconify-icon icon="solar:close-circle-linear" width="24" height="24" />
           </button>
         </div>
@@ -137,7 +134,12 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
         <div className="p-6 overflow-y-auto">
           {error && (
             <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200 flex items-start gap-2">
-              <iconify-icon icon="solar:danger-triangle-linear" width="16" height="16" className="shrink-0 mt-0.5" />
+              <iconify-icon
+                icon="solar:danger-triangle-linear"
+                width="16"
+                height="16"
+                className="shrink-0 mt-0.5"
+              />
               <span>{error}</span>
             </div>
           )}
@@ -195,7 +197,9 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">สต็อกเริ่มต้น {item ? '(แก้ไขจากหน้าต่างนี้ไม่ได้)' : '*'}</label>
+                <label className="text-sm font-medium text-foreground">
+                  สต็อกเริ่มต้น {item ? "(แก้ไขจากหน้าต่างนี้ไม่ได้)" : "*"}
+                </label>
                 <input
                   type="number"
                   required={!item}
@@ -254,17 +258,28 @@ export function InventoryItemDialog({ isOpen, onClose, item }: Props) {
           >
             ยกเลิก
           </button>
-            <button
-              type="submit"
-              form="inventory-form"
-              disabled={loading || isWorkspaceLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {(loading || isWorkspaceLoading) && (
-                <iconify-icon icon="solar:refresh-circle-linear" width="16" height="16" className="animate-spin" />
-              )}
-              {isWorkspaceLoading ? 'กำลังซิงก์...' : loading ? 'กำลังบันทึก...' : item ? 'บันทึกการเปลี่ยนแปลง' : 'เพิ่มสินค้า'}
-            </button>
+          <button
+            type="submit"
+            form="inventory-form"
+            disabled={loading || isWorkspaceLoading}
+            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {(loading || isWorkspaceLoading) && (
+              <iconify-icon
+                icon="solar:refresh-circle-linear"
+                width="16"
+                height="16"
+                className="animate-spin"
+              />
+            )}
+            {isWorkspaceLoading
+              ? "กำลังซิงก์..."
+              : loading
+                ? "กำลังบันทึก..."
+                : item
+                  ? "บันทึกการเปลี่ยนแปลง"
+                  : "เพิ่มสินค้า"}
+          </button>
         </div>
       </div>
     </div>

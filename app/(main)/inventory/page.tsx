@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useQuery, useConvexAuth } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
-import { InventoryItemDialog } from './components/InventoryItemDialog';
-import { ArchiveItemDialog } from './components/ArchiveItemDialog';
-import { AdjustStockDialog } from './components/AdjustStockDialog';
-import { MovementHistoryDialog } from './components/MovementHistoryDialog';
+import { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useQuery, useConvexAuth } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useWorkspaceId } from "@/app/providers/WorkspaceProvider";
+import { InventoryItemDialog } from "./components/InventoryItemDialog";
+import { ArchiveItemDialog } from "./components/ArchiveItemDialog";
+import { AdjustStockDialog } from "./components/AdjustStockDialog";
+import { MovementHistoryDialog } from "./components/MovementHistoryDialog";
 
 type InventoryItem = {
-  _id: Id<'inventoryItems'>;
+  _id: Id<"inventoryItems">;
   name: string;
   sku: string;
   category: string;
   currentStock: number;
   minStockLevel: number;
   unit: string;
-  status: 'Critical' | 'Warning' | 'In Stock';
+  status: "Critical" | "Warning" | "In Stock";
 };
 
 const PER_PAGE = 20;
-const SKEL_WIDTHS = ['w-2/3', 'w-1/3', 'w-1/2', 'w-1/4', 'w-1/4', 'w-1/3', 'w-8'];
+const SKEL_WIDTHS = ["w-2/3", "w-1/3", "w-1/2", "w-1/4", "w-1/4", "w-1/3", "w-8"];
 
 function SkeletonRow() {
   return (
@@ -42,10 +42,18 @@ function EmptyTableState({ cols, message }: { cols: number; message: string }) {
     <tr>
       <td colSpan={cols} className="px-6 py-24 text-center">
         <div className="w-16 h-16 rounded-full bg-surface-raised flex items-center justify-center mx-auto mb-4 border border-border shadow-inner">
-          <iconify-icon icon="solar:box-minimalistic-bold-duotone" width="32" height="32" className="text-muted/40 mx-auto" aria-hidden="true" />
+          <iconify-icon
+            icon="solar:box-minimalistic-bold-duotone"
+            width="32"
+            height="32"
+            className="text-muted/40 mx-auto"
+            aria-hidden="true"
+          />
         </div>
         <p className="text-base font-bold text-foreground">{message}</p>
-        <p className="text-sm text-muted mt-1 leading-relaxed">เพิ่มรายการได้จากปุ่ม <strong>เพิ่มสินค้า</strong> ด้านบน</p>
+        <p className="text-sm text-muted mt-1 leading-relaxed">
+          เพิ่มรายการได้จากปุ่ม <strong>เพิ่มสินค้า</strong> ด้านบน
+        </p>
       </td>
     </tr>
   );
@@ -55,15 +63,15 @@ export default function InventoryPage() {
   const { isAuthenticated } = useConvexAuth();
   const workspaceId = useWorkspaceId();
   const searchParams = useSearchParams();
-  const highlightedItemId = searchParams.get('highlight');
+  const highlightedItemId = searchParams.get("highlight");
   const rawItems = useQuery(
     api.inventory.list,
-    (workspaceId && isAuthenticated) ? { workspaceId } : 'skip'
+    workspaceId && isAuthenticated ? { workspaceId } : "skip",
   ) as InventoryItem[] | undefined;
 
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
 
   // Dialog state
@@ -74,13 +82,13 @@ export default function InventoryPage() {
   const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
   const [itemToAdjust, setItemToAdjust] = useState<InventoryItem | null>(null);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
-  const [historyItemId, setHistoryItemId] = useState<Id<'inventoryItems'> | null>(null);
+  const [historyItemId, setHistoryItemId] = useState<Id<"inventoryItems"> | null>(null);
 
   const isLoading = workspaceId !== undefined && rawItems === undefined;
 
   const categories = useMemo(
     () => [...new Set(rawItems?.map((i) => i.category) ?? [])].sort(),
-    [rawItems]
+    [rawItems],
   );
 
   const filtered = useMemo(() => {
@@ -98,9 +106,18 @@ export default function InventoryPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
-  const handleCategory = (v: string) => { setCategoryFilter(v); setPage(1); };
-  const handleStatus = (v: string) => { setStatusFilter(v); setPage(1); };
+  const handleSearch = (v: string) => {
+    setSearch(v);
+    setPage(1);
+  };
+  const handleCategory = (v: string) => {
+    setCategoryFilter(v);
+    setPage(1);
+  };
+  const handleStatus = (v: string) => {
+    setStatusFilter(v);
+    setPage(1);
+  };
 
   const isEmpty = !isLoading && (rawItems ?? []).length === 0;
   const noResults = !isLoading && (rawItems ?? []).length > 0 && filtered.length === 0;
@@ -122,12 +139,24 @@ export default function InventoryPage() {
               className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-widest text-foreground hover:bg-surface-raised rounded-lg transition-all"
               title="ประวัติการเคลื่อนไหวทั้งหมด"
             >
-              <iconify-icon icon="solar:history-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
+              <iconify-icon
+                icon="solar:history-bold-duotone"
+                width="18"
+                height="18"
+                aria-hidden="true"
+                className="text-muted"
+              />
               ประวัติ
             </button>
             <div className="w-px bg-border my-1 mx-1" />
             <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-widest text-foreground hover:bg-surface-raised rounded-lg transition-all">
-              <iconify-icon icon="solar:export-bold-duotone" width="18" height="18" aria-hidden="true" className="text-muted" />
+              <iconify-icon
+                icon="solar:export-bold-duotone"
+                width="18"
+                height="18"
+                aria-hidden="true"
+                className="text-muted"
+              />
               ส่งออก
             </button>
           </div>
@@ -138,7 +167,12 @@ export default function InventoryPage() {
             }}
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold uppercase tracking-widest text-white bg-accent rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 active:scale-[0.98]"
           >
-            <iconify-icon icon="solar:add-circle-bold-duotone" width="18" height="18" aria-hidden="true" />
+            <iconify-icon
+              icon="solar:add-circle-bold-duotone"
+              width="18"
+              height="18"
+              aria-hidden="true"
+            />
             เพิ่มสินค้า
           </button>
         </div>
@@ -151,7 +185,8 @@ export default function InventoryPage() {
             <div className="relative max-w-xs w-full">
               <iconify-icon
                 icon="solar:magnifer-linear"
-                width="18" height="18"
+                width="18"
+                height="18"
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
                 aria-hidden="true"
               />
@@ -172,7 +207,9 @@ export default function InventoryPage() {
             >
               <option value="">ทุกหมวดหมู่</option>
               {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
             <select
@@ -202,13 +239,27 @@ export default function InventoryPage() {
             <caption className="sr-only">รายการสินค้าคงคลังแสดงระดับสต็อกและสถานะ</caption>
             <thead className="text-[10px] text-muted font-bold uppercase tracking-widest bg-surface-raised/50 border-b border-border">
               <tr>
-                <th scope="col" className="px-6 py-4">ชื่อสินค้า</th>
-                <th scope="col" className="px-6 py-4">SKU</th>
-                <th scope="col" className="px-6 py-4">หมวดหมู่</th>
-                <th scope="col" className="px-6 py-4 text-right">สต็อกปัจจุบัน</th>
-                <th scope="col" className="px-6 py-4 text-right">สต็อกขั้นต่ำ</th>
-                <th scope="col" className="px-6 py-4 text-center">สถานะ</th>
-                <th scope="col" className="px-6 py-4 text-right">การจัดการ</th>
+                <th scope="col" className="px-6 py-4">
+                  ชื่อสินค้า
+                </th>
+                <th scope="col" className="px-6 py-4">
+                  SKU
+                </th>
+                <th scope="col" className="px-6 py-4">
+                  หมวดหมู่
+                </th>
+                <th scope="col" className="px-6 py-4 text-right">
+                  สต็อกปัจจุบัน
+                </th>
+                <th scope="col" className="px-6 py-4 text-right">
+                  สต็อกขั้นต่ำ
+                </th>
+                <th scope="col" className="px-6 py-4 text-center">
+                  สถานะ
+                </th>
+                <th scope="col" className="px-6 py-4 text-right">
+                  การจัดการ
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -249,10 +300,22 @@ export default function InventoryPage() {
 
         <div className="p-5 border-t border-border flex items-center justify-between text-sm bg-surface-raised/30">
           <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60">
-            {isLoading
-              ? <div className="h-4 w-40 bg-surface-raised rounded animate-pulse" />
-              : <>แสดง <span className="text-foreground">{Math.min((page - 1) * PER_PAGE + 1, filtered.length)}</span>–<span className="text-foreground">{Math.min(page * PER_PAGE, filtered.length)}</span> จาก <span className="text-foreground">{filtered.length.toLocaleString()}</span> รายการ</>
-            }
+            {isLoading ? (
+              <div className="h-4 w-40 bg-surface-raised rounded animate-pulse" />
+            ) : (
+              <>
+                แสดง{" "}
+                <span className="text-foreground">
+                  {Math.min((page - 1) * PER_PAGE + 1, filtered.length)}
+                </span>
+                –
+                <span className="text-foreground">
+                  {Math.min(page * PER_PAGE, filtered.length)}
+                </span>{" "}
+                จาก <span className="text-foreground">{filtered.length.toLocaleString()}</span>{" "}
+                รายการ
+              </>
+            )}
           </div>
           {totalPages > 1 && (
             <nav aria-label="Pagination">
@@ -271,11 +334,11 @@ export default function InventoryPage() {
                       key={p}
                       onClick={() => setPage(p)}
                       aria-label={`หน้า ${p}`}
-                      aria-current={page === p ? 'page' : undefined}
+                      aria-current={page === p ? "page" : undefined}
                       className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all ${
-                        page === p 
-                          ? 'bg-accent text-white shadow-md shadow-accent/20' 
-                          : 'text-muted hover:bg-surface-raised border border-transparent hover:border-border'
+                        page === p
+                          ? "bg-accent text-white shadow-md shadow-accent/20"
+                          : "text-muted hover:bg-surface-raised border border-transparent hover:border-border"
                       }`}
                     >
                       {p}
@@ -339,41 +402,60 @@ function InventoryRow({
   onAdjust: () => void;
   onHistory: () => void;
 }) {
-  const isCritical = item.status === 'Critical';
-  const isWarning = item.status === 'Warning';
+  const isCritical = item.status === "Critical";
+  const isWarning = item.status === "Warning";
 
   return (
-    <tr className={`transition-all group ${isHighlighted ? 'bg-accent-subtle/20 border-l-2 border-l-accent' : 'hover:bg-accent-subtle/5'}`}>
+    <tr
+      className={`transition-all group ${isHighlighted ? "bg-accent-subtle/20 border-l-2 border-l-accent" : "hover:bg-accent-subtle/5"}`}
+    >
       <td className="px-6 py-5 min-w-0 max-w-[220px]">
-        <span className="block font-bold text-foreground truncate group-hover:text-accent transition-colors" title={item.name}>{item.name || '(ไม่มีชื่อ)'}</span>
-        <span className="block text-[10px] font-bold uppercase tracking-widest text-muted/50 mt-1">{item.sku}</span>
+        <span
+          className="block font-bold text-foreground truncate group-hover:text-accent transition-colors"
+          title={item.name}
+        >
+          {item.name || "(ไม่มีชื่อ)"}
+        </span>
+        <span className="block text-[10px] font-bold uppercase tracking-widest text-muted/50 mt-1">
+          {item.sku}
+        </span>
       </td>
       <td className="px-6 py-5 text-muted font-mono text-[10px] tracking-tight whitespace-nowrap">
-        <span className="px-2 py-0.5 rounded bg-surface-raised border border-border">{item.sku}</span>
+        <span className="px-2 py-0.5 rounded bg-surface-raised border border-border">
+          {item.sku}
+        </span>
       </td>
       <td className="px-6 py-5 text-muted max-w-[140px] text-xs font-medium">
-        <span className="block truncate" title={item.category}>{item.category}</span>
+        <span className="block truncate" title={item.category}>
+          {item.category}
+        </span>
       </td>
       <td className="px-6 py-5 text-right font-bold text-foreground tabular-nums whitespace-nowrap tracking-tight">
-        {item.currentStock.toLocaleString()} <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 ml-0.5">{item.unit}</span>
+        {item.currentStock.toLocaleString()}{" "}
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted/60 ml-0.5">
+          {item.unit}
+        </span>
       </td>
       <td className="px-6 py-5 text-right text-muted tabular-nums whitespace-nowrap font-medium text-xs">
-        {item.minStockLevel.toLocaleString()} <span className="text-[10px] font-medium text-muted/40 ml-0.5">{item.unit}</span>
+        {item.minStockLevel.toLocaleString()}{" "}
+        <span className="text-[10px] font-medium text-muted/40 ml-0.5">{item.unit}</span>
       </td>
       <td className="px-6 py-5 text-center">
         <span
           className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border ${
             isCritical
-              ? 'bg-danger-subtle/50 text-danger border-danger/20'
+              ? "bg-danger-subtle/50 text-danger border-danger/20"
               : isWarning
-              ? 'bg-warning-subtle/50 text-warning border-warning/20'
-              : 'bg-success-subtle/50 text-success border-success/20'
+                ? "bg-warning-subtle/50 text-warning border-warning/20"
+                : "bg-success-subtle/50 text-success border-success/20"
           }`}
         >
-          <span className={`w-1 h-1 rounded-full mr-1.5 ${
-            isCritical ? 'bg-danger' : isWarning ? 'bg-warning' : 'bg-success'
-          }`} />
-          {item.status === 'Warning' ? 'สต็อกต่ำ' : item.status === 'Critical' ? 'วิกฤต' : 'มีสต็อก'}
+          <span
+            className={`w-1 h-1 rounded-full mr-1.5 ${
+              isCritical ? "bg-danger" : isWarning ? "bg-warning" : "bg-success"
+            }`}
+          />
+          {item.status === "Warning" ? "สต็อกต่ำ" : item.status === "Critical" ? "วิกฤต" : "มีสต็อก"}
         </span>
       </td>
       <td className="px-6 py-5 text-right">
@@ -384,7 +466,12 @@ function InventoryRow({
             aria-label={`ประวัติของ ${item.name}`}
             title="ประวัติการเคลื่อนไหว"
           >
-            <iconify-icon icon="solar:history-bold-duotone" width="18" height="18" aria-hidden="true" />
+            <iconify-icon
+              icon="solar:history-bold-duotone"
+              width="18"
+              height="18"
+              aria-hidden="true"
+            />
           </button>
           <button
             onClick={onAdjust}
@@ -392,7 +479,12 @@ function InventoryRow({
             aria-label={`ปรับสต็อกของ ${item.name}`}
             title="ปรับสต็อก"
           >
-            <iconify-icon icon="solar:calculator-minimalistic-bold-duotone" width="18" height="18" aria-hidden="true" />
+            <iconify-icon
+              icon="solar:calculator-minimalistic-bold-duotone"
+              width="18"
+              height="18"
+              aria-hidden="true"
+            />
           </button>
           <button
             onClick={onEdit}
@@ -408,7 +500,12 @@ function InventoryRow({
             aria-label={`เก็บ ${item.name} เป็นคลังเก่า`}
             title="เก็บเข้าคลังเก่า"
           >
-            <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="18" height="18" aria-hidden="true" />
+            <iconify-icon
+              icon="solar:trash-bin-trash-bold-duotone"
+              width="18"
+              height="18"
+              aria-hidden="true"
+            />
           </button>
         </div>
       </td>

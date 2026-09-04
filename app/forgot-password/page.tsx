@@ -1,5 +1,5 @@
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 
 export default function ForgotPasswordPage() {
   return (
@@ -38,9 +38,9 @@ export default function ForgotPasswordPage() {
             </button>
           </div>
         </form>
-        
+
         <p className="mt-6 text-center text-sm text-neutral-600">
-          จำรหัสผ่านได้แล้วใช่ไหม?{' '}
+          จำรหัสผ่านได้แล้วใช่ไหม?{" "}
           <Link href="/login" className="font-medium text-neutral-900 hover:underline">
             กลับไปหน้าเข้าสู่ระบบ
           </Link>

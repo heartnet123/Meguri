@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useConvexAuth } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-import { useState } from 'react';
-import { useWorkspaceId } from '@/app/providers/WorkspaceProvider';
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useState } from "react";
+import { useWorkspaceId } from "@/app/providers/WorkspaceProvider";
 
 type Recommendation = {
-  _id: Id<'reorderRecommendations'>;
+  _id: Id<"reorderRecommendations">;
   recommendedQty: number;
-  urgency: 'high' | 'medium' | 'low';
+  urgency: "high" | "medium" | "low";
   reason: string;
-  status: 'pending' | 'accepted' | 'dismissed';
+  status: "pending" | "accepted" | "dismissed";
   item: {
     name: string;
     sku: string;
@@ -23,7 +23,10 @@ type Recommendation = {
 
 function CardSkeleton() {
   return (
-    <div aria-hidden="true" className="bg-surface border border-border rounded-2xl shadow-sm p-6 animate-pulse">
+    <div
+      aria-hidden="true"
+      className="bg-surface border border-border rounded-2xl shadow-sm p-6 animate-pulse"
+    >
       <div className="flex items-start justify-between mb-5">
         <div className="space-y-3 flex-1">
           <div className="h-6 bg-surface-raised rounded-lg w-1/3" />
@@ -48,7 +51,7 @@ export default function PurchasePlanningPage() {
   const workspaceId = useWorkspaceId();
   const recs = useQuery(
     api.purchasePlanning.recommendations,
-    (workspaceId && isAuthenticated) ? { workspaceId } : 'skip'
+    workspaceId && isAuthenticated ? { workspaceId } : "skip",
   ) as Recommendation[] | undefined;
 
   const accept = useMutation(api.purchasePlanning.accept);
@@ -59,17 +62,25 @@ export default function PurchasePlanningPage() {
 
   const isLoading = workspaceId !== undefined && recs === undefined;
 
-  const high = recs?.filter((r) => r.urgency === 'high') ?? [];
-  const medium = recs?.filter((r) => r.urgency !== 'high') ?? [];
+  const high = recs?.filter((r) => r.urgency === "high") ?? [];
+  const medium = recs?.filter((r) => r.urgency !== "high") ?? [];
 
-  async function handleAccept(id: Id<'reorderRecommendations'>) {
+  async function handleAccept(id: Id<"reorderRecommendations">) {
     setAccepting(id);
-    try { await accept({ id }); } finally { setAccepting(null); }
+    try {
+      await accept({ id });
+    } finally {
+      setAccepting(null);
+    }
   }
 
-  async function handleDismiss(id: Id<'reorderRecommendations'>) {
+  async function handleDismiss(id: Id<"reorderRecommendations">) {
     setDismissing(id);
-    try { await dismiss({ id }); } finally { setDismissing(null); }
+    try {
+      await dismiss({ id });
+    } finally {
+      setDismissing(null);
+    }
   }
 
   return (
@@ -77,10 +88,17 @@ export default function PurchasePlanningPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">วางแผนการจัดซื้อ</h1>
-          <p className="text-sm text-muted mt-1.5 leading-relaxed">คำแนะนำการสั่งซื้อซ้ำและคำสั่งซื้อฉบับร่างที่ขับเคลื่อนด้วย AI</p>
+          <p className="text-sm text-muted mt-1.5 leading-relaxed">
+            คำแนะนำการสั่งซื้อซ้ำและคำสั่งซื้อฉบับร่างที่ขับเคลื่อนด้วย AI
+          </p>
         </div>
         <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-foreground bg-surface border border-border rounded-xl hover:bg-surface-raised transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/20 active:scale-[0.98]">
-          <iconify-icon icon="solar:document-text-bold-duotone" width="18" height="18" aria-hidden="true" />
+          <iconify-icon
+            icon="solar:document-text-bold-duotone"
+            width="18"
+            height="18"
+            aria-hidden="true"
+          />
           ดูคำสั่งซื้อฉบับร่าง
         </button>
       </div>
@@ -101,7 +119,9 @@ export default function PurchasePlanningPage() {
         <div className="flex-1" />
         <div className="hidden lg:flex flex-col items-end shrink-0 gap-1.5 opacity-80">
           <span className="text-[10px] font-bold uppercase tracking-widest">เวอร์ชันโมเดล</span>
-          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-[10px] font-bold">SMART-STOCK-V4</span>
+          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-[10px] font-bold">
+            SMART-STOCK-V4
+          </span>
         </div>
       </div>
 
@@ -118,10 +138,20 @@ export default function PurchasePlanningPage() {
       {!isLoading && (recs ?? []).length === 0 && (
         <div className="bg-surface border border-border rounded-3xl shadow-sm p-20 text-center">
           <div className="w-20 h-20 bg-surface-raised rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border border-border shadow-inner group transition-transform hover:scale-105 duration-500">
-            <iconify-icon icon="solar:cart-large-bold-duotone" width="40" height="40" className="text-muted/30 group-hover:text-accent/40 transition-colors" aria-hidden="true" />
+            <iconify-icon
+              icon="solar:cart-large-bold-duotone"
+              width="40"
+              height="40"
+              className="text-muted/30 group-hover:text-accent/40 transition-colors"
+              aria-hidden="true"
+            />
           </div>
-          <p className="text-lg font-bold text-foreground mb-1.5 tracking-tight">ระดับสต็อกอยู่ในเกณฑ์ปกติ</p>
-          <p className="text-sm text-muted max-w-xs mx-auto leading-relaxed">AI ประเมินว่าสินค้าคงคลังทั้งหมดอยู่ในช่วงปลอดภัย ยังไม่จำเป็นต้องสั่งซื้อเพิ่ม</p>
+          <p className="text-lg font-bold text-foreground mb-1.5 tracking-tight">
+            ระดับสต็อกอยู่ในเกณฑ์ปกติ
+          </p>
+          <p className="text-sm text-muted max-w-xs mx-auto leading-relaxed">
+            AI ประเมินว่าสินค้าคงคลังทั้งหมดอยู่ในช่วงปลอดภัย ยังไม่จำเป็นต้องสั่งซื้อเพิ่ม
+          </p>
         </div>
       )}
 
@@ -129,10 +159,12 @@ export default function PurchasePlanningPage() {
       {!isLoading && high.length > 0 && (
         <div className="space-y-5 animate-in slide-in-from-bottom-4 duration-700">
           <div className="flex items-center gap-3">
-             <div className="flex items-center justify-center w-6 h-6 rounded-full bg-danger-subtle border border-danger/10">
-               <span className="w-2 h-2 rounded-full bg-danger animate-ping" />
-             </div>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">รายการขาดแคลนวิกฤต</h2>
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-danger-subtle border border-danger/10">
+              <span className="w-2 h-2 rounded-full bg-danger animate-ping" />
+            </div>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
+              รายการขาดแคลนวิกฤต
+            </h2>
           </div>
           <div className="grid grid-cols-1 gap-5">
             {high.map((rec) => (
@@ -153,10 +185,12 @@ export default function PurchasePlanningPage() {
       {!isLoading && medium.length > 0 && (
         <div className="space-y-5 pt-4 animate-in slide-in-from-bottom-6 duration-1000">
           <div className="flex items-center gap-3">
-             <div className="flex items-center justify-center w-6 h-6 rounded-full bg-warning-subtle border border-warning/10">
-               <span className="w-2 h-2 rounded-full bg-warning" />
-             </div>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">รายการเติมสต็อกเชิงกลยุทธ์</h2>
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-warning-subtle border border-warning/10">
+              <span className="w-2 h-2 rounded-full bg-warning" />
+            </div>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
+              รายการเติมสต็อกเชิงกลยุทธ์
+            </h2>
           </div>
           <div className="grid grid-cols-1 gap-5">
             {medium.map((rec) => (
@@ -189,12 +223,14 @@ function ReorderCard({
   onAccept: () => void;
   onDismiss: () => void;
 }) {
-  const isHigh = rec.urgency === 'high';
-  const itemName = rec.item?.name ?? 'สินค้าไม่ทราบชื่อ';
-  const itemSku = rec.item?.sku ?? '—';
-  const supplierName = rec.supplier?.name ?? 'ซัพพลายเออร์ไม่ทราบชื่อ';
-  const currentStock = rec.item ? `${rec.item.currentStock.toLocaleString()} ${rec.item.unit}` : '—';
-  const recommendedQty = `${rec.recommendedQty.toLocaleString()}${rec.item?.unit ? ` ${rec.item.unit}` : ''}`;
+  const isHigh = rec.urgency === "high";
+  const itemName = rec.item?.name ?? "สินค้าไม่ทราบชื่อ";
+  const itemSku = rec.item?.sku ?? "—";
+  const supplierName = rec.supplier?.name ?? "ซัพพลายเออร์ไม่ทราบชื่อ";
+  const currentStock = rec.item
+    ? `${rec.item.currentStock.toLocaleString()} ${rec.item.unit}`
+    : "—";
+  const recommendedQty = `${rec.recommendedQty.toLocaleString()}${rec.item?.unit ? ` ${rec.item.unit}` : ""}`;
 
   return (
     <div className="bg-surface border border-border rounded-2xl shadow-sm p-1 hover:border-accent/30 transition-all group active:scale-[0.995]">
@@ -203,32 +239,44 @@ function ReorderCard({
           <div className="flex items-start justify-between mb-5 gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                <h3 className="text-lg font-bold text-foreground truncate tracking-tight group-hover:text-accent transition-colors" title={itemName}>
+                <h3
+                  className="text-lg font-bold text-foreground truncate tracking-tight group-hover:text-accent transition-colors"
+                  title={itemName}
+                >
                   {itemName}
                 </h3>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-colors ${
-                  isHigh
-                    ? 'bg-danger-subtle/50 text-danger border-danger/20'
-                    : 'bg-warning-subtle/50 text-warning border-warning/20'
-                }`}>
-                  {isHigh ? 'เร่งด่วนสูง' : 'ตามรอบปกติ'}
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-colors ${
+                    isHigh
+                      ? "bg-danger-subtle/50 text-danger border-danger/20"
+                      : "bg-warning-subtle/50 text-warning border-warning/20"
+                  }`}
+                >
+                  {isHigh ? "เร่งด่วนสูง" : "ตามรอบปกติ"}
                 </span>
               </div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted/60 truncate flex items-center gap-2">
-                <span className="text-muted/40 font-medium">SKU:</span> {itemSku} 
+                <span className="text-muted/40 font-medium">SKU:</span> {itemSku}
                 <span className="w-1 h-1 rounded-full bg-border" />
-                <span className="text-muted/40 font-medium">ซัพพลายเออร์:</span> <span className="text-foreground/70">{supplierName}</span>
+                <span className="text-muted/40 font-medium">ซัพพลายเออร์:</span>{" "}
+                <span className="text-foreground/70">{supplierName}</span>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 mb-6">
             <div className="space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted/50 mb-1">สต็อกคงเหลือ</div>
-              <div className="text-base font-bold text-foreground tabular-nums tracking-tight">{currentStock}</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted/50 mb-1">
+                สต็อกคงเหลือ
+              </div>
+              <div className="text-base font-bold text-foreground tabular-nums tracking-tight">
+                {currentStock}
+              </div>
             </div>
             <div className="bg-accent-subtle/50 p-3 px-4 rounded-xl border border-accent/10 transition-colors group-hover:bg-accent-subtle">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-accent mb-1">คำแนะนำจาก AI</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-accent mb-1">
+                คำแนะนำจาก AI
+              </div>
               <div className="text-xl font-black text-accent tabular-nums tracking-tighter">
                 + {recommendedQty}
               </div>
@@ -237,11 +285,15 @@ function ReorderCard({
 
           <div className="flex items-start gap-4 text-sm text-foreground/70 bg-surface-raised/50 p-5 rounded-2xl border border-border transition-colors group-hover:border-accent/10 leading-relaxed font-medium">
             <div className="p-2 bg-accent/10 rounded-lg shrink-0">
-              <iconify-icon icon="solar:magic-stick-bold-duotone" width="20" height="20" className="text-accent" aria-hidden="true" />
+              <iconify-icon
+                icon="solar:magic-stick-bold-duotone"
+                width="20"
+                height="20"
+                className="text-accent"
+                aria-hidden="true"
+              />
             </div>
-            <p className="line-clamp-3 italic">
-              &ldquo;{rec.reason}&rdquo;
-            </p>
+            <p className="line-clamp-3 italic">&ldquo;{rec.reason}&rdquo;</p>
           </div>
         </div>
 
@@ -253,7 +305,12 @@ function ReorderCard({
           >
             {accepting ? (
               <>
-                <iconify-icon icon="solar:refresh-bold-duotone" width="16" height="16" className="animate-spin" />
+                <iconify-icon
+                  icon="solar:refresh-bold-duotone"
+                  width="16"
+                  height="16"
+                  className="animate-spin"
+                />
                 กำลังประมวลผล...
               </>
             ) : (
@@ -268,7 +325,7 @@ function ReorderCard({
             disabled={accepting || dismissing}
             className="flex-1 md:flex-none inline-flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-muted hover:text-danger hover:bg-danger-subtle/50 px-6 py-2.5 rounded-xl transition-all focus:outline-none"
           >
-            {dismissing ? 'กำลังยกเลิก…' : 'ยกเลิกคำแนะนำ'}
+            {dismissing ? "กำลังยกเลิก…" : "ยกเลิกคำแนะนำ"}
           </button>
         </div>
       </div>
