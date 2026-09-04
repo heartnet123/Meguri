@@ -10,6 +10,7 @@ coverage/
 
 # Auto Claude data directory
 .auto-claude/
+.agents/
 
 # Auto Claude generated files
 .auto-claude-security.json
