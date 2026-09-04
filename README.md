@@ -1,7 +1,7 @@
 <div align="center">
-  <img width="1200" height="475" alt="Meguri SmartStock banner" src="https://i.ibb.co/Nn9cp10p/hf-20260408-134813-9867711d-1240-40a9-b050-a393ba0687f8.png" />
+  <img width="1200" height="475" alt="Meguri banner" src="https://i.ibb.co/Nn9cp10p/hf-20260408-134813-9867711d-1240-40a9-b050-a393ba0687f8.png" />
 
-  # Meguri (SmartStock)
+  # Meguri
 
   *The complete operational backbone for recipe-based businesses, inventory management, and smart retail.*
 
@@ -23,13 +23,13 @@
 
 ## Overview
 
-**Meguri (SmartStock)** is a self-serve operational management platform built for cafés, bakeries, restaurants, and small retail businesses. It bridges the gap between raw inventory tracking, multi-ingredient recipe yields, point-of-sale sales execution, and predictive demand replenishment.
+**Meguri** is a self-serve operational management platform built for cafés, bakeries, restaurants, and small retail businesses. It bridges the gap between raw inventory tracking, multi-ingredient recipe yields, point-of-sale sales execution, and predictive demand replenishment.
 
-Traditional inventory management systems often track items in isolation without accounting for recipe consumption, supplier lead times, or unexpected demand spikes. SmartStock solves this by offering a real-time, multi-tenant backend that automatically recalculates inventory levels upon sale, triggers automated purchase order recommendations, and leverages Google Gemini AI for predictive demand forecasting.
+Traditional inventory management systems often track items in isolation without accounting for recipe consumption, supplier lead times, or unexpected demand spikes. Meguri solves this by offering a real-time, multi-tenant backend that automatically recalculates inventory levels upon sale, triggers automated purchase order recommendations, and leverages Google Gemini AI for predictive demand forecasting.
 
 > [!NOTE]
 > **Serverless & Real-Time Foundation**
-> SmartStock is built on top of [Next.js 15 App Router](https://nextjs.org) and [Convex](https://convex.dev), providing instant real-time data sync across all connected clients without polling or manual page refreshes.
+> Meguri is built on top of [Next.js 15 App Router](https://nextjs.org) and [Convex](https://convex.dev), providing instant real-time data sync across all connected clients without polling or manual page refreshes.
 
 ---
 
@@ -48,7 +48,7 @@ Traditional inventory management systems often track items in isolation without 
 
 ## Architecture
 
-SmartStock follows a modern serverless architecture separating client presentation, edge middleware protection, real-time database state, and AI inference.
+Meguri follows a modern serverless architecture separating client presentation, edge middleware protection, real-time database state, and AI inference.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -84,7 +84,7 @@ SmartStock follows a modern serverless architecture separating client presentati
 ### Codebase Organization
 
 ```text
-smartstock/
+Meguri/
 ├── app/                      # Next.js App Router (Pages, Layouts & Components)
 │   ├── (auth)/               # Login & Registration authentication routes
 │   ├── (main)/               # Authenticated workspace dashboard & operational views
@@ -112,7 +112,7 @@ smartstock/
 
 ## Getting Started
 
-Follow these steps to set up SmartStock on your local machine.
+Follow these steps to set up Meguri on your local machine.
 
 ### Prerequisites
 
